@@ -29,4 +29,11 @@ yarn-error.log*
 *.ntvs*
 *.njsproj
 *.sln
-*.sw? 
+*.sw?
+
+# Archivos de entorno
+.env
+*.env
+
+# Directorios de versiones antiguas
+/VERSIONES/ 

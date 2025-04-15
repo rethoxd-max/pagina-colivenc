@@ -1,0 +1,31 @@
+<form [formGroup]="entrenamientoForm" (ngSubmit)="onSubmit()">
+    <label for="tipo">Tipo de Entrenamiento:</label>
+    <select id="tipo" formControlName="tipo">
+        <option *ngFor="let tipo of tiposEntrenamiento" [value]="tipo">{{ tipo }}</option>
+    </select>
+
+    <div *ngIf="entrenamientoForm.get('tipo')?.value === 'Técnica'" formArrayName="tecnica">
+        <h3>Técnica</h3>
+        <div *ngFor="let item of tecnica.controls; let i = index" [formGroupName]="i">
+            <select formControlName="descripcion">
+                <option value="" disabled>Selecciona una técnica</option>
+                <option *ngFor="let tecnica of tecnicas" [value]="tecnica">{{ tecnica }}</option>
+            </select>
+        </div>
+        <button type="button" (click)="addField('tecnica')">Añadir Técnica</button>
+    </div>
+
+
+    <div *ngIf="entrenamientoForm.get('tipo')?.value === 'Pesas'" formArrayName="pesas">
+        <h3>Pesas</h3>
+        <div *ngFor="let pesasItem of pesas.controls; let i = index" [formGroupName]="i">
+            <input formControlName="series" placeholder="Series">
+            <input formControlName="repeticiones" placeholder="Repeticiones">
+            <input formControlName="porcentaje" placeholder="Porcentaje (%)">
+            <input formControlName="comentario" placeholder="Comentario">
+        </div>
+        <button type="button" (click)="addField('pesas')">Añadir Pesas</button>
+    </div>
+
+    <button type="submit" [disabled]="!entrenamientoForm.valid">Guardar Entrenamiento</button>
+</form>

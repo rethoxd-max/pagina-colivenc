@@ -1,0 +1,23 @@
+<h2 mat-dialog-title>Marcas de la combinada</h2>
+<mat-dialog-content>
+    <div class="column-container">
+        <!-- Primera columna -->
+        <div class="column">
+            <div *ngFor="let prueba of pruebas.slice(0, pruebas.length / 2)">
+                <label>{{ prueba.nombre }}: </label>
+                <span> {{ prueba.marca }}</span>
+            </div>
+        </div>
+
+        <!-- Segunda columna -->
+        <div class="column">
+            <div *ngFor="let prueba of pruebas.slice(pruebas.length / 2)">
+                <label>{{ prueba.nombre }}: </label>
+                <span> {{ prueba.marca }}</span>
+            </div>
+        </div>
+    </div>
+</mat-dialog-content>
+<mat-dialog-actions>
+    <button mat-button (click)="onClose()">Cerrar</button>
+</mat-dialog-actions>

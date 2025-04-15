@@ -1,0 +1,22 @@
+<div class="container d-flex justify-content-center align-items-center vh-100">
+    <div class="row w-100 justify-content-center">
+        <div class="col-12 col-md-8 col-lg-6">
+            <form [formGroup]="buscadorForm" (ngSubmit)="onSubmit()" class="p-4 border rounded bg-light">
+                <div class="mb-3 text-center">
+                    <div class="d-flex justify-content-center">
+                        <app-search-atleta [nombreAtletaControl]="nombreAtletaControl"
+                            (atletaSeleccionado)="onAtletaSelected($event)">
+                        </app-search-atleta>
+                    </div>
+                    <div *ngIf="buscadorForm.get('nombre_atleta')?.invalid && buscadorForm.get('nombre_atleta')?.touched"
+                        class="text-danger">
+                        El nombre del atleta es requerido.
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-primary w-100" [disabled]="buscadorForm.invalid">
+                    Acceder al perfil del atleta
+                </button>
+            </form>
+        </div>
+    </div>
+</div>

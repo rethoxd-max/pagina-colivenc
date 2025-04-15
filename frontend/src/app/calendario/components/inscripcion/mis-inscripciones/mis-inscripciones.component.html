@@ -1,0 +1,22 @@
+<div *ngIf="inscripcionesEntrenador.length > 0; else noInscripciones">
+    <h3>Mis Inscripciones</h3>
+    <ul>
+        <li *ngFor="let inscripcion of inscripcionesEntrenador">
+            {{ inscripcion.nombre_atleta }} -
+
+            <!-- Recorrer las pruebas seleccionadas y mostrar su nombre -->
+            <span *ngFor="let prueba of inscripcion.pruebasSeleccionadas">
+                {{ prueba.nombre_prueba }} {{ prueba.categoria_id.nombre_categoria }} <span *ngIf="!isLastElement(prueba, inscripcion.pruebasSeleccionadas)">,
+                </span>
+            </span>
+
+            <button (click)="editarInscripcion(inscripcion._id)">Editar</button>
+            <button (click)="borrarInscripcion(inscripcion._id)">Borrar</button>
+        </li>
+
+    </ul>
+</div>
+
+<ng-template #noInscripciones>
+    <p>No tienes inscripciones realizadas.</p>
+</ng-template>

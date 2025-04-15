@@ -1,0 +1,14 @@
+<div class="mb-3">
+    <mat-form-field appearance="fill">
+        <mat-label>Atleta</mat-label>
+        <input matInput #filterInput [formControl]="nombreAtletaControl" [matAutocomplete]="auto" />
+        <mat-autocomplete #auto="matAutocomplete" (optionSelected)="onOptionSelected($event.option.value)">
+            <mat-option *ngFor="let atleta of filteredAtletas$ | async" [value]="atleta.nombre">
+                {{ atleta.nombre }}
+            </mat-option>
+        </mat-autocomplete>
+    </mat-form-field>
+    <div *ngIf="nombreAtletaControl.invalid && nombreAtletaControl.touched" class="text-danger">
+        El nombre del atleta es requerido.
+    </div>
+</div>

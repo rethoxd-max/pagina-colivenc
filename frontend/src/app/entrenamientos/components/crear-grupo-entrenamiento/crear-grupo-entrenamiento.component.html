@@ -1,0 +1,40 @@
+<form [formGroup]="grupoForm" (ngSubmit)="saveGrupo()" class="container mt-4 p-4 border rounded shadow">
+    <h3 class="mb-3 text-center">Crear Grupo de Entrenamiento</h3>
+
+    <!-- Nombre del grupo -->
+    <div class="mb-3">
+        <label for="nombreGrupo" class="form-label">Nombre del grupo:</label>
+        <input id="nombreGrupo" formControlName="nombre_grupo" class="form-control" required
+            placeholder="Ingresa el nombre del grupo">
+    </div>
+
+    <!-- Entrenador -->
+    <div class="mb-3">
+        <label for="entrenador" class="form-label">Entrenador:</label>
+        <input id="entrenador" [value]="entrenadorNombre" class="form-control" readonly>
+    </div>
+
+    <!-- Buscador de atletas -->
+    <div class="mb-3">
+        <label class="form-label">Buscar Atletas:</label>
+        <app-search-atleta [nombreAtletaControl]="nombreAtletaControl"
+            (atletaSeleccionado)="addAtleta($event)"></app-search-atleta>
+    </div>
+
+    <!-- Lista de atletas seleccionados -->
+    <div class="mb-3">
+        <label class="form-label">Atletas Seleccionados:</label>
+        <ul class="list-group">
+            <li *ngFor="let atleta of atletasSeleccionados"
+                class="list-group-item d-flex justify-content-between align-items-center">
+                {{ atleta.nombre }}
+                <button type="button" (click)="removeAtleta(atleta._id)" class="btn btn-danger btn-sm">Eliminar</button>
+            </li>
+        </ul>
+    </div>
+
+    <!-- Botón para guardar -->
+    <div class="text-center mt-4">
+        <button type="submit" class="btn btn-primary">Guardar Grupo</button>
+    </div>
+</form>

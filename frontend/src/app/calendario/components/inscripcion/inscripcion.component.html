@@ -1,0 +1,20 @@
+<div class="container mt-5">
+    <h2>Inscribirse en competición</h2>
+    <form [formGroup]="inscripcionForm" (ngSubmit)="onSubmit()">
+        <div class="mb-3">
+            <label for="nombre" class="form-label">Nombre</label>
+            <!-- Quitar el form extra aquí -->
+            <input type="text" id="nombre" formControlName="nombre" class="form-control">
+        </div>
+
+        <div formArrayName="pruebas" class="mb-3">
+            <label for="pruebas" class="form-label">Selecciona las pruebas</label>
+            <div *ngFor="let prueba of pruebas; let i = index">
+                <input type="checkbox" [formControlName]="i"> {{ prueba.nombre_prueba }} {{
+                prueba.categoria_id.nombre_categoria }}
+            </div>
+        </div>
+
+        <button type="submit" class="btn btn-primary">Inscribirse</button>
+    </form>
+</div>

@@ -1,0 +1,29 @@
+<div class="calendar">
+    <div class="calendar-header">
+        <button (click)="previousMonth()">←</button>
+        <span>{{ currentMonth + 1 }}/{{ currentYear }}</span>
+        <button (click)="nextMonth()">→</button>
+    </div>
+
+    <div class="calendar-grid">
+        <div *ngFor="let day of daysInMonth" class="calendar-day">
+            <div class="day-number">{{ day.date.getDate() }}</div>
+
+            <!-- Botón para añadir o crear un día de entrenamiento -->
+            <a *ngIf="!day.diaEntrenamiento" (click)="onClickAgregarOEditar(day.date)">Añadir Entrenamiento</a>
+
+            <!-- Botón para editar el entrenamiento existente en un día -->
+            <a *ngIf="day.diaEntrenamiento" [routerLink]="['/crear-entrenamiento', day.diaEntrenamiento._id]"
+                class="editar-btn">Editar Entrenamiento</a>
+
+            <!-- Lista de entrenamientos del día -->
+            <div *ngIf="day.diaEntrenamiento?.entrenamientos?.length > 0" class="entrenamientos-list">
+                <ul>
+                    <li *ngFor="let entrenamiento of day.diaEntrenamiento.entrenamientos">
+                        {{ entrenamiento.tipo }}
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,88 @@
+import { Component, OnInit } from '@angular/core';
+import { ActivatedRoute, Router } from '@angular/router';
+import { PostService } from '../../services/posts.service';
+import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { NgClass, NgIf } from '@angular/common';
+import { environment } from '../../../../environments/environment.development';
+@Component({
+  selector: 'app-post-form',
+  standalone: true,
+  imports: [ReactiveFormsModule, NgIf, NgClass],
+  templateUrl: './post-form.component.html',
+  styleUrls: ['./post-form.component.css'],
+})
+export class PostFormComponent implements OnInit {
+  postForm: FormGroup;
+  postId: string | null = null;
+  isEditMode = false;
+  selectedFile: File | null = null;
+  imageUrl: string | null = null;
+
+  baseUrl: string = environment.apiUrl;
+
+  constructor(
+    private postService: PostService,
+    private route: ActivatedRoute,
+    private router: Router,
+    private fb: FormBuilder
+  ) {
+    // Inicializar formulario con validaciones
+    this.postForm = this.fb.group({
+      title: ['', Validators.required],
+      content: ['', Validators.required],
+    });
+  }
+
+  ngOnInit(): void {
+    this.postId = this.route.snapshot.paramMap.get('id');
+    if (this.postId) {
+      this.isEditMode = true;
+      this.postService.getPosts().subscribe(
+        (posts) => {
+          const post = posts.find((p: { _id: string | null }) => p._id === this.postId);
+          if (post) {
+            this.postForm.patchValue({
+              title: post.title,
+              content: post.content,
+            });
+          }
+        }
+      );
+    }
+  }
+
+  onFileSelected(event: any) {
+    this.selectedFile = event.target.files[0];
+    if (this.selectedFile) {
+      const reader = new FileReader();
+      reader.onload = (e: any) => {
+        this.imageUrl = e.target.result;
+      };
+      reader.readAsDataURL(this.selectedFile);
+    }
+  }
+
+  onSubmit() {
+    if (this.postForm.invalid) {
+      this.postForm.markAllAsTouched(); // Marca todos los campos como "tocados"
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append('title', this.postForm.get('title')?.value);
+    formData.append('content', this.postForm.get('content')?.value);
+
+    if (this.selectedFile) {
+      formData.append('image', this.selectedFile);
+    }
+
+    this.postService.createPost(formData).subscribe(
+      () => {
+        this.router.navigate(['/posts']);
+      },
+      (error) => {
+        console.error('Error al crear el post:', error);
+      }
+    );
+  }
+}

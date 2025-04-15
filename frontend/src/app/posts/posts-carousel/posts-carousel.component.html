@@ -1,0 +1,13 @@
+<div class="carousel-container" *ngIf="posts.length > 0">
+    <div class="carousel-slide">
+        <img [src]="posts[currentIndex].imageUrl" alt="Imagen del post" class="carousel-image"
+            *ngIf="posts[currentIndex].imageUrl">
+        <div class="carousel-text">
+            <h2>{{ posts[currentIndex].title }}</h2>
+            <p>{{ posts[currentIndex].content | slice:0:150 }}...</p>
+        </div>
+    </div>
+
+    <button class="prev" (click)="prevSlide()">&#10094;</button>
+    <button class="next" (click)="nextSlide()">&#10095;</button>
+</div>

@@ -1,0 +1,54 @@
+<div class="container main-content">
+    <div class="row justify-content-center">
+        <div class="col-lg-8 col-md-10">
+            <div class="card shadow-sm p-4 mb-5 bg-body rounded">
+                <div class="card-body">
+                    <h3 class="text-center mb-4">Editar Post</h3>
+
+                    <form [formGroup]="postForm" (ngSubmit)="onSubmit()">
+                        <!-- Título -->
+                        <div class="mb-3">
+                            <label for="title" class="form-label">Título</label>
+                            <input type="text" id="title" class="form-control" formControlName="title"
+                                placeholder="Introduce el título"
+                                [ngClass]="{'is-invalid': postForm.get('title')?.invalid && postForm.get('title')?.touched}" />
+                            <div *ngIf="postForm.get('title')?.invalid && postForm.get('title')?.touched"
+                                class="invalid-feedback">
+                                El título es requerido.
+                            </div>
+                        </div>
+
+                        <!-- Contenido -->
+                        <div class="mb-3">
+                            <label for="content" class="form-label">Contenido</label>
+                            <textarea id="content" class="form-control" formControlName="content"
+                                placeholder="Introduce el contenido" rows="5"
+                                [ngClass]="{'is-invalid': postForm.get('content')?.invalid && postForm.get('content')?.touched}"></textarea>
+                            <div *ngIf="postForm.get('content')?.invalid && postForm.get('content')?.touched"
+                                class="invalid-feedback">
+                                El contenido es requerido.
+                            </div>
+                        </div>
+
+                        <!-- Imagen -->
+                        <div class="mb-3">
+                            <label for="image" class="form-label">Imagen</label>
+                            <input type="file" id="image" class="form-control" (change)="onFileSelected($event)" />
+                        </div>
+
+                        <!-- Vista previa de imagen -->
+                        <div *ngIf="imageUrl" class="mb-3">
+                            <img [src]="imageUrl" alt="Vista previa" class="img-fluid img-thumbnail" />
+                        </div>
+
+                        <div class="text-center">
+                            <button type="submit" class="btn btn-primary w-100" [disabled]="postForm.invalid">
+                                Actualizar Post
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,80 @@
+<div class="container mt-4">
+    <h2>{{ isEditMode ? 'Editar Competición' : 'Crear Competición' }}</h2>
+
+    <form [formGroup]="competicionForm" (ngSubmit)="onSubmit()" enctype="multipart/form-data">
+        <!-- Campo Nombre -->
+        <div class="mb-3">
+            <label for="nombre" class="form-label">Nombre</label>
+            <input id="nombre" type="text" class="form-control" formControlName="nombre">
+        </div>
+
+        <!-- Campo Fecha -->
+        <div class="mb-3">
+            <label for="fecha" class="form-label">Fecha</label>
+            <input id="fecha" type="date" class="form-control" formControlName="fecha">
+        </div>
+
+        <!-- Campo Lugar -->
+        <div class="mb-3">
+            <label for="lugar" class="form-label">Lugar</label>
+            <input id="lugar" type="text" class="form-control" formControlName="lugar">
+        </div>
+
+        <!-- Campo Lugar -->
+        <div class="mb-3">
+            <label for="tipo" class="form-label">Tipo</label>
+            <input id="tipo" type="text" class="form-control" formControlName="tipo">
+        </div>
+
+        <!-- Campo Categorías -->
+        <div class="mb-3">
+            <label for="categorias" class="form-label">Categorías</label>
+            <mat-select id="categorias" formControlName="categorias" multiple
+                (selectionChange)="onCategoriasChange($event)">
+                <mat-option *ngFor="let categoria of categoriasDisponibles" [value]="categoria._id">
+                    {{ categoria.nombre_categoria }}
+                </mat-option>
+            </mat-select>
+        </div>
+
+        <!-- Mostrar sector y pruebas solo si hay categorías seleccionadas -->
+        <div *ngIf="categoriasSeleccionadas!.length > 0">
+            <!-- Campo Sector -->
+            <div class="mb-3">
+                <label for="sector" class="form-label">Sector</label>
+                <select id="sector" class="form-control" formControlName="sector" (change)="onSectorChange($event)">
+                    <option *ngFor="let sector of sectoresDisponibles" [value]="sector._id">{{ sector.nombre_sector }}
+                    </option>
+                </select>
+            </div>
+
+            <!-- Campo Pruebas -->
+            <div class="mb-3">
+                <label for="pruebas" class="form-label">Pruebas</label>
+                <mat-select id="pruebas" formControlName="pruebas" multiple>
+                    <mat-option *ngFor="let prueba of pruebasDisponibles" [value]="prueba">
+                        {{ prueba.nombre_prueba }} {{ prueba.categoria_id.nombre_categoria }}
+                    </mat-option>
+                </mat-select>
+                <p *ngIf="pruebasDisponibles.length === 0">No hay pruebas disponibles para las categorías y sector
+                    seleccionados</p>
+            </div>
+        </div>
+
+
+        <!-- Campo Imagen -->
+        <div class="mb-3">
+            <label for="imagen" class="form-label">Imagen</label>
+            <input id="imagen" type="file" class="form-control" (change)="onFileSelected($event)">
+        </div>
+
+        <!-- Mostrar la imagen seleccionada (opcional) -->
+        <div *ngIf="imageUrl" class="mb-3">
+            <img [src]="imageUrl" alt="Imagen seleccionada" class="img-fluid" style="max-width: 200px;">
+        </div>
+
+
+        <!-- Botón de envío -->
+        <button type="submit" class="btn btn-primary">{{ isEditMode ? 'Actualizar' : 'Crear' }}</button>
+    </form>
+</div>

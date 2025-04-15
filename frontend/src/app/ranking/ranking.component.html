@@ -1,0 +1,93 @@
+<div class="container mt-5">
+    <h2 class="text-center mb-4">Ranking de Marcas</h2>
+
+    <!-- Selección de sector -->
+    <div class="form-group">
+        <label for="sectores">Seleccione un sector:</label>
+        <select id="sectores" class="form-control" [(ngModel)]="sectorSeleccionado"
+            (ngModelChange)="onSectorSelected()">
+            <option *ngFor="let sector of sectores" [ngValue]="sector">{{ sector.nombre_sector }}</option>
+        </select>
+    </div>
+
+    <!-- Selección de prueba (mostrada después de seleccionar sector) -->
+    <div *ngIf="sectorSeleccionado" class="form-group">
+        <label for="pruebas">Seleccione una prueba del sector {{ sectorSeleccionado.nombre_sector }}:</label>
+        <select id="pruebas" class="form-control" [(ngModel)]="pruebaSeleccionada" (ngModelChange)="onPruebaSelected()">
+            <option *ngFor="let prueba of pruebas" [ngValue]="prueba">{{ prueba.nombre_prueba }}</option>
+        </select>
+    </div>
+
+    <!-- Selección de categoría (mostrada después de seleccionar prueba) -->
+    <div *ngIf="pruebaSeleccionada" class="form-group">
+        <label for="categorias">Seleccione una categoría:</label>
+        <select id="categorias" class="form-control" [(ngModel)]="categoriaSeleccionada"
+            (ngModelChange)="onCategoriaSelected()">
+            <option *ngFor="let categoria of categorias" [ngValue]="categoria">{{ categoria.nombre_categoria }}</option>
+        </select>
+    </div>
+
+    <div *ngIf="categoriaSeleccionada" class="form-group">
+        <label for="PcAL">Seleccione Temporada:</label>
+        <select id="PcAL" class="form-control" [(ngModel)]="PcALSeleccionado" (ngModelChange)="onPcALSelected()">
+            <option [ngValue]="ambas">{{ambas.PcAL}}</option> <!-- Aquí asignamos directamente el objeto ambas -->
+            <option *ngFor="let pcal of PcAL" [ngValue]="pcal">{{ pcal.PcAL }}</option>
+        </select>
+    </div>
+
+    <!-- Tabla de marcas (mostrada después de seleccionar prueba y categoría) -->
+    <div *ngIf="pruebaSeleccionada && categoriaSeleccionada && PcALSeleccionado && marcas.length > 0; else noMarcas"
+        class="table-responsive mt-4">
+        <h3 class="text-center">Marcas para la prueba {{ pruebaSeleccionada.nombre_prueba }}</h3>
+        <table class="table table-bordered table-striped mt-3">
+            <thead class="thead-dark">
+                <tr>
+                    <th *ngIf="mostrarAtleta">Atleta</th>
+                    <th *ngIf="mostrarTiempo">Tiempo</th>
+                    <th *ngIf="mostrarMetros">Metros</th>
+                    <th *ngIf="mostrarPuntos">Puntos</th>
+                    <th *ngIf="mostrarLugar">Lugar</th>
+                    <th *ngIf="mostrarViento">Viento</th>
+                    <th *ngIf="mostrarComentario">Comentario</th>
+                    <th *ngIf="mostrarFecha">Fecha de realización</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr *ngFor="let marca of marcas">
+                    <!-- En tu template de ranking -->
+                    <td *ngIf="mostrarAtleta">
+                        <a [routerLink]="['/atletas', marca.nombre_atleta._id, 'perfil']">
+                            {{ marca.nombre_atleta.nombre }}
+                        </a>
+                    </td>
+                    <td *ngIf="mostrarTiempo">{{ formatearTiempo(marca.horas, marca.minutos, marca.segundos) }}</td>
+                    <td *ngIf="mostrarMetros">{{ marca.metros }}</td>
+                    <td *ngIf="mostrarPuntos">{{ marca.puntos }}</td>
+                    <td *ngIf="mostrarLugar">{{ marca.lugar }}</td>
+                    <td *ngIf="mostrarViento">{{ marca.viento }}</td>
+                    <td *ngIf="mostrarComentario">
+                        <a href="#" (click)="openDecathlonModal(marca.comentario); $event.preventDefault();">Ver marcas
+                            combinadas</a>
+                    </td>
+                    <td *ngIf="mostrarFecha">{{ marca.fecha_realizacion }}</td>
+
+                    <td *ngIf="isAdmin()">
+                        <button (click)="deleteMarca(marca._id)" class="btn btn-danger">Borrar</button>
+                    </td>
+
+
+                </tr>
+            </tbody>
+        </table>
+
+    </div>
+
+    <!-- Esta es la sección que se mostrará cuando no haya marcas -->
+    <ng-template #noMarcas>
+        <div *ngIf="pruebaSeleccionada && categoriaSeleccionada && PcALSeleccionado"
+            class="alert alert-info mt-4 text-center">
+            No hay marcas disponibles para tu búsqueda
+        </div>
+    </ng-template>
+
+</div>

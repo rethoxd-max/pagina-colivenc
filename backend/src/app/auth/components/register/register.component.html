@@ -1,0 +1,49 @@
+<div class="container main-content">
+    <div class="container register-container">
+        <div class="row justify-content-center">
+            <div class="col-lg-6 col-md-8 col-sm-12">
+                <div class="card shadow-sm p-4 mb-5 bg-body rounded">
+                    <div class="card-body">
+                        <h3 class="text-center mb-4">Crea tu cuenta</h3>
+                        <form (ngSubmit)="onSubmit()" #registerForm="ngForm">
+                            <div class="mb-3">
+                                <input [(ngModel)]="user.name" type="text" class="form-control"
+                                    placeholder="Nombre completo" name="name" required #name="ngModel" />
+                                <div *ngIf="name.invalid && name.touched" class="text-danger">
+                                    <div *ngIf="name.errors?.['required']">El nombre es obligatorio</div>
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <input [(ngModel)]="user.email" type="email" class="form-control"
+                                    placeholder="Correo electrónico" name="email" required email #email="ngModel" />
+                                <div *ngIf="email.invalid && email.touched" class="text-danger">
+                                    <div *ngIf="email.errors?.['required']">El correo es obligatorio</div>
+                                    <div *ngIf="email.errors?.['email']">El formato del correo no es válido</div>
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <input [(ngModel)]="user.password" type="password" class="form-control"
+                                    placeholder="Contraseña" name="password" required minlength="6"
+                                    #password="ngModel" />
+                                <div *ngIf="password.invalid && password.touched" class="text-danger">
+                                    <div *ngIf="password.errors?.['required']">La contraseña es obligatoria</div>
+                                    <div *ngIf="password.errors?.['minlength']">La contraseña debe tener al menos 6
+                                        caracteres</div>
+                                </div>
+                            </div>
+                            <button type="submit" class="btn btn-primary w-100"
+                                [disabled]="registerForm.invalid">Registrarse</button>
+
+                            <!-- Mostrar error del backend -->
+                            <div *ngIf="errorMessage" class="alert alert-danger mt-3">{{ errorMessage }}</div>
+                        </form>
+                        <div class="text-center mt-3">
+                            <a routerLink="/login" class="text-decoration-none">¿Ya tienes cuenta? Inicia sesión
+                                aquí</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
