@@ -1,0 +1,773 @@
+MEMORIA DEL PROYECTO FIN DE GRADO
+
+SISTEMA DE GESTIÓN DEPORTIVA CON ANGULAR Y MONGODB
+
+Autor: [Tu Nombre]
+Tutor: [Nombre del Tutor]
+Curso Académico: 2023/2024
+
+RESUMEN
+
+Este Trabajo de Fin de Grado presenta el desarrollo de una aplicación web completa para la gestión deportiva, implementada utilizando tecnologías modernas como Angular para el frontend y MongoDB como base de datos, con un backend desarrollado en Node.js. El sistema permite la gestión integral de atletas, competiciones, rankings y entrenamientos, proporcionando una solución completa para clubes deportivos y federaciones. La aplicación facilita el seguimiento del rendimiento de los atletas, la organización de competiciones y la gestión de entrenamientos, todo ello a través de una interfaz intuitiva y responsive.
+
+El proyecto implementa un sistema de autenticación robusto con diferentes roles de usuario (Administrador, Entrenador, Atleta, Editor y Viewer), garantizando la seguridad y el acceso controlado a las diferentes funcionalidades. Además, incorpora características avanzadas como la gestión de rankings por categorías, un sistema de inscripciones a competiciones y un calendario de entrenamientos personalizado.
+
+Palabras clave: Angular, MongoDB, Node.js, Gestión Deportiva, Desarrollo Web, Express, REST API
+
+ABSTRACT
+
+This Final Degree Project presents the development of a comprehensive web application for sports management, implemented using modern technologies such as Angular for the frontend and MongoDB as a database, with a backend developed in Node.js. The system allows comprehensive management of athletes, competitions, rankings and training, providing a complete solution for sports clubs and federations. The application facilitates athlete performance tracking, competition organization and training management, all through an intuitive and responsive interface.
+
+The project implements a robust authentication system with different user roles (Administrator, Coach, Athlete, Editor and Viewer), ensuring security and controlled access to different functionalities. Additionally, it incorporates advanced features such as category-based ranking management, a competition registration system and a personalized training calendar.
+
+Keywords: Angular, MongoDB, Node.js, Sports Management, Web Development, Express, REST API
+
+ÍNDICE
+
+1. INTRODUCCIÓN
+   1.1. Motivación
+   1.2. Objetivos
+   1.3. Estructura de la memoria
+
+2. ESTADO DEL ARTE
+   2.1. Tecnologías web actuales
+   2.2. Sistemas de gestión deportiva existentes
+   2.3. Frameworks y herramientas utilizadas
+
+3. ANÁLISIS Y REQUISITOS
+   3.1. Requisitos funcionales
+   3.2. Requisitos no funcionales
+   3.3. Casos de uso
+   3.4. Análisis de usuarios y roles
+
+4. DISEÑO DE LA SOLUCIÓN
+   4.1. Arquitectura del sistema
+        4.1.1. Frontend (Angular)
+        4.1.2. Backend (Node.js + Express)
+        4.1.3. Base de datos (MongoDB)
+   4.2. Diseño de la interfaz de usuario
+   4.3. Diseño de la base de datos
+   4.4. Diseño de la API REST
+
+5. IMPLEMENTACIÓN
+   5.1. Frontend
+        5.1.1. Componentes principales
+        5.1.2. Servicios
+        5.1.3. Módulos
+        5.1.4. Routing y navegación
+   5.2. Backend
+        5.2.1. Estructura del servidor
+        5.2.2. Modelos de datos
+        5.2.3. Controladores
+        5.2.4. Middleware
+   5.3. Base de datos
+        5.3.1. Esquemas
+        5.3.2. Relaciones
+        5.3.3. Consultas principales
+
+6. FUNCIONALIDADES IMPLEMENTADAS
+   6.1. Sistema de ranking
+        6.1.1. Gestión de atletas
+        6.1.2. Registro de marcas
+        6.1.3. Categorías y sectores
+   6.2. Gestión de competiciones
+        6.2.1. Inscripciones
+        6.2.2. Pruebas y categorías
+   6.3. Sistema de entrenamientos
+        6.3.1. Grupos de entrenamiento
+        6.3.2. Calendario
+        6.3.3. Gestión de sesiones
+
+7. SEGURIDAD
+   7.1. Autenticación y autorización
+   7.2. Gestión de sesiones
+   7.3. Protección de datos
+   7.4. Buenas prácticas implementadas
+
+8. PRUEBAS Y VALIDACIÓN
+   8.1. Pruebas unitarias
+   8.2. Pruebas de integración
+   8.3. Pruebas de usuario
+   8.4. Resultados y métricas
+
+9. DESPLIEGUE
+   9.1. Preparación del entorno
+   9.2. Configuración de servidores
+   9.3. Proceso de despliegue
+   9.4. Monitorización
+
+10. CONCLUSIONES Y TRABAJO FUTURO
+    10.1. Objetivos alcanzados
+    10.2. Dificultades encontradas
+    10.3. Lecciones aprendidas
+    10.4. Líneas futuras de desarrollo
+
+BIBLIOGRAFÍA
+
+ANEXOS
+Anexo A: Manual de instalación
+Anexo B: Manual de usuario
+Anexo C: Documentación de la API
+Anexo D: Glosario de términos 
+
+1. INTRODUCCIÓN
+
+1.1. Motivación
+
+El sector deportivo ha experimentado una creciente necesidad de digitalización en sus procesos de gestión. Los clubes deportivos y federaciones requieren herramientas modernas que les permitan gestionar eficientemente sus actividades, desde el seguimiento del rendimiento de los atletas hasta la organización de competiciones. Este proyecto nace como respuesta a esta necesidad, proporcionando una solución integral que automatiza y simplifica estos procesos.
+
+1.2. Objetivos
+
+Los objetivos principales de este proyecto son:
+
+- Desarrollar una aplicación web completa para la gestión deportiva utilizando tecnologías modernas.
+- Implementar un sistema de gestión de atletas con seguimiento de rendimiento y rankings.
+- Crear un módulo de gestión de competiciones con sistema de inscripciones.
+- Desarrollar un sistema de gestión de entrenamientos con calendario personalizado.
+- Implementar un sistema de autenticación y autorización con diferentes roles de usuario.
+- Proporcionar una interfaz de usuario intuitiva y responsive.
+- Garantizar la seguridad y protección de los datos.
+
+1.3. Estructura de la memoria
+
+[Continúa el desarrollo del contenido...]
+
+2. ESTADO DEL ARTE
+
+2.1. Tecnologías web actuales
+
+El desarrollo web moderno ha evolucionado significativamente en los últimos años, con frameworks y bibliotecas que facilitan la creación de aplicaciones robustas y escalables. Entre las tecnologías más relevantes utilizadas en este proyecto destacan:
+
+Angular:
+- Framework de desarrollo frontend mantenido por Google
+- Arquitectura basada en componentes
+- TypeScript como lenguaje principal
+- Sistema de módulos y servicios
+- Routing integrado
+
+Node.js y Express:
+- Entorno de ejecución de JavaScript del lado del servidor
+- Express como framework minimalista y flexible
+- Sistema de middleware para procesamiento de peticiones
+- Gestión eficiente de operaciones asíncronas
+
+MongoDB:
+- Base de datos NoSQL orientada a documentos
+- Alta escalabilidad y flexibilidad
+- Esquemas dinámicos
+- Excelente integración con Node.js
+
+2.2. Sistemas de gestión deportiva existentes
+
+[Se desarrollaría un análisis de sistemas similares existentes en el mercado]
+
+2.3. Frameworks y herramientas utilizadas
+
+[Descripción detallada de todas las herramientas y frameworks utilizados]
+
+3. ANÁLISIS Y REQUISITOS
+
+3.1. Requisitos funcionales
+
+Sistema de Usuarios:
+- Registro e inicio de sesión de usuarios
+- Gestión de roles (Admin, Entrenador, Atleta, Editor, Viewer)
+- Perfiles de usuario personalizados
+
+Gestión de Atletas:
+- Registro y actualización de información personal
+- Seguimiento de marcas y resultados
+- Historial de competiciones
+
+Sistema de Rankings:
+- Clasificación por categorías y sectores
+- Registro y validación de marcas
+- Visualización de rankings históricos
+
+Gestión de Competiciones:
+- Creación y edición de eventos
+- Sistema de inscripciones
+- Gestión de pruebas y categorías
+
+Sistema de Entrenamientos:
+- Creación de grupos de entrenamiento
+- Calendario personalizado
+- Gestión de sesiones y asistencia
+
+3.2. Requisitos no funcionales
+
+Rendimiento:
+- Tiempo de respuesta rápido en operaciones de consulta
+- Capacidad para manejar múltiples usuarios concurrentes
+- Optimización de consultas a la base de datos
+
+Seguridad:
+- Autenticación segura de usuarios
+- Encriptación de datos sensibles
+- Control de acceso basado en roles
+- Protección contra ataques comunes (XSS, CSRF)
+
+Usabilidad:
+- Interfaz intuitiva y fácil de usar
+- Diseño responsive para diferentes dispositivos
+- Feedback claro al usuario
+- Tiempos de carga optimizados
+
+Mantenibilidad:
+- Código modular y bien documentado
+- Arquitectura escalable
+- Facilidad de actualización y mantenimiento
+- Gestión de versiones
+
+3.3. Casos de uso
+
+[Diagrama de casos de uso]
+
+Principales casos de uso identificados:
+
+Usuario Administrador:
+- Gestión completa de usuarios
+- Configuración del sistema
+- Gestión de permisos
+- Supervisión general
+
+Entrenador:
+- Gestión de grupos de entrenamiento
+- Creación y modificación de sesiones
+- Seguimiento de atletas
+- Registro de marcas
+
+Atleta:
+- Consulta de entrenamientos
+- Visualización de rankings
+- Inscripción a competiciones
+- Seguimiento de progreso personal
+
+3.4. Análisis de usuarios y roles
+
+El sistema implementa un modelo de roles jerárquico:
+
+1. Administrador:
+   - Control total del sistema
+   - Gestión de usuarios y permisos
+   - Configuración global
+
+2. Entrenador:
+   - Gestión de grupos de entrenamiento
+   - Registro y validación de marcas
+   - Seguimiento de atletas
+
+3. Atleta:
+   - Acceso a perfil personal
+   - Visualización de rankings
+   - Inscripción a competiciones
+
+4. Editor:
+   - Gestión de contenido
+   - Actualización de información
+
+5. Viewer:
+   - Acceso de solo lectura
+   - Visualización de información pública
+
+4. DISEÑO DE LA SOLUCIÓN
+
+4.1. Arquitectura del sistema
+
+La aplicación sigue una arquitectura cliente-servidor basada en REST:
+
+4.1.1. Frontend (Angular)
+- Arquitectura basada en componentes
+- Módulos principales:
+  * AuthModule: Gestión de autenticación
+  * RankingModule: Sistema de rankings
+  * CompeticionesModule: Gestión de competiciones
+  * EntrenamientosModule: Gestión de entrenamientos
+- Servicios compartidos
+- Routing y navegación
+- Interceptores HTTP
+- Guards de autenticación
+
+4.1.2. Backend (Node.js + Express)
+- Arquitectura MVC
+- Middleware de autenticación
+- Controladores REST
+- Validación de datos
+- Manejo de errores
+- Sistema de logging
+
+4.1.3. Base de datos (MongoDB)
+Estructura de colecciones:
+
+Users:
+- Información de usuarios
+- Roles y permisos
+- Datos de autenticación
+
+Atletas:
+- Datos personales
+- Historial deportivo
+- Referencias a marcas
+
+Marcas:
+- Registros de rendimiento
+- Referencias a pruebas
+- Validación y estado
+
+Competiciones:
+- Información del evento
+- Pruebas asociadas
+- Inscripciones
+
+Entrenamientos:
+- Grupos de entrenamiento
+- Sesiones programadas
+- Asistencia
+
+4.2. Diseño de la interfaz de usuario
+
+La interfaz sigue principios de Material Design:
+- Diseño responsive
+- Navegación intuitiva
+- Feedback visual
+- Accesibilidad
+
+Componentes principales:
+- Dashboard personalizado
+- Tablas de rankings
+- Formularios de registro
+- Calendarios interactivos
+- Paneles de administración
+
+4.3. Diseño de la base de datos
+
+Esquema de datos principal:
+
+```javascript
+// Usuario
+{
+  name: String,
+  email: String,
+  password: String,
+  userTypes: [String]
+}
+
+// Atleta
+{
+  nombre: String,
+  fechaNacimiento: Date,
+  categoria: ObjectId,
+  marcas: [ObjectId]
+}
+
+// Marca
+{
+  valor: Number,
+  fecha: Date,
+  prueba: ObjectId,
+  atleta: ObjectId,
+  competicion: ObjectId
+}
+
+// Competicion
+{
+  nombre: String,
+  fecha: Date,
+  pruebas: [ObjectId],
+  inscripciones: [ObjectId]
+}
+```
+
+[El documento continuaría con el resto de las secciones...] 
+
+5. IMPLEMENTACIÓN
+
+5.1. Frontend
+
+5.1.1. Componentes principales
+
+La aplicación Angular está organizada en los siguientes módulos y componentes principales:
+
+Auth:
+- Login y registro
+- Gestión de sesiones
+- Guards de autenticación
+- Interceptores HTTP
+
+Ranking:
+- Visualización de rankings
+- Filtros por categorías y sectores
+- Registro de marcas
+- Historial de resultados
+
+Calendario:
+- Vista de competiciones
+- Sistema de inscripciones
+- Gestión de eventos
+- Calendario interactivo
+
+Entrenamientos:
+- Gestión de grupos
+- Programación de sesiones
+- Control de asistencia
+- Seguimiento de progreso
+
+Perfil Atleta:
+- Información personal
+- Historial deportivo
+- Estadísticas y progreso
+- Marcas personales
+
+5.1.2. Servicios
+
+Los servicios principales incluyen:
+
+```typescript
+// AuthService
+export class AuthService {
+  login(credentials)
+  register(userData)
+  logout()
+  getCurrentUser()
+  isAuthenticated()
+}
+
+// RankingService
+export class RankingService {
+  getMarcas()
+  registrarMarca()
+  getRankingByCategoria()
+  getAtletaStats()
+}
+
+// CompeticionService
+export class CompeticionService {
+  getCompeticiones()
+  inscribirAtleta()
+  getPruebasCompeticion()
+  getInscripciones()
+}
+```
+
+5.1.3. Módulos
+
+La aplicación está modularizada para mejor mantenibilidad:
+
+```typescript
+@NgModule({
+  declarations: [
+    AppComponent,
+    RankingComponent,
+    CompeticionesComponent,
+    EntrenamientosComponent
+  ],
+  imports: [
+    BrowserModule,
+    HttpClientModule,
+    RouterModule,
+    MaterialModule
+  ],
+  providers: [
+    AuthService,
+    RankingService,
+    CompeticionService
+  ]
+})
+```
+
+5.2. Backend
+
+5.2.1. Estructura del servidor
+
+El backend está organizado siguiendo el patrón MVC:
+
+```
+backend/
+├── models/
+│   ├── User.js
+│   ├── ranking/
+│   │   ├── Atleta.js
+│   │   ├── Marca.js
+│   │   └── Categoria.js
+│   └── calendario/
+├── routes/
+│   ├── auth.js
+│   ├── ranking/
+│   └── calendario/
+├── middleware/
+│   ├── auth.js
+│   └── validation.js
+└── index.js
+```
+
+5.2.2. Modelos de datos
+
+Los modelos principales están implementados usando Mongoose:
+
+```javascript
+// Modelo de Atleta
+const AtletaSchema = new Schema({
+  nombre: String,
+  fechaNacimiento: Date,
+  categoria: { type: Schema.Types.ObjectId, ref: 'Categoria' },
+  marcas: [{ type: Schema.Types.ObjectId, ref: 'Marca' }]
+});
+
+// Modelo de Marca
+const MarcaSchema = new Schema({
+  valor: Number,
+  fecha: Date,
+  prueba: { type: Schema.Types.ObjectId, ref: 'Prueba' },
+  atleta: { type: Schema.Types.ObjectId, ref: 'Atleta' },
+  competicion: { type: Schema.Types.ObjectId, ref: 'Competicion' }
+});
+```
+
+5.2.3. Controladores
+
+Implementación de la lógica de negocio principal:
+
+```javascript
+// Controlador de Rankings
+const getRanking = async (req, res) => {
+  try {
+    const { categoria, prueba } = req.query;
+    const marcas = await Marca.find({ ... })
+      .populate('atleta')
+      .populate('prueba')
+      .sort({ valor: -1 });
+    res.json(marcas);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// Controlador de Competiciones
+const inscribirAtleta = async (req, res) => {
+  try {
+    const { atletaId, competicionId, pruebaId } = req.body;
+    const inscripcion = new Inscripcion({ ... });
+    await inscripcion.save();
+    res.status(201).json(inscripcion);
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+};
+```
+
+6. FUNCIONALIDADES IMPLEMENTADAS
+
+6.1. Sistema de ranking
+
+6.1.1. Gestión de atletas
+- Registro y actualización de información personal
+- Asignación de categorías
+- Historial deportivo
+- Estadísticas personales
+
+6.1.2. Registro de marcas
+- Validación de resultados
+- Categorización automática
+- Histórico de marcas
+- Comparativas y progreso
+
+6.1.3. Categorías y sectores
+- Clasificación por edades
+- Divisiones por nivel
+- Rankings específicos
+- Filtros y búsquedas
+
+6.2. Gestión de competiciones
+
+6.2.1. Inscripciones
+- Proceso de inscripción online
+- Validación de requisitos
+- Gestión de pagos
+- Confirmaciones automáticas
+
+6.2.2. Pruebas y categorías
+- Configuración de pruebas
+- Asignación de categorías
+- Límites de participación
+- Gestión de horarios
+
+6.3. Sistema de entrenamientos
+
+6.3.1. Grupos de entrenamiento
+- Creación y gestión de grupos
+- Asignación de entrenadores
+- Control de asistencia
+- Evaluación de progreso
+
+6.3.2. Calendario
+- Programación de sesiones
+- Gestión de horarios
+- Notificaciones automáticas
+- Recordatorios de eventos
+
+6.3.3. Gestión de sesiones
+- Planificación de entrenamientos
+- Registro de actividades
+- Seguimiento de objetivos
+- Evaluación de resultados
+
+7. SEGURIDAD
+
+7.1. Autenticación y autorización
+
+Implementación de seguridad robusta:
+
+```javascript
+// Middleware de autenticación
+const authMiddleware = async (req, res, next) => {
+  try {
+    const token = req.header('Authorization').replace('Bearer ', '');
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const user = await User.findOne({ _id: decoded._id });
+    if (!user) throw new Error();
+    req.user = user;
+    next();
+  } catch (error) {
+    res.status(401).send({ error: 'Please authenticate.' });
+  }
+};
+
+// Control de acceso basado en roles
+const roleMiddleware = (allowedRoles) => {
+  return (req, res, next) => {
+    if (!req.user.userTypes.some(role => allowedRoles.includes(role))) {
+      return res.status(403).json({ message: 'Access denied' });
+    }
+    next();
+  };
+};
+```
+
+7.2. Gestión de sesiones
+- Tokens JWT
+- Renovación automática
+- Control de sesiones activas
+- Cierre de sesión seguro
+
+7.3. Protección de datos
+- Encriptación de datos sensibles
+- Validación de entrada
+- Sanitización de datos
+- Protección contra inyecciones
+
+8. PRUEBAS Y VALIDACIÓN
+
+8.1. Pruebas unitarias
+
+```typescript
+describe('AuthService', () => {
+  it('should authenticate valid user', async () => {
+    const result = await authService.login(validCredentials);
+    expect(result.token).toBeDefined();
+  });
+
+  it('should reject invalid credentials', async () => {
+    await expect(authService.login(invalidCredentials))
+      .rejects.toThrow('Invalid credentials');
+  });
+});
+
+describe('RankingService', () => {
+  it('should return sorted rankings', async () => {
+    const rankings = await rankingService.getRankingByCategoria(categoriaId);
+    expect(rankings).toBeSorted((a, b) => b.valor - a.valor);
+  });
+});
+```
+
+8.2. Pruebas de integración
+- Flujos completos de usuario
+- Integración entre módulos
+- Pruebas de API
+- Validación de datos
+
+8.3. Pruebas de usuario
+- Casos de uso principales
+- Interfaz de usuario
+- Experiencia de usuario
+- Rendimiento
+
+9. DESPLIEGUE
+
+9.1. Preparación del entorno
+
+```bash
+# Configuración de variables de entorno
+PORT=5000
+MONGO_URI=mongodb://localhost:27017/sports_db
+JWT_SECRET=your_jwt_secret
+NODE_ENV=production
+
+# Instalación de dependencias
+npm install
+npm run build
+
+# Configuración de PM2
+pm2 start index.js --name sports-app
+```
+
+9.2. Configuración de servidores
+- Servidor Node.js
+- Base de datos MongoDB
+- Servidor web (Nginx)
+- Certificados SSL
+
+9.3. Proceso de despliegue
+- Build de producción
+- Migración de datos
+- Configuración de dominios
+- Monitorización inicial
+
+10. CONCLUSIONES Y TRABAJO FUTURO
+
+10.1. Objetivos alcanzados
+- Sistema completo de gestión deportiva
+- Interfaz intuitiva y responsive
+- Gestión eficiente de datos
+- Sistema seguro y escalable
+
+10.2. Dificultades encontradas
+- Complejidad de los cálculos de rankings
+- Gestión de concurrencia
+- Optimización de consultas
+- Manejo de sesiones múltiples
+
+10.3. Lecciones aprendidas
+- Importancia del diseño modular
+- Valor de las pruebas automatizadas
+- Necesidad de documentación clara
+- Beneficios de la arquitectura REST
+
+10.4. Líneas futuras de desarrollo
+- Implementación de análisis estadístico avanzado
+- Integración con dispositivos wearables
+- Sistema de notificaciones en tiempo real
+- Módulo de análisis de rendimiento
+
+BIBLIOGRAFÍA
+
+1. Angular Documentation. https://angular.io/docs
+2. MongoDB Manual. https://docs.mongodb.com/manual/
+3. Node.js Documentation. https://nodejs.org/en/docs/
+4. Express.js Guide. https://expressjs.com/en/guide/routing.html
+5. JWT Authentication. https://jwt.io/introduction/
+6. Material Design Guidelines. https://material.io/design
+
+ANEXOS
+
+Anexo A: Manual de instalación
+[Instrucciones detalladas de instalación y configuración]
+
+Anexo B: Manual de usuario
+[Guía completa de uso del sistema]
+
+Anexo C: Documentación de la API
+[Documentación detallada de endpoints y modelos]
+
+Anexo D: Glosario de términos
+[Definiciones de términos técnicos y deportivos] 
