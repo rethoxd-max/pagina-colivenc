@@ -24,7 +24,18 @@ const marcaSchema = new mongoose.Schema({
         ref: 'Categoria',
         required: true,
     },
-    anyo: { type: Number, required: true },
+    anyo: { 
+        type: Number, 
+        required: true,
+        validate: {
+            validator: function(v) {
+                return v !== undefined && v !== null && !isNaN(v);
+            },
+            message: function(props) {
+                return `${props.value} no es un año válido`;
+            }
+        }
+    },
     PcAL: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'PcAL',

@@ -1,0 +1,64 @@
+<div class="calendario-container">
+    <div class="calendario-header">
+        <button class="nav-button" (click)="prevMonth()">
+            <i class="fas fa-chevron-left"></i>
+        </button>
+        <h3>{{ getMonthName() | titlecase }} {{ getYear() }}</h3>
+        <button class="nav-button" (click)="nextMonth()">
+            <i class="fas fa-chevron-right"></i>
+        </button>
+    </div>
+
+    <div class="dias-semana">
+        <span>Lun</span>
+        <span>Mar</span>
+        <span>Mié</span>
+        <span>Jue</span>
+        <span>Vie</span>
+        <span>Sáb</span>
+        <span>Dom</span>
+    </div>
+
+    <div class="calendario-grid">
+        <div *ngFor="let day of daysInMonth" 
+             class="dia-calendario"
+             [class.empty]="day === 0"
+             [class.has-competicion]="hasCompeticiones(day)"
+             (mouseenter)="setHoveredDate(day)"
+             (mouseleave)="clearHoveredDate()">
+            {{ day === 0 ? '' : day }}
+        </div>
+    </div>
+
+    <div class="competiciones-tooltip" *ngIf="hoveredDate && hasCompeticiones(hoveredDate.getDate())">
+        <div class="tooltip-header">
+            <h4>{{ hoveredDate.getDate() }} de {{ getMonthName() }}</h4>
+        </div>
+        <div class="competiciones-list">
+            <div *ngFor="let competicion of getCompeticionesDelDia(hoveredDate.getDate())" 
+                 class="competicion-item">
+                <h5>{{ competicion.nombre }}</h5>
+                <p><i class="fas fa-map-marker-alt"></i> {{ competicion.lugar }}</p>
+                <p><i class="fas fa-info-circle"></i> {{ competicion.descripcion }}</p>
+                <div class="competicion-tags">
+                    <span class="tag" *ngFor="let categoria of getCategoriasUnicas(competicion)">
+                        <i class="fas fa-tag"></i> {{ categoria }}
+                    </span>
+                    <span class="tag" *ngIf="competicion.pruebas && competicion.pruebas.length > 0">
+                        <i class="fas fa-list"></i> {{ competicion.pruebas.length }} pruebas
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="cumpleanos-container" *ngIf="cumpleanerosHoy.length > 0">
+    <h4>¡Hoy es el cumpleaños de!</h4>
+    <div class="cumpleaneros-list">
+        <div *ngFor="let atleta of cumpleanerosHoy" class="cumpleanero-item">
+            <i class="fas fa-birthday-cake"></i>
+            <a [routerLink]="['/perfil-atleta', atleta._id]" class="cumpleanero-link">{{ atleta.nombre }}</a>
+        </div>
+    </div>
+</div> 

@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { CompeticionService, PruebaCompeticion, SectorCompeticion, CategoriaCompeticion } from '../../services/competicion.service';
-import { NgClass, NgFor, NgIf } from '@angular/common';
+import { NgFor, NgIf } from '@angular/common';
 import { environment } from '../../../../environments/environment.development';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -12,7 +12,7 @@ import { MatSelectChange } from '@angular/material/select';
 @Component({
   selector: 'app-competicion-form',
   standalone: true,
-  imports: [ReactiveFormsModule, NgIf, NgClass, NgFor, MatAutocompleteModule, MatFormFieldModule, MatSelectModule],
+  imports: [ReactiveFormsModule, NgIf, NgFor, MatAutocompleteModule, MatFormFieldModule, MatSelectModule],
   templateUrl: './competicion-form.component.html',
   styleUrls: ['./competicion-form.component.css'],
 })

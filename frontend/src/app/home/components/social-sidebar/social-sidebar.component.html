@@ -1,0 +1,49 @@
+<div class="social-sidebar">
+    <!-- Instagram Feed -->
+    <div class="social-feed instagram-feed">
+        <div class="feed-header">
+            <i class="fab fa-instagram"></i>
+            <h3>Instagram</h3>
+        </div>
+        <div class="feed-content">
+            <div class="post" *ngFor="let post of instagramPosts">
+                <img [src]="post.media_url" [alt]="post.caption">
+                <div class="post-info">
+                    <p class="post-caption">{{ post.caption }}</p>
+                    <div class="post-meta">
+                        <span class="post-date">{{ post.timestamp | date:'dd/MM/yyyy' }}</span>
+                        <a [href]="post.permalink" target="_blank" class="post-link">
+                            <i class="fas fa-external-link-alt"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Facebook Feed -->
+    <div class="social-feed facebook-feed">
+        <div class="feed-header">
+            <i class="fab fa-facebook"></i>
+            <h3>Facebook</h3>
+        </div>
+        <div class="feed-content">
+            <div class="post" *ngFor="let post of facebookPosts">
+                <img [src]="post.full_picture" [alt]="post.message">
+                <div class="post-info">
+                    <p class="post-message">{{ post.message }}</p>
+                    <div class="post-meta">
+                        <span class="post-date">{{ post.created_time | date:'dd/MM/yyyy' }}</span>
+                        <span class="post-likes">
+                            <i class="fas fa-thumbs-up"></i>
+                            {{ post.likes.summary.total_count }}
+                        </span>
+                        <a [href]="post.permalink_url" target="_blank" class="post-link">
+                            <i class="fas fa-external-link-alt"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div> 

@@ -110,15 +110,33 @@ router.get('/marcas/atleta/:atletaId', async (req, res) => {
     try {
         const { atletaId } = req.params;
 
-        const marcas = await Marca.find({
-            nombre_atleta: atletaId
-        }).populate('nombre_atleta nombre_prueba categoria PcAL').lean();
+        // Validar el ID del atleta
+        if (!mongoose.Types.ObjectId.isValid(atletaId)) {
+            return res.status(400).json({ message: 'ID de atleta no válido.' });
+        }
+
+        // Construir la consulta base
+        const query = {
+            nombre_atleta: new mongoose.Types.ObjectId(atletaId)
+        };
+
+        // Obtener las marcas sin filtrar por año
+        const marcas = await Marca.find(query)
+            .populate('nombre_atleta nombre_prueba categoria PcAL')
+            .lean();
 
         if (!marcas || marcas.length === 0) {
             return res.status(404).json({ message: 'No se encontraron marcas para este atleta.' });
         }
 
-        res.json(marcas);
+        // Filtrar marcas que tengan un año válido
+        const marcasValidas = marcas.filter(marca => {
+            return marca.anyo !== undefined && 
+                   marca.anyo !== null && 
+                   !isNaN(Number(marca.anyo));
+        });
+
+        res.json(marcasValidas);
     } catch (err) {
         console.error(err);
         res.status(500).json({ message: err.message });

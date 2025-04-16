@@ -134,20 +134,29 @@ export class RankingComponent implements OnInit {
   }
 
   getMejoresMarcasPorCategoria(pruebaId: string, categoriaId: string): void {
-    if (!categoriaId) {
-      console.error('categoriaId es undefined');
-      return; // Evita llamar al servicio si categoriaId es undefined
+    if (!categoriaId || !pruebaId) {
+      console.error('categoriaId o pruebaId es undefined');
+      return;
     }
 
     this.rankingService.getMejoresMarcasPorCategoria(pruebaId, categoriaId).subscribe(
       (marcas) => {
-        this.marcas = marcas.filter(marca =>
-          marca.nombre_prueba && marca.nombre_prueba._id === pruebaId &&
-          marca.categoria && marca.categoria._id === categoriaId
-        );
+        if (!marcas || marcas.length === 0) {
+          this.marcas = [];
+          return;
+        }
+
+        // Filtrar marcas válidas
+        this.marcas = marcas.filter(marca => {
+          if (!marca || !marca.nombre_prueba || !marca.categoria) {
+            return false;
+          }
+          return marca.nombre_prueba._id === pruebaId && marca.categoria._id === categoriaId;
+        });
       },
       (error) => {
         console.error('Error al obtener las mejores marcas por categoría:', error);
+        this.marcas = [];
       }
     );
   }

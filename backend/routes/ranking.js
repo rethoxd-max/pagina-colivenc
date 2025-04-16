@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const Marca = require('../models/ranking/Marca');
+const mongoose = require('mongoose');
 
 // GET all marcas
 router.get('/', async (req, res) => {
@@ -81,16 +82,32 @@ router.get('/mejores-marcas/:pruebaId/:categoriaId', async (req, res) => {
         const pruebaId = req.params.pruebaId;
         const categoriaId = req.params.categoriaId;
 
+        // Validar que los IDs sean válidos
+        if (!mongoose.Types.ObjectId.isValid(pruebaId) || !mongoose.Types.ObjectId.isValid(categoriaId)) {
+            return res.status(400).json({ message: 'ID de prueba o categoría no válido.' });
+        }
+
         // Obtener todas las marcas de la prueba seleccionada y la categoría
         const marcas = await Marca.find({
             nombre_prueba: pruebaId,
-            categoria: categoriaId // Asegúrate de que el campo 'categoria' sea el correcto
+            categoria: categoriaId
         })
             .populate('nombre_atleta nombre_prueba categoria')
-            .lean(); // Usamos lean() para mejorar el rendimiento
+            .lean();
+
+        // Filtrar marcas que tengan todos los campos necesarios
+        const marcasValidas = marcas.filter(marca => 
+            marca.nombre_atleta && 
+            marca.nombre_prueba && 
+            marca.categoria
+        );
+
+        if (marcasValidas.length === 0) {
+            return res.status(404).json({ message: 'No se encontraron marcas válidas para esta prueba y categoría.' });
+        }
 
         // Agrupar las marcas por atleta
-        const marcasPorAtleta = marcas.reduce((acc, marca) => {
+        const marcasPorAtleta = marcasValidas.reduce((acc, marca) => {
             const atletaId = marca.nombre_atleta._id.toString();
             if (!acc[atletaId]) acc[atletaId] = [];
             acc[atletaId].push(marca);
@@ -106,6 +123,7 @@ router.get('/mejores-marcas/:pruebaId/:categoriaId', async (req, res) => {
         // Enviar las mejores marcas ordenadas
         res.json(rankingOrdenado);
     } catch (err) {
+        console.error(err);
         res.status(500).json({ message: err.message });
     }
 });
