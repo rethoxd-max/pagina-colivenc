@@ -82,6 +82,33 @@ export class CompeticionService {
     return this.http.get<SectorCompeticion[]>(`${this.apiUrl}/sectoresCompeticion`);
   }
 
+  createSector(sectorData: any): Observable<any> {
+    const token = this.authService.getToken();
+    if (!token) {
+      throw new Error('No token found');
+    }
+    const headers = new HttpHeaders().set('x-auth-token', token);
+    return this.http.post(`${this.apiUrl}/sectoresCompeticion`, sectorData, { headers });
+  }
+
+  createCategoria(categoriaData: any): Observable<any> {
+    const token = this.authService.getToken();
+    if (!token) {
+      throw new Error('No token found');
+    }
+    const headers = new HttpHeaders().set('x-auth-token', token);
+    return this.http.post(`${this.apiUrl}/categoriasCompeticion`, categoriaData, { headers });
+  }
+
+  createPrueba(pruebaData: any): Observable<any> {
+    const token = this.authService.getToken();
+    if (!token) {
+      throw new Error('No token found');
+    }
+    const headers = new HttpHeaders().set('x-auth-token', token);
+    return this.http.post(`${this.apiUrl}/pruebasCompeticion`, pruebaData, { headers });
+  }
+
   createCompeticion(competicionData: FormData): Observable<any> {
     const token = this.authService.getToken();
     if (!token) {

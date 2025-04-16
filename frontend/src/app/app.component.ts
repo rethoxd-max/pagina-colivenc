@@ -39,4 +39,9 @@ export class AppComponent implements OnInit {
     this.authService.logout();
     this.router.navigate(['/']);
   }
+
+  isAdmin(): boolean {
+    const user = this.authService.getUser();
+    return this.authService.isAuthenticated() && user && user.userTypes.includes('Admin');
+  }
 }

@@ -1,0 +1,110 @@
+<div class="container">
+  <mat-card>
+    <mat-card-header>
+      <mat-card-title>Gestión de Datos de Competiciones</mat-card-title>
+    </mat-card-header>
+    
+    <mat-card-content>
+      <mat-tab-group>
+        <!-- Pestaña de Sectores -->
+        <mat-tab label="Sectores">
+          <div class="form-container">
+            <form [formGroup]="sectorForm" (ngSubmit)="crearSector()">
+              <mat-form-field appearance="outline" class="full-width">
+                <mat-label>Nombre del Sector</mat-label>
+                <input matInput formControlName="nombre_sector" placeholder="Ej: Velocidad, Saltos, etc.">
+                <mat-error *ngIf="sectorForm.get('nombre_sector')?.hasError('required')">
+                  El nombre del sector es requerido
+                </mat-error>
+              </mat-form-field>
+
+              <button mat-raised-button color="primary" type="submit" [disabled]="!sectorForm.valid">
+                Crear Sector
+              </button>
+            </form>
+
+            <div class="list-container" *ngIf="sectores.length > 0">
+              <h3>Sectores Existentes</h3>
+              <mat-list>
+                <mat-list-item *ngFor="let sector of sectores">
+                  {{ sector.nombre_sector }}
+                </mat-list-item>
+              </mat-list>
+            </div>
+          </div>
+        </mat-tab>
+
+        <!-- Pestaña de Categorías -->
+        <mat-tab label="Categorías">
+          <div class="form-container">
+            <form [formGroup]="categoriaForm" (ngSubmit)="crearCategoria()">
+              <mat-form-field appearance="outline" class="full-width">
+                <mat-label>Nombre de la Categoría</mat-label>
+                <input matInput formControlName="nombre_categoria" placeholder="Ej: Sub-23, Sub-20, etc.">
+                <mat-error *ngIf="categoriaForm.get('nombre_categoria')?.hasError('required')">
+                  El nombre de la categoría es requerido
+                </mat-error>
+              </mat-form-field>
+
+              <button mat-raised-button color="primary" type="submit" [disabled]="!categoriaForm.valid">
+                Crear Categoría
+              </button>
+            </form>
+
+            <div class="list-container" *ngIf="categorias.length > 0">
+              <h3>Categorías Existentes</h3>
+              <mat-list>
+                <mat-list-item *ngFor="let categoria of categorias">
+                  {{ categoria.nombre_categoria }}
+                </mat-list-item>
+              </mat-list>
+            </div>
+          </div>
+        </mat-tab>
+
+        <!-- Pestaña de Pruebas -->
+        <mat-tab label="Pruebas">
+          <div class="form-container">
+            <form [formGroup]="pruebaForm" (ngSubmit)="crearPrueba()">
+              <mat-form-field appearance="outline" class="full-width">
+                <mat-label>Nombre de la Prueba</mat-label>
+                <input matInput formControlName="nombre_prueba" placeholder="Ej: 100 metros lisos">
+                <mat-error *ngIf="pruebaForm.get('nombre_prueba')?.hasError('required')">
+                  El nombre de la prueba es requerido
+                </mat-error>
+              </mat-form-field>
+
+              <mat-form-field appearance="outline" class="full-width">
+                <mat-label>Sector</mat-label>
+                <mat-select formControlName="sector_id">
+                  <mat-option *ngFor="let sector of sectores" [value]="sector._id">
+                    {{ sector.nombre_sector }}
+                  </mat-option>
+                </mat-select>
+                <mat-error *ngIf="pruebaForm.get('sector_id')?.hasError('required')">
+                  El sector es requerido
+                </mat-error>
+              </mat-form-field>
+
+              <mat-form-field appearance="outline" class="full-width">
+                <mat-label>Categoría</mat-label>
+                <mat-select formControlName="categoria_id">
+                  <mat-option *ngFor="let categoria of categorias" [value]="categoria._id">
+                    {{ categoria.nombre_categoria }}
+                  </mat-option>
+                </mat-select>
+                <mat-error *ngIf="pruebaForm.get('categoria_id')?.hasError('required')">
+                  La categoría es requerida
+                </mat-error>
+              </mat-form-field>
+
+              <button mat-raised-button color="primary" type="submit" [disabled]="!pruebaForm.valid">
+                Crear Prueba
+              </button>
+            </form>
+          </div>
+        </mat-tab>
+      </mat-tab-group>
+    </mat-card-content>
+  </mat-card>
+</div> 

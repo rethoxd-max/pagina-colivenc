@@ -64,6 +64,7 @@ export class CompeticionFormComponent implements OnInit {
 
     this.competicionService.getSectores().subscribe(
       sectores => {
+        console.log('Sectores disponibles:', sectores);
         this.sectoresDisponibles = sectores;
       }
     );
@@ -73,13 +74,14 @@ export class CompeticionFormComponent implements OnInit {
       this.isEditMode = true;
       this.competicionService.getCompeticionById(this.competicionId).subscribe(
         competicion => {
+          console.log('Competición cargada:', competicion);
           this.competicionForm.patchValue({
             nombre: competicion.nombre,
             fecha: this.formatDate(competicion.fecha),
             lugar: competicion.lugar,
             descripcion: competicion.descripcion,
             tipo: competicion.tipo,
-            imagen: competicion.imageUrl, // Aquí estás asignando el campo imagen
+            imagen: competicion.imageUrl,
             categorias: competicion.categorias,
             pruebas: [],
             sector: ''
@@ -120,9 +122,11 @@ export class CompeticionFormComponent implements OnInit {
 
   // Cargar pruebas según las categorías y el sector seleccionados
   cargarPruebas(sectorId: string, categorias: string[]): void {
+    console.log('Cargando pruebas con:', { sectorId, categorias });
     if (categorias.length > 0 && sectorId) {
       this.competicionService.getPruebasPorCategoriaYSector(sectorId, categorias).subscribe(
         pruebas => {
+          console.log('Pruebas encontradas:', pruebas);
           // Mezclar las pruebas disponibles y seleccionadas
           const nuevasPruebas = pruebas.filter(
             prueba => !this.pruebasSeleccionadas.some(sel => sel._id === prueba._id)
@@ -153,12 +157,18 @@ export class CompeticionFormComponent implements OnInit {
   }
 
   // Manejador de cambio de sector
-  onSectorChange(event: any): void {
-    const sectorId = event.target.value; // Se obtiene el valor del sector seleccionado
+  onSectorChange(event: MatSelectChange): void {
+    const sectorId = event.value; // Obtener el valor directamente del evento
+    const sectorSeleccionado = this.sectoresDisponibles.find(s => s._id === sectorId);
+    console.log('Sector seleccionado:', sectorSeleccionado);
+    
     const categoriasIds = this.competicionForm.get('categorias')?.value;
+    console.log('Categorías seleccionadas:', categoriasIds);
 
-    if (sectorId && categoriasIds.length > 0) {
+    if (sectorId && categoriasIds && categoriasIds.length > 0) {
       this.cargarPruebas(sectorId, categoriasIds);
+    } else {
+      this.pruebasDisponibles = [];
     }
   }
 
@@ -214,7 +224,7 @@ export class CompeticionFormComponent implements OnInit {
     });
 
     if (this.selectedFile) {
-      formData.append('imagen', this.selectedFile);
+      formData.append('image', this.selectedFile);
     } else if (this.isEditMode && this.imageUrl) {
       formData.append('imageUrl', this.imageUrl);  // Enviar la URL de la imagen existente si no se selecciona una nueva.
     }

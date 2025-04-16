@@ -1,110 +1,112 @@
 import { Component, OnInit } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { PostService } from '../../services/posts.service';
-import { NgClass, NgIf } from '@angular/common';
+import { AuthService } from '../../../auth/services/auth.service';
 import { environment } from '../../../../environments/environment.development';
+
+interface Post {
+  _id: string;
+  title: string;
+  content: string;
+  imageUrl?: string;
+}
+
 @Component({
   selector: 'app-edit-post',
   standalone: true,
-  templateUrl: './edit-post.component.html',
-  styleUrls: ['./edit-post.component.css'],
-  imports: [ReactiveFormsModule, NgIf, NgClass]
+  imports: [CommonModule, FormsModule],
+  template: `
+    <div class="container mt-5">
+      <div class="row justify-content-center">
+        <div class="col-md-8">
+          <div class="card shadow">
+            <div class="card-body">
+              <h2 class="card-title mb-4">Editar Noticia</h2>
+              <form (ngSubmit)="onSubmit()">
+                <div class="mb-3">
+                  <label for="title" class="form-label">Título</label>
+                  <input type="text" class="form-control" id="title" [(ngModel)]="post.title" name="title" required>
+                </div>
+                <div class="mb-3">
+                  <label for="content" class="form-label">Contenido</label>
+                  <textarea class="form-control" id="content" [(ngModel)]="post.content" name="content" rows="5" required></textarea>
+                </div>
+                <div class="mb-3">
+                  <label for="image" class="form-label">Imagen</label>
+                  <input type="file" class="form-control" id="image" (change)="onFileSelected($event)" name="image">
+                </div>
+                <div class="d-flex justify-content-between">
+                  <button type="button" class="btn btn-outline-secondary" (click)="volver()">Cancelar</button>
+                  <button type="submit" class="btn btn-primary">Guardar Cambios</button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  `
 })
 export class EditPostComponent implements OnInit {
-  postForm: FormGroup;
+  post: Post = {
+    _id: '',
+    title: '',
+    content: '',
+    imageUrl: ''
+  };
   selectedFile: File | null = null;
-  imageUrl: string | null = null;
-  postId: string | null = null;
-  baseUrl: string = environment.apiUrl;
-
-
-
+  baseURL: string = environment.apiUrl;
 
   constructor(
     private route: ActivatedRoute,
-    private formBuilder: FormBuilder,
+    private router: Router,
     private postService: PostService,
-    private router: Router
-  ) {
-    this.postForm = this.formBuilder.group({
-      title: ['', Validators.required],
-      content: ['', Validators.required],
+    private authService: AuthService
+  ) { }
+
+  ngOnInit() {
+    const id = this.route.snapshot.paramMap.get('id');
+    if (id) {
+      this.postService.getPost(id).subscribe({
+        next: (data: Post) => {
+          this.post = data;
+        },
+        error: (error: Error) => {
+          console.error('Error al cargar la noticia:', error);
+          this.router.navigate(['/noticias']);
+        }
+      });
+    }
+  }
+
+  onFileSelected(event: Event) {
+    const input = event.target as HTMLInputElement;
+    if (input.files && input.files[0]) {
+      this.selectedFile = input.files[0];
+    }
+  }
+
+  onSubmit() {
+    const formData = new FormData();
+    formData.append('title', this.post.title);
+    formData.append('content', this.post.content);
+    if (this.selectedFile) {
+      formData.append('image', this.selectedFile);
+    }
+
+    this.postService.updatePost(this.post._id, formData).subscribe({
+      next: () => {
+        this.router.navigate(['/noticias']);
+      },
+      error: (error: Error) => {
+        console.error('Error al actualizar la noticia:', error);
+      }
     });
   }
 
-  ngOnInit(): void {
-    this.postId = this.route.snapshot.paramMap.get('id');
-    console.log('Post ID:', this.postId); // Verifica si el ID se está recuperando correctamente
-    if (this.postId) {
-      this.loadPostData(this.postId);
-    }
-  }
-
-
-  loadPostData(id: string): void {
-    this.postService.getPostById(id).subscribe(
-      post => {
-        this.postForm.patchValue({
-          title: post.title,
-          content: post.content,
-        });
-
-        // Si el post tiene una imagen, concatenamos la URL base con el path de la imagen
-        if (post.imageUrl) {
-          this.imageUrl = this.getImageUrl(post.imageUrl); // Cargar la imagen actual correctamente
-        }
-      },
-      error => {
-        console.error('Error al cargar el post:', error);
-      }
-    );
-  }
-
-
-  getImageUrl(imageUrl: string) {
-    // Verificar si la URL ya tiene el dominio para evitar duplicarlo
-    if (imageUrl.startsWith('http')) {
-      return imageUrl; // Si la URL ya es completa, la devolvemos tal cual
-    }
-    return `${this.baseUrl}${imageUrl}`; // Si es relativa, la completamos con baseUrl
-  }
-
-
-  onFileSelected(event: any) {
-    this.selectedFile = event.target.files[0];
-
-    if (this.selectedFile) {
-      const reader = new FileReader();
-
-      // Cargar la imagen seleccionada y mostrarla en el formulario
-      reader.onload = (e: any) => {
-        this.imageUrl = e.target.result;  // Actualiza imageUrl para la vista previa
-      };
-
-      reader.readAsDataURL(this.selectedFile); // Lee la imagen seleccionada
-    }
-  }
-
-
-  onSubmit(): void {
-    if (!this.postId) return;
-
-    const formData = new FormData();
-    formData.append('title', this.postForm.get('title')?.value);
-    formData.append('content', this.postForm.get('content')?.value);
-
-    if (this.selectedFile) {
-      formData.append('image', this.selectedFile); // Añadir la nueva imagen si se selecciona
-    }
-
-    this.postService.updatePost(this.postId, formData).subscribe(
-      () => {
-        this.router.navigate(['/posts']);
-      },
-      error => {
-        console.error('Error al actualizar el post:', error);
-      }
-    );
+  volver() {
+    this.router.navigate(['/noticias']);
   }
 }

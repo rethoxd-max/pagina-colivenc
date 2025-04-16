@@ -1,275 +1,208 @@
-<div class="container">
-    <h2>Perfil de Atleta</h2>
-
-    <div *ngIf="atleta; else loading">
-        <p><strong>Nombre:</strong> {{ atleta.nombre }}</p>
-        <p><strong>Fecha de nacimiento:</strong> {{ atleta.fecha_nacimiento }}</p>
-        <p><strong>Categoría:</strong> {{ calcularCategoria() }}</p>
-
-        <!-- Pestañas para las mejores marcas -->
-        <div>
-            <ul class="nav nav-tabs">
-                <li class="nav-item">
-                    <a class="nav-link" [class.active]="activeTab === 'marcasPersonales'"
-                        (click)="onTabChange('marcasPersonales')">
-                        Marcas Personales
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" [class.active]="activeTab === 'mejoresAnyo'"
-                        (click)="onTabChange('mejoresAnyo')">
-                        Mejores Marcas del Año
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" [class.active]="activeTab === 'progresion'" (click)="onTabChange('progresion')">
-                        Progresión
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" [class.active]="activeTab === 'resultados'"
-                        (click)="onTabChange('resultados')">Resultados</a>
-                </li>
-            </ul>
-
-            <div class="tab-content">
-                <!-- Contenido Marcas marcasPersonales -->
-                <div *ngIf="activeTab === 'marcasPersonales'">
-                    <h3>
-                        Mejores Marcas Personales
-                        <span *ngIf="filtroCategoria"> - {{ categoriaSeleccionada }}</span>
-                        <span *ngIf="filtroPcAL">
-                            - {{ PcALseleccionado === 'PC' ? 'Pista Cubierta' : PcALseleccionado === 'AL' ? 'Aire Libre'
-                            : 'Ambas' }}
-                        </span>
-                    </h3>
-
-                    <div class="filters">
-                        <label for="categoria">Categoría:</label>
-                        <select id="categoria" [(ngModel)]="filtroCategoria"
-                            (ngModelChange)="onCategoriaChange($event)">
-                            <option value="">Todas</option>
-                            <option *ngFor="let categoria of categorias" [value]="categoria._id">{{
-                                categoria.nombre_categoria
-                                }}
-                            </option>
-                        </select>
-
-                        <label for="PcAL">PcAL:</label>
-                        <select id="PcAL" [(ngModel)]="filtroPcAL" (ngModelChange)="onPcALChange($event)">
-                            <option value="">Todos</option>
-                            <option *ngFor="let pcAL of PcAL" [value]="pcAL._id">{{ pcAL.PcAL }}</option>
-                        </select>
-                    </div>
-
-                    <table class="table">
-                        <thead>
-                            <tr>
-                                <th>Prueba</th>
-                                <th>Marca</th>
-                                <th>Fecha</th>
-                                <th>Lugar</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr *ngFor="let marca of mejoresMarcas">
-                                <td>{{ marca.nombre_prueba.nombre_prueba }}</td>
-                                <td>
-                                    <!-- Mostrar metros, tiempo o puntos según corresponda -->
-                                    <ng-container *ngIf="marca.metros; else tiempoTemplate">
-                                        {{ marca.metros}}
-                                    </ng-container>
-                                    <ng-template #tiempoTemplate>
-                                        <ng-container
-                                            *ngIf="marca.horas || marca.minutos || marca.segundos; else puntosTemplate">
-                                            {{ formatearTiempo(marca.horas, marca.minutos, marca.segundos) }}
-
-                                        </ng-container>
-                                    </ng-template>
-
-                                    <ng-template #puntosTemplate>
-                                        <ng-container *ngIf="marca.puntos">
-                                            {{ marca.puntos}}
-                                        </ng-container>
-                                    </ng-template>
-                                </td>
-                                <td>
-                                    {{ marca.fecha_realizacion }}
-                                </td>
-                                <td>
-                                    {{ marca.lugar }}
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-
-                <!-- Contenido Mejores Marcas del Año -->
-                <div *ngIf="activeTab === 'mejoresAnyo'">
-                    <h3>Mejores Marcas del Año</h3>
-
-                    <div class="filters">
-                        <label for="PcAL">PcAL:</label>
-                        <select id="PcAL" [(ngModel)]="filtroPcAL" (ngModelChange)="onPcALChange($event)">
-                            <option value="">Todos</option>
-                            <option *ngFor="let pcAL of PcAL" [value]="pcAL._id">{{ pcAL.PcAL }}</option>
-                        </select>
-
-                        <label for="anyo">Año:</label>
-                        <select id="anyo" [(ngModel)]="filtroAnyo" (ngModelChange)="onAnyoChange($event)"
-                            (ngModelChange)="onTabChange('mejoresAnyo')">
-                            <option *ngFor="let anyo of anyos" [value]="anyo">{{ anyo }}</option>
-                        </select>
-
-                    </div>
-
-                    <table class="table">
-                        <thead>
-                            <tr>
-                                <th>Prueba</th>
-                                <th>Marca</th>
-                                <th>Fecha</th>
-                                <th>Lugar</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr *ngFor="let marca of mejoresMarcas">
-                                <td>{{ marca.nombre_prueba.nombre_prueba }}</td>
-                                <td>
-                                    <ng-container *ngIf="marca.metros; else tiempoTemplate2">
-                                        {{ marca.metros }}
-                                    </ng-container>
-                                    <ng-template #tiempoTemplate2>
-                                        <ng-container
-                                            *ngIf="marca.horas || marca.minutos || marca.segundos; else puntosTemplate2">
-                                            {{ formatearTiempo(marca.horas, marca.minutos, marca.segundos) }}
-
-                                        </ng-container>
-                                    </ng-template>
-
-                                    <ng-template #puntosTemplate2>
-                                        <ng-container *ngIf="marca.puntos">
-                                            {{ marca.puntos}}
-                                        </ng-container>
-                                    </ng-template>
-                                </td>
-                                <td>
-                                    {{ marca.fecha_realizacion }}
-                                </td>
-                                <td>
-                                    {{ marca.lugar }}
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-                <!-- Contenido Progresión -->
-                <div *ngIf="activeTab === 'progresion'">
-                    <h3>Progresión de Marcas</h3>
-
-
-
-                    <div *ngFor="let prueba of pruebas">
-                        <h4>{{ prueba.nombre_prueba }}</h4>
-                        <table class="table">
-                            <thead>
-                                <tr>
-                                    <th>Año</th>
-                                    <th>Marca</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr *ngFor="let anyo of anyosPorPrueba[prueba._id]">
-                                    <td>{{ anyo }}</td>
-                                    <td>
-                                        <!-- Cargar la mejor marca al momento de iterar -->
-                                        {{ cargarMejorMarcaPorAnyo(prueba._id, anyo) }}
-
-                                        <ng-container
-                                            *ngIf="marcasPorPruebaAnyo[prueba._id + '-' + anyo]?.metros; else tiempoTemplate2">
-                                            {{ marcasPorPruebaAnyo[prueba._id + '-' + anyo]!.metros}}
-                                        </ng-container>
-
-                                        <ng-template #tiempoTemplate2>
-                                            <ng-container *ngIf="
-                                                    marcasPorPruebaAnyo[prueba._id + '-' + anyo]?.horas ||
-                                                    marcasPorPruebaAnyo[prueba._id + '-' + anyo]?.minutos ||
-                                                    marcasPorPruebaAnyo[prueba._id + '-' + anyo]?.segundos;
-                                                    else puntosTemplate2
-                                                ">
-                                                {{ formatearTiempo(
-                                                marcasPorPruebaAnyo[prueba._id + '-' + anyo]!.horas,
-                                                marcasPorPruebaAnyo[prueba._id + '-' + anyo]!.minutos,
-                                                marcasPorPruebaAnyo[prueba._id + '-' + anyo]!.segundos
-                                                ) }}
-                                            </ng-container>
-
-                                        </ng-template>
-
-                                        <ng-template #puntosTemplate2>
-                                            <ng-container *ngIf="marcasPorPruebaAnyo[prueba._id + '-' + anyo]?.puntos">
-                                                {{ marcasPorPruebaAnyo[prueba._id + '-' + anyo]!.puntos}}
-                                            </ng-container>
-                                        </ng-template>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-                <!-- Contenido Resultados -->
-                <div *ngIf="activeTab === 'resultados'">
-                    <h3>Resultados</h3>
-
-                    <div class="filters">
-                        <label for="anyo">Año:</label>
-                        <select id="anyo" [(ngModel)]="filtroAnyo" (ngModelChange)="onAnyoChange($event)">
-                            <option *ngFor="let anyo of anyos" [value]="anyo">{{ anyo }}</option>
-                        </select>
-                    </div>
-
-                    <div *ngFor="let prueba of pruebas">
-                        <h4>{{ prueba.nombre_prueba }}</h4>
-                        <table class="table">
-                            <thead>
-                                <tr>
-                                    <th>Marca</th>
-                                    <th>Lugar</th>
-                                    <th>Fecha</th>
-                                </tr>
-                            </thead>
-
-                            <tbody>
-                                <!-- Verifica si hay marcas para esta prueba antes de iterar -->
-                                <tr *ngFor="let marca of marcasPorPrueba[prueba._id] || []">
-                                    <td>
-                                        <ng-container *ngIf="marca.metros; else tiempoTemplate">
-                                            {{ marca.metros }}
-                                        </ng-container>
-                                        <ng-template #tiempoTemplate>
-                                            <ng-container *ngIf="marca.horas || marca.minutos || marca.segundos; else puntosTemplate2">
-                                                {{ formatearTiempo(marca.horas, marca.minutos, marca.segundos) }}
-                                            </ng-container>
-                                        </ng-template>
-                                        <ng-template #puntosTemplate2>
-                                            <ng-container *ngIf="marca.puntos">
-                                                {{ marca.puntos}}
-                                            </ng-container>
-                                        </ng-template>
-                                    </td>
-                                    <td>{{ marca.lugar }}</td>
-                                    <td>{{ marca.fecha_realizacion }}</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-
+<div class="profile-container">
+    <div class="profile-header">
+        <div class="profile-info">
+            <div class="profile-avatar">
+                <i class="fas fa-user-circle"></i>
+            </div>
+            <div class="profile-details" *ngIf="atleta">
+                <h1>{{ atleta.nombre }}</h1>
+                <div class="profile-meta">
+                    <span class="meta-item">
+                        <i class="fas fa-calendar"></i>
+                        {{ atleta.fecha_nacimiento | date:'dd/MM/yyyy' }}
+                    </span>
+                    <span class="meta-item">
+                        <i class="fas fa-running"></i>
+                        {{ calcularCategoria() }}
+                    </span>
                 </div>
             </div>
         </div>
     </div>
 
-    <ng-template #loading>
-        <p>Cargando...</p>
-    </ng-template>
+    <div class="profile-content" *ngIf="atleta; else loading">
+        <!-- Pestañas de navegación -->
+        <ul class="nav-tabs">
+            <li class="nav-item">
+                <a class="nav-link" [class.active]="activeTab === 'marcasPersonales'"
+                    (click)="onTabChange('marcasPersonales')">
+                    <i class="fas fa-trophy"></i>
+                    <span>Marcas Personales</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" [class.active]="activeTab === 'mejoresAnyo'"
+                    (click)="onTabChange('mejoresAnyo')">
+                    <i class="fas fa-medal"></i>
+                    <span>Mejores del Año</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" [class.active]="activeTab === 'progresion'"
+                    (click)="onTabChange('progresion')">
+                    <i class="fas fa-chart-line"></i>
+                    <span>Progresión</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" [class.active]="activeTab === 'resultados'"
+                    (click)="onTabChange('resultados')">
+                    <i class="fas fa-list"></i>
+                    <span>Resultados</span>
+                </a>
+            </li>
+        </ul>
+
+        <!-- Contenido de las pestañas -->
+        <div class="tab-content">
+            <!-- Marcas Personales -->
+            <div *ngIf="activeTab === 'marcasPersonales'" class="tab-pane active">
+                <div class="filters-container">
+                    <div class="filter-group">
+                        <label for="categoria">
+                            <i class="fas fa-filter"></i> Categoría
+                        </label>
+                        <select id="categoria" [(ngModel)]="filtroCategoria" (ngModelChange)="onCategoriaChange($event)">
+                            <option value="">Todas</option>
+                            <option *ngFor="let categoria of categorias" [value]="categoria._id">
+                                {{categoria.nombre_categoria}}
+                            </option>
+                        </select>
+                    </div>
+
+                    <div class="filter-group">
+                        <label for="PcAL">
+                            <i class="fas fa-running"></i> Tipo
+                        </label>
+                        <select id="PcAL" [(ngModel)]="filtroPcAL" (ngModelChange)="onPcALChange($event)">
+                            <option value="">Todos</option>
+                            <option *ngFor="let pcAL of PcAL" [value]="pcAL._id">{{pcAL.PcAL}}</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="records-grid">
+                    <div class="record-card" *ngFor="let marca of mejoresMarcas">
+                        <div class="record-header">
+                            <h3>{{marca.nombre_prueba.nombre_prueba}}</h3>
+                            <span class="record-type">{{marca.PcAL.PcAL}}</span>
+                        </div>
+                        <div class="record-body">
+                            <div class="record-mark">
+                                <ng-container *ngIf="marca.metros">
+                                    {{marca.metros}}m
+                                </ng-container>
+                                <ng-container *ngIf="marca.horas || marca.minutos || marca.segundos">
+                                    {{formatearTiempo(marca.horas, marca.minutos, marca.segundos)}}
+                                </ng-container>
+                                <ng-container *ngIf="marca.puntos">
+                                    {{marca.puntos}} pts
+                                </ng-container>
+                            </div>
+                            <div class="record-details">
+                                <span><i class="fas fa-calendar"></i> {{(convertirFecha(marca.fecha_realizacion) | date:'dd/MM/yyyy') ?? 'Fecha no disponible'}}</span>
+                                <span><i class="fas fa-map-marker-alt"></i> {{marca.lugar || 'Lugar no disponible'}}</span>
+                                <span *ngIf="marca.segundos && !marca.horas && !marca.minutos && marca.viento" class="wind-info">
+                                    <i class="fas fa-wind"></i> {{marca.viento}} m/s
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Mejores del Año -->
+            <div *ngIf="activeTab === 'mejoresAnyo'" class="tab-pane active">
+                <div class="filters-container">
+                    <div class="filter-group">
+                        <label for="anyo">
+                            <i class="fas fa-calendar-alt"></i> Año
+                        </label>
+                        <select id="anyo" [(ngModel)]="filtroAnyo" (ngModelChange)="onAnyoChange($event)">
+                            <option *ngFor="let anyo of anyos" [value]="anyo">{{anyo}}</option>
+                        </select>
+                    </div>
+
+                    <div class="filter-group">
+                        <label for="PcAL">
+                            <i class="fas fa-running"></i> Tipo
+                        </label>
+                        <select id="PcAL" [(ngModel)]="filtroPcAL" (ngModelChange)="onPcALChange($event)">
+                            <option value="">Todos</option>
+                            <option *ngFor="let pcAL of PcAL" [value]="pcAL._id">{{pcAL.PcAL}}</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="records-grid">
+                    <div class="record-card" *ngFor="let marca of mejoresMarcas">
+                        <div class="record-header">
+                            <h3>{{marca.nombre_prueba.nombre_prueba}}</h3>
+                            <span class="record-type">{{marca.PcAL.PcAL}}</span>
+                        </div>
+                        <div class="record-body">
+                            <div class="record-mark">
+                                <ng-container *ngIf="marca.metros">
+                                    {{marca.metros}}m
+                                </ng-container>
+                                <ng-container *ngIf="marca.horas || marca.minutos || marca.segundos">
+                                    {{formatearTiempo(marca.horas, marca.minutos, marca.segundos)}}
+                                </ng-container>
+                                <ng-container *ngIf="marca.puntos">
+                                    {{marca.puntos}} pts
+                                </ng-container>
+                            </div>
+                            <div class="record-details">
+                                <span><i class="fas fa-calendar"></i> {{(convertirFecha(marca.fecha_realizacion) | date:'dd/MM/yyyy') ?? 'Fecha no disponible'}}</span>
+                                <span><i class="fas fa-map-marker-alt"></i> {{marca.lugar || 'Lugar no disponible'}}</span>
+                                <span *ngIf="marca.segundos && !marca.horas && !marca.minutos && marca.viento" class="wind-info">
+                                    <i class="fas fa-wind"></i> {{marca.viento}} m/s
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Progresión -->
+            <div *ngIf="activeTab === 'progresion'" class="tab-pane active">
+                <div class="progression-container">
+                    <div class="progression-card" *ngFor="let prueba of pruebas">
+                        <h3 class="progression-title">{{prueba.nombre_prueba}}</h3>
+                        <div class="progression-years">
+                            <div class="year-mark" *ngFor="let anyo of anyosPorPrueba[prueba._id]">
+                                <div class="year">{{anyo}}</div>
+                                <div class="mark">
+                                    {{cargarMejorMarcaPorAnyo(prueba._id, anyo)}}
+                                    <ng-container *ngIf="marcasPorPruebaAnyo[prueba._id + '-' + anyo]?.metros">
+                                        {{marcasPorPruebaAnyo[prueba._id + '-' + anyo].metros}}m
+                                    </ng-container>
+                                    <ng-container *ngIf="marcasPorPruebaAnyo[prueba._id + '-' + anyo]?.horas || marcasPorPruebaAnyo[prueba._id + '-' + anyo]?.minutos || marcasPorPruebaAnyo[prueba._id + '-' + anyo]?.segundos">
+                                        {{formatearTiempo(
+                                            marcasPorPruebaAnyo[prueba._id + '-' + anyo].horas,
+                                            marcasPorPruebaAnyo[prueba._id + '-' + anyo].minutos,
+                                            marcasPorPruebaAnyo[prueba._id + '-' + anyo].segundos
+                                        )}}
+                                        <span *ngIf="marcasPorPruebaAnyo[prueba._id + '-' + anyo].segundos && !marcasPorPruebaAnyo[prueba._id + '-' + anyo].horas && !marcasPorPruebaAnyo[prueba._id + '-' + anyo].minutos && marcasPorPruebaAnyo[prueba._id + '-' + anyo].viento" class="wind-info-small">
+                                            <i class="fas fa-wind"></i> {{marcasPorPruebaAnyo[prueba._id + '-' + anyo].viento}} m/s
+                                        </span>
+                                    </ng-container>
+                                    <ng-container *ngIf="marcasPorPruebaAnyo[prueba._id + '-' + anyo]?.puntos">
+                                        {{marcasPorPruebaAnyo[prueba._id + '-' + anyo].puntos}} pts
+                                    </ng-container>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
+
+<ng-template #loading>
+    <div class="loading-container">
+        <i class="fas fa-spinner fa-spin"></i>
+        <p>Cargando perfil...</p>
+    </div>
+</ng-template>

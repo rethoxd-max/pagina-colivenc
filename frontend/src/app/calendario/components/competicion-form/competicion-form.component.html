@@ -42,10 +42,10 @@
             <!-- Campo Sector -->
             <div class="mb-3">
                 <label for="sector" class="form-label">Sector</label>
-                <select id="sector" class="form-control" formControlName="sector" (change)="onSectorChange($event)">
-                    <option *ngFor="let sector of sectoresDisponibles" [value]="sector._id">{{ sector.nombre_sector }}
-                    </option>
-                </select>
+                <mat-select id="sector" class="form-control" formControlName="sector" (selectionChange)="onSectorChange($event)">
+                    <mat-option *ngFor="let sector of sectoresDisponibles" [value]="sector._id">{{ sector.nombre_sector }}
+                    </mat-option>
+                </mat-select>
             </div>
 
             <!-- Campo Pruebas -->

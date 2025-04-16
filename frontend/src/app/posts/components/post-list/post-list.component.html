@@ -1,29 +1,61 @@
 <section class="container mt-5">
     <div class="row">
-        <div class="col-md-8 mx-auto">
-            <button *ngIf="(isAdmin() || isEditor())" class="btn btn-primary mb-4" [routerLink]="['/create']">Crear
-                nuevo
-                post</button>
+        <div class="col-12 text-center mb-5">
+            <h1 class="display-4 fw-bold">Boletín Semanal</h1>
+            <p class="lead">Las últimas noticias y eventos de nuestro club</p>
+        </div>
 
-            <div *ngIf="posts.length > 0">
-                <div *ngFor="let post of posts" class="card mb-4">
-                    <div class="card-body">
-                        <h3 class="card-title">{{ post.title }}</h3>
-                        <p class="card-text">{{ post.content }}</p>
-                        <img [src]="getImageUrl(post.imageUrl)" class="img-fluid rounded mb-3" alt="Imagen del post"
-                            *ngIf="post.imageUrl">
+        <div class="col-12">
+            <div class="d-flex justify-content-end mb-4">
+                <button *ngIf="(isAdmin() || isEditor())" class="btn btn-primary" [routerLink]="['/create']">
+                    <i class="bi bi-plus-circle me-2"></i>Crear nueva noticia
+                </button>
+            </div>
 
-                        <!-- Botones solo visibles si el usuario está logueado -->
-                        <button *ngIf="(isAdmin() || isEditor())" (click)="deletePost(post._id)"
-                            class="btn btn-danger me-2">Eliminar</button>
-                        <button *ngIf="(isAdmin() || isEditor())" [routerLink]="['/edit', post._id]"
-                            class="btn btn-warning">Editar</button>
+            <div *ngIf="posts.length > 0" class="row g-4">
+                <div *ngFor="let post of posts" class="col-md-4">
+                    <div class="card h-100 hover-card" (click)="verNoticia(post._id)">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <h3 class="card-title">{{ post.title }}</h3>
+                                <span class="post-date">{{ post.createdAt | date:'shortDate' }}</span>
+                            </div>
+                            
+                            <div class="post-preview">
+                                <p class="card-text">{{ post.content | slice:0:150 }}...</p>
+                                
+                                <div *ngIf="post.imageUrl" class="text-center my-3">
+                                    <img [src]="getImageUrl(post.imageUrl)" 
+                                         class="img-fluid" 
+                                         alt="Imagen de la noticia"
+                                         style="max-height: 200px; object-fit: cover;">
+                                </div>
+                            </div>
+
+                            <div class="d-flex justify-content-between align-items-center mt-3">
+                                <button class="btn btn-link">Leer más...</button>
+                                <div *ngIf="(isAdmin() || isEditor())" class="btn-group">
+                                    <button (click)="editarNoticia($event, post._id)" 
+                                            class="btn-action btn-edit">
+                                        <i class="bi bi-pencil"></i>
+                                        Editar
+                                    </button>
+                                    <button (click)="eliminarNoticia($event, post._id)" 
+                                            class="btn-action btn-delete">
+                                        <i class="bi bi-trash"></i>
+                                        Eliminar
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
 
-            <div *ngIf="posts.length === 0">
-                <p class="text-center">No hay posts disponibles.</p>
+            <div *ngIf="posts.length === 0" class="text-center py-5">
+                <i class="bi bi-newspaper display-1 text-muted"></i>
+                <h3 class="mt-3">No hay noticias disponibles</h3>
+                <p class="text-muted">Vuelve pronto para ver las últimas actualizaciones</p>
             </div>
         </div>
     </div>

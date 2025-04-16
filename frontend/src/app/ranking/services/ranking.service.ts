@@ -113,7 +113,7 @@ export class RankingService {
   }
 
   getPcAL(): Observable<PcAL[]> {
-    return this.http.get<PcAL[]>(`${this.apiUrl}/PcAL`);
+    return this.http.get<PcAL[]>(`${this.apiUrl}/pcAL`);
   }
 
   deleteMarca(marcaId: string): Observable<Marca> {

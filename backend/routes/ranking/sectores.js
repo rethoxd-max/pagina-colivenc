@@ -5,7 +5,7 @@ const Sector = require('../../models/ranking/Sector');
 // GET all sectores
 router.get('/', async (req, res) => {
     try {
-        const sectores = await Sector.find();
+        const sectores = await Sector.find().sort({ nombre_sector: 1 });
         res.json(sectores);
     } catch (err) {
         res.status(500).json({ message: err.message });
@@ -51,7 +51,7 @@ router.delete('/:id', async (req, res) => {
     try {
         const sector = await Sector.findById(req.params.id);
         if (!sector) return res.status(404).json({ message: 'Sector no encontrado' });
-        await sector.remove();
+        await sector.deleteOne();
         res.json({ message: 'Sector eliminado' });
     } catch (err) {
         res.status(500).json({ message: err.message });

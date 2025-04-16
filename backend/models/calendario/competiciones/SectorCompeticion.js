@@ -4,6 +4,7 @@ const sectorCompeticionSchema = new mongoose.Schema({
     nombre_sector: {
         type: String,
         required: true,
+        unique: true
     }
 });
 

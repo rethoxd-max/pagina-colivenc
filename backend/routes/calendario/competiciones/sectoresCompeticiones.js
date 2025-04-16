@@ -36,22 +36,27 @@ router.post('/', async (req, res) => {
     }
 });
 
-// DELETE all sectores
-router.delete('/', async (req, res) => {
+// PUT update sector
+router.put('/:id', async (req, res) => {
     try {
-        await SectorCompeticion.deleteMany({});
-        res.json({ message: 'Todos los sectores eliminados' });
+        const sector = await SectorCompeticion.findById(req.params.id);
+        if (!sector) return res.status(404).json({ message: 'Sector no encontrado' });
+
+        sector.nombre_sector = req.body.nombre_sector;
+        const updatedSector = await sector.save();
+        res.json(updatedSector);
     } catch (err) {
-        res.status(500).json({ message: err.message });
+        res.status(400).json({ message: err.message });
     }
 });
 
-// DELETE sector by ID
+// DELETE sector
 router.delete('/:id', async (req, res) => {
     try {
         const sector = await SectorCompeticion.findById(req.params.id);
         if (!sector) return res.status(404).json({ message: 'Sector no encontrado' });
-        await sector.remove();
+
+        await sector.deleteOne();
         res.json({ message: 'Sector eliminado' });
     } catch (err) {
         res.status(500).json({ message: err.message });

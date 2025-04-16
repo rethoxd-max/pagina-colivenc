@@ -6,6 +6,15 @@ import { RouterLink, ActivatedRoute } from '@angular/router'; // Añadido Activa
 import { AuthService } from '../../../auth/services/auth.service';
 import { environment } from '../../../../environments/environment.development';
 
+interface CompeticionAgrupada {
+  year: number;
+  months: {
+    month: number;
+    monthName: string;
+    competiciones: any[];
+  }[];
+}
+
 @Component({
   selector: 'app-competicion-list',
   standalone: true,
@@ -16,7 +25,8 @@ import { environment } from '../../../../environments/environment.development';
 })
 export class CompeticionListComponent implements OnInit {
   competiciones: any[] = [];
-  pruebas: { [competicionId: string]: PruebaCompeticion[] } = {}; // Diccionario para almacenar las pruebas por competicionId
+  competicionesAgrupadas: CompeticionAgrupada[] = [];
+  pruebas: { [competicionId: string]: PruebaCompeticion[] } = {};
   baseURL: string = environment.apiUrl;
 
   filteredCompeticiones: any[] = [];
@@ -30,6 +40,11 @@ export class CompeticionListComponent implements OnInit {
   inscripcionesPorCompeticionYEntrenador: { [competicionId: string]: any[] } = {};
   competicionId!: string;
   userId!: string | null;
+
+  private nombresMeses = [
+    'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
+    'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'
+  ];
 
   constructor(
     private competicionService: CompeticionService,
@@ -52,20 +67,51 @@ export class CompeticionListComponent implements OnInit {
     )
   }
 
+  private agruparCompeticiones(competiciones: any[]): CompeticionAgrupada[] {
+    const agrupadas: { [año: number]: { [mes: number]: any[] } } = {};
+
+    competiciones.forEach(competicion => {
+      const fecha = new Date(competicion.fecha);
+      const año = fecha.getFullYear();
+      const mes = fecha.getMonth();
+
+      if (!agrupadas[año]) {
+        agrupadas[año] = {};
+      }
+      if (!agrupadas[año][mes]) {
+        agrupadas[año][mes] = [];
+      }
+      agrupadas[año][mes].push(competicion);
+    });
+
+    return Object.keys(agrupadas)
+      .map(year => Number(year))
+      .sort((a, b) => b - a) // Ordenar años de más reciente a más antiguo
+      .map(year => ({
+        year,
+        months: Object.keys(agrupadas[year])
+          .map(month => Number(month))
+          .sort((a, b) => b - a) // Ordenar meses de más reciente a más antiguo
+          .map(month => ({
+            month,
+            monthName: this.nombresMeses[month],
+            competiciones: agrupadas[year][month]
+          }))
+      }));
+  }
+
   loadCompeticiones() {
     this.competicionService.getCompeticiones().subscribe(
       (data) => {
-        this.competiciones = data; // Guardamos las competiciones obtenidas
+        this.competiciones = data;
         this.filteredCompeticiones = data;
-        // Iteramos sobre cada competición y llamamos a loadPruebas con su ID
+        this.competicionesAgrupadas = this.agruparCompeticiones(data);
+        
         data.forEach((competicion: any) => {
-          this.loadPruebas(competicion._id); // Pasamos el ID de la competición a loadPruebas
+          this.loadPruebas(competicion._id);
           this.competicionId = competicion._id;
-          this.loadInscripciones(this.competicionId); // Carga inscripciones para la competición
-
+          this.loadInscripciones(this.competicionId);
         });
-
-        // Después de cargar las competiciones, cargamos las inscripciones
       },
       (error) => {
         console.error('Error al cargar las competiciones:', error);
@@ -101,10 +147,6 @@ export class CompeticionListComponent implements OnInit {
 
   }
 
-
-
-
-
   loadPruebas(competicionId: string) {
     this.competicionService.getPruebasByCompeticionId(competicionId).subscribe(
       (pruebas: { _id: string; nombre_prueba: string; sector_id: string; categoria_id: string; __v: number }[]) => { // Cambié el tipo de pruebaIds a un arreglo de objetos
@@ -131,18 +173,22 @@ export class CompeticionListComponent implements OnInit {
   }
 
   filterCompeticiones() {
-    this.filteredCompeticiones = this.competiciones.filter(competicion => {
-      const matchesName = competicion.nombre.toLowerCase().includes(this.searchName.toLowerCase());
-      const matchesDate = this.startDate && this.endDate
-        ? new Date(competicion.fecha) >= new Date(this.startDate) && new Date(competicion.fecha) <= new Date(this.endDate)
-        : true;
+    this.filteredCompeticiones = this.competiciones
+      .filter(competicion => {
+        const matchesName = competicion.nombre.toLowerCase().includes(this.searchName.toLowerCase());
+        const matchesDate = this.startDate && this.endDate
+          ? new Date(competicion.fecha) >= new Date(this.startDate) && new Date(competicion.fecha) <= new Date(this.endDate)
+          : true;
 
-      const matchesCategoria = this.searchCategoria
-        ? this.pruebas[competicion._id]?.some(prueba => prueba.categoria_id.nombre_categoria === this.searchCategoria)
-        : true;
+        const matchesCategoria = this.searchCategoria
+          ? this.pruebas[competicion._id]?.some(prueba => prueba.categoria_id.nombre_categoria === this.searchCategoria)
+          : true;
 
-      return matchesName && matchesDate && matchesCategoria;
-    });
+        return matchesName && matchesDate && matchesCategoria;
+      })
+      .sort((a, b) => new Date(b.fecha).getTime() - new Date(a.fecha).getTime());
+
+    this.competicionesAgrupadas = this.agruparCompeticiones(this.filteredCompeticiones);
   }
 
   getCategoriasUnicas(competicionId: string): string[] {
@@ -190,7 +236,6 @@ export class CompeticionListComponent implements OnInit {
     // Verifica si alguna inscripción pertenece al atleta actual
     return inscripciones.some(inscripcion => inscripcion.usuario === this.userId);
   }
-
 
   isEntrenador(): boolean {
     const user = this.authService.getUser();

@@ -1,7 +1,10 @@
 const express = require('express');
 const router = express.Router();
+const mongoose = require('mongoose');
 const PruebaCompeticion = require('../../../models/calendario/competiciones/PruebaCompeticion');
 const Competicion = require('../../../models/calendario/competicion');
+const SectorCompeticion = require('../../../models/calendario/competiciones/SectorCompeticion');
+const CategoriaCompeticion = require('../../../models/calendario/competiciones/CategoriaCompeticion');
 
 // GET all pruebas
 router.get('/', async (req, res) => {
@@ -36,6 +39,74 @@ router.get('/competicion/:competicionId', async (req, res) => {
   }
 });
 
+// GET pruebas por sector y categorías
+router.get('/sector/:sectorId/categorias', async (req, res) => {
+  try {
+    const { sectorId } = req.params;
+    const { categorias } = req.query;
+    
+
+
+    if (!categorias) {
+      return res.status(400).json({ message: 'El parámetro de categorías es requerido' });
+    }
+
+    const categoriasArray = categorias.split(',').map(categoria => categoria.trim());
+
+
+    // Convertir los IDs a ObjectId
+    const sectorObjectId = new mongoose.Types.ObjectId(sectorId);
+    const categoriasObjectIds = categoriasArray.map(id => new mongoose.Types.ObjectId(id));
+
+    // Primero verificar que el sector existe
+    const sector = await SectorCompeticion.findById(sectorObjectId);
+    if (!sector) {
+      return res.status(404).json({ message: 'Sector no encontrado' });
+    }
+
+    // Verificar que las categorías existen
+    const categoriasEncontradas = await CategoriaCompeticion.find({
+      _id: { $in: categoriasObjectIds }
+    });
+    
+    if (categoriasEncontradas.length !== categoriasObjectIds.length) {
+      return res.status(404).json({ message: 'Una o más categorías no fueron encontradas' });
+    }
+
+    // Construir la consulta
+    const query = {
+      sector_id: sectorObjectId,
+      categoria_id: { $in: categoriasObjectIds }
+    };
+
+
+    // Realizar la consulta con populate
+    const pruebas = await PruebaCompeticion.find(query)
+      .populate('sector_id')
+      .populate('categoria_id');
+
+
+
+    if (!pruebas || pruebas.length === 0) {
+      return res.status(404).json({ 
+        message: 'No se encontraron pruebas para el sector y las categorías proporcionadas',
+        debug: {
+          query,
+          sectorId,
+          categoriasArray,
+          sector,
+          categoriasEncontradas
+        }
+      });
+    }
+
+    res.json(pruebas);
+  } catch (err) {
+    console.error('Error en la consulta:', err);
+    res.status(500).json({ message: err.message });
+  }
+});
+
 // GET pruebas por sector y array de categorías
 router.get('/sector/:sector/categorias', async (req, res) => {
   try {
@@ -65,9 +136,6 @@ router.get('/sector/:sector/categorias', async (req, res) => {
   }
 });
 
-
-
-
 // GET pruebas by array of IDs using query parameter
 router.get('/ids', async (req, res) => {
   try {
@@ -85,10 +153,6 @@ router.get('/ids', async (req, res) => {
     res.status(500).json({ message: err.message });
   }
 });
-
-
-
-
 
 router.get('/sector/:sector_id', async (req, res) => {
   try {
@@ -113,7 +177,6 @@ router.get('/:id', async (req, res) => {
   }
 });
 
-
 // POST new prueba
 router.post('/', async (req, res) => {
   const prueba = new PruebaCompeticion({
@@ -128,7 +191,6 @@ router.post('/', async (req, res) => {
     res.status(400).json({ message: err.message });
   }
 });
-
 
 // DELETE all pruebas
 router.delete('/', async (req, res) => {
@@ -151,7 +213,5 @@ router.delete('/:id', async (req, res) => {
     res.status(500).json({ message: err.message });
   }
 });
-
-
 
 module.exports = router;

@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const CategoriaCompeticion = require('../../../models/calendario/competiciones/CategoriaCompeticion');
 
-// GET all categorias
+// GET all categorías
 router.get('/', async (req, res) => {
     try {
         const categorias = await CategoriaCompeticion.find();
@@ -12,7 +12,7 @@ router.get('/', async (req, res) => {
     }
 });
 
-// GET categoria by ID
+// GET categoría by ID
 router.get('/:id', async (req, res) => {
     try {
         const categoria = await CategoriaCompeticion.findById(req.params.id);
@@ -23,7 +23,7 @@ router.get('/:id', async (req, res) => {
     }
 });
 
-// POST new categoria
+// POST new categoría
 router.post('/', async (req, res) => {
     const categoria = new CategoriaCompeticion({
         nombre_categoria: req.body.nombre_categoria
@@ -36,22 +36,27 @@ router.post('/', async (req, res) => {
     }
 });
 
-// DELETE all categorias
-router.delete('/', async (req, res) => {
+// PUT update categoría
+router.put('/:id', async (req, res) => {
     try {
-        await CategoriaCompeticion.deleteMany({});
-        res.json({ message: 'Todas las categorías eliminadas' });
+        const categoria = await CategoriaCompeticion.findById(req.params.id);
+        if (!categoria) return res.status(404).json({ message: 'Categoría no encontrada' });
+
+        categoria.nombre_categoria = req.body.nombre_categoria;
+        const updatedCategoria = await categoria.save();
+        res.json(updatedCategoria);
     } catch (err) {
-        res.status(500).json({ message: err.message });
+        res.status(400).json({ message: err.message });
     }
 });
 
-// DELETE categoria by ID
+// DELETE categoría
 router.delete('/:id', async (req, res) => {
     try {
         const categoria = await CategoriaCompeticion.findById(req.params.id);
         if (!categoria) return res.status(404).json({ message: 'Categoría no encontrada' });
-        await categoria.remove();
+
+        await categoria.deleteOne();
         res.json({ message: 'Categoría eliminada' });
     } catch (err) {
         res.status(500).json({ message: err.message });

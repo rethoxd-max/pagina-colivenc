@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { PostService } from '../../services/posts.service';
 import { CommonModule, NgIf } from '@angular/common'; // Importar CommonModule para usar *ngIf y *ngFor
 import { ReactiveFormsModule } from '@angular/forms';
-import { RouterLink } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../../auth/services/auth.service';
 import { environment } from '../../../../environments/environment.development';
 
@@ -21,7 +21,8 @@ export class PostListComponent implements OnInit {
 
   constructor(
     private postService: PostService,
-    private authService: AuthService // Inyección correcta de AuthService
+    private authService: AuthService,
+    private router: Router
   ) { }
 
   ngOnInit(): void {
@@ -40,17 +41,29 @@ export class PostListComponent implements OnInit {
     );
   }
 
-  deletePost(id: string) {
-    const token = this.authService.getToken();
-    console.log('Token enviado:', token); // Verifica el token aquí
-    this.postService.deletePost(id).subscribe(
-      () => {
-        this.posts = this.posts.filter(post => post._id !== id);
-      },
-      (error) => {
-        console.error('Error al eliminar el post:', error);
-      }
-    );
+  verNoticia(id: string) {
+    this.router.navigate(['/noticia', id]);
+  }
+
+  editarNoticia(event: Event, id: string) {
+    event.stopPropagation();
+    this.router.navigate(['/edit', id]);
+  }
+
+  eliminarNoticia(event: Event, id: string) {
+    event.stopPropagation();
+    if (confirm('¿Estás seguro de que deseas eliminar esta noticia?')) {
+      const token = this.authService.getToken();
+      console.log('Token enviado:', token); // Verifica el token aquí
+      this.postService.deletePost(id).subscribe(
+        () => {
+          this.posts = this.posts.filter(post => post._id !== id);
+        },
+        (error) => {
+          console.error('Error al eliminar el post:', error);
+        }
+      );
+    }
   }
 
   isLoggedIn(): boolean {

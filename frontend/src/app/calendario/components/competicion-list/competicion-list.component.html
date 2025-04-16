@@ -1,107 +1,117 @@
-<section class="container mt-5">
-    <div class="row">
-        <div class="col-md-8 mx-auto">
+<section class="competiciones-container">
+    <!-- Filtros -->
+    <div class="filtros-container">
+        <div class="search-box">
+            <input type="text" class="search-input" placeholder="Buscar competición..." [(ngModel)]="searchName"
+                (ngModelChange)="filterCompeticiones()">
+            <i class="fas fa-search"></i>
+        </div>
 
-            <!-- Formulario de búsqueda -->
-            <div class="mb-4">
-                <input type="text" class="form-control" placeholder="Buscar por nombre" [(ngModel)]="searchName"
-                    (ngModelChange)="filterCompeticiones()">
+        <div class="filtros-fecha">
+            <div class="fecha-input">
+                <label>Fecha inicio</label>
+                <input type="date" [(ngModel)]="startDate" (ngModelChange)="filterCompeticiones()">
             </div>
-
-            <div class="mb-4">
-                <!-- Campo para la fecha de inicio -->
-                <input type="date" class="form-control mb-2" placeholder="Fecha de inicio" [(ngModel)]="startDate"
-                    (ngModelChange)="filterCompeticiones()">
-                <!-- Campo para la fecha de fin -->
-                <input type="date" class="form-control" placeholder="Fecha de fin" [(ngModel)]="endDate"
-                    (ngModelChange)="filterCompeticiones()">
-            </div>
-
-
-            <div class="mb-4">
-                <select class="form-select" [(ngModel)]="searchCategoria" (ngModelChange)="filterCompeticiones()">
-                    <option value="">Buscar por categoría</option>
-                    <option *ngFor="let categoria of categoriasDisponibles" [value]="categoria">{{ categoria }}</option>
-                </select>
-            </div>
-
-            <!-- Botón para crear nueva competición -->
-            <button *ngIf="(isAdmin() || isEditor()) && isLoggedIn()" class="btn btn-primary mb-4"
-                [routerLink]="['/create-competicion']">
-                Crear nueva competición
-            </button>
-
-            <!-- Mostrar competiciones filtradas -->
-            <div *ngIf="filteredCompeticiones.length > 0">
-                <div *ngFor="let competicion of filteredCompeticiones" class="card mb-4 shadow-sm">
-                    <!-- Contenido de cada tarjeta -->
-                    <div class="card-body">
-                        <h3 class="card-title">{{ competicion.nombre }}</h3>
-                        <p class="card-text"><strong>Fecha:</strong> {{ competicion.fecha | date }}</p>
-                        <p class="card-text"><strong>Lugar:</strong> {{ competicion.lugar }}</p>
-                        <p class="card-text"><strong>Descripción:</strong> {{ competicion.descripcion }}</p>
-
-                        <!-- Pruebas -->
-                        <strong>Pruebas</strong>
-                        <div class="d-flex flex-wrap gap-2 mt-2"
-                            *ngIf="pruebas[competicion._id] && pruebas[competicion._id].length > 0">
-                            <span *ngFor="let prueba of pruebas[competicion._id]"
-                                class="badge bg-info text-dark px-3 py-2">
-                                {{ prueba.nombre_prueba }} {{ prueba.categoria_id.nombre_categoria }}
-                            </span>
-                        </div>
-
-                        <!-- Categorías -->
-                        <strong>Categorias</strong>
-                        <div class="d-flex flex-wrap gap-2 mt-2"
-                            *ngIf="pruebas[competicion._id] && pruebas[competicion._id].length > 0">
-                            <span *ngFor="let categoria of getCategoriasUnicas(competicion._id)"
-                                class="badge bg-info text-dark px-3 py-2">
-                                {{ categoria }}
-                            </span>
-                        </div>
-
-                        <p class="card-text"><strong>Tipo:</strong> {{ competicion.tipo }}</p>
-
-                        <!-- Imagen de competición -->
-                        <img [src]="getImageUrl(competicion.imageUrl)" class="img-fluid rounded mb-3"
-                            alt="Imagen de la competición" *ngIf="competicion.imageUrl">
-
-                        <!-- Botones de acción -->
-                        <button *ngIf="(isAdmin() || isEditor())" (click)="deleteCompeticion(competicion._id)"
-                            class="btn btn-danger me-2">
-                            Eliminar
-                        </button>
-                        <button *ngIf="(isAdmin() || isEditor())" [routerLink]="['/edit-competicion', competicion._id]"
-                            class="btn btn-warning">
-                            Editar
-                        </button>
-                        <button
-                            *ngIf="(isAdmin() || isEntrenador() || (isAtleta() && !tieneInscripcionEnCompeticion(competicion._id)))"
-                            class="btn btn-success" [routerLink]="['/inscripcion', competicion._id]">
-                            Inscribirse
-                        </button>
-
-
-
-                    </div>
-
-                    <div *ngIf="isEntrenador() && (inscripcionesPorCompeticion[competicion._id]?.length || 0) > 0">
-                        <button [routerLink]="['/inscripciones', competicion._id]">Todas las inscripciones</button>
-                    </div>
-
-                    <div *ngIf="(inscripcionesPorCompeticionYEntrenador[competicion._id]?.length || 0) > 0">
-                        <button [routerLink]="['/mis-inscripciones', userId, competicion._id]">Mis
-                            Inscripciones</button>
-                    </div>
-
-
-                </div>
-            </div>
-
-            <div *ngIf="filteredCompeticiones.length === 0">
-                <p class="text-center">No hay competiciones disponibles.</p>
+            <div class="fecha-input">
+                <label>Fecha fin</label>
+                <input type="date" [(ngModel)]="endDate" (ngModelChange)="filterCompeticiones()">
             </div>
         </div>
+
+        <div class="categoria-select">
+            <select [(ngModel)]="searchCategoria" (ngModelChange)="filterCompeticiones()">
+                <option value="">Todas las categorías</option>
+                <option *ngFor="let categoria of categoriasDisponibles" [value]="categoria">{{ categoria }}</option>
+            </select>
+        </div>
+
+        <button *ngIf="(isAdmin() || isEditor()) && isLoggedIn()" class="btn-nueva-competicion" [routerLink]="['/create-competicion']">
+            <i class="fas fa-plus"></i> Nueva Competición
+        </button>
+    </div>
+
+    <!-- Lista de Competiciones Agrupadas -->
+    <div *ngIf="competicionesAgrupadas.length > 0" class="competiciones-agrupadas">
+        <div *ngFor="let grupo of competicionesAgrupadas" class="grupo-year">
+            <h2 class="year-titulo">{{ grupo.year }}</h2>
+            <div *ngFor="let mes of grupo.months" class="grupo-mes">
+                <h3 class="mes-titulo">{{ mes.monthName }}</h3>
+                <div class="competiciones-grid">
+                    <div *ngFor="let competicion of mes.competiciones" class="competicion-card">
+                        <div class="card-image" *ngIf="competicion.imageUrl">
+                            <img [src]="getImageUrl(competicion.imageUrl)" alt="Imagen de la competición">
+                        </div>
+                        
+                        <div class="card-content">
+                            <div class="card-header">
+                                <h3>{{ competicion.nombre }}</h3>
+                                <span class="fecha">{{ competicion.fecha | date:'dd/MM/yyyy' }}</span>
+                            </div>
+
+                            <div class="card-info">
+                                <p class="lugar"><i class="fas fa-map-marker-alt"></i> {{ competicion.lugar }}</p>
+                                <p class="tipo"><i class="fas fa-tag"></i> {{ competicion.tipo }}</p>
+                            </div>
+
+                            <div class="card-description">
+                                <p>{{ competicion.descripcion }}</p>
+                            </div>
+
+                            <div class="card-tags">
+                                <div class="pruebas-tags" *ngIf="pruebas[competicion._id] && pruebas[competicion._id].length > 0">
+                                    <span class="tag-label">Pruebas:</span>
+                                    <div class="tags-container">
+                                        <span *ngFor="let prueba of pruebas[competicion._id]" class="tag">
+                                            {{ prueba.nombre_prueba }}
+                                        </span>
+                                    </div>
+                                </div>
+
+                                <div class="categorias-tags" *ngIf="getCategoriasUnicas(competicion._id).length > 0">
+                                    <span class="tag-label">Categorías:</span>
+                                    <div class="tags-container">
+                                        <span *ngFor="let categoria of getCategoriasUnicas(competicion._id)" class="tag">
+                                            {{ categoria }}
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="card-actions">
+                                <button *ngIf="(isAdmin() || isEditor())" (click)="deleteCompeticion(competicion._id)" 
+                                    class="btn-action btn-delete">
+                                    <i class="fas fa-trash"></i> Borrar
+                                </button>
+                                <button *ngIf="(isAdmin() || isEditor())" [routerLink]="['/edit-competicion', competicion._id]"
+                                    class="btn-action btn-edit">
+                                    <i class="fas fa-edit"></i> Editar
+                                </button>
+                                <button *ngIf="(isAdmin() || isEntrenador() || (isAtleta() && !tieneInscripcionEnCompeticion(competicion._id)))"
+                                    [routerLink]="['/inscripcion', competicion._id]" class="btn-action btn-inscribir">
+                                    <i class="fas fa-user-plus"></i> Inscribirse
+                                </button>
+                            </div>
+
+                            <div class="card-inscripciones" *ngIf="isEntrenador() && (inscripcionesPorCompeticion[competicion._id]?.length || 0) > 0">
+                                <button [routerLink]="['/inscripciones', competicion._id]" class="btn-inscripciones">
+                                    <i class="fas fa-list"></i> Ver Inscripciones
+                                </button>
+                            </div>
+
+                            <div class="card-mis-inscripciones" *ngIf="(inscripcionesPorCompeticionYEntrenador[competicion._id]?.length || 0) > 0">
+                                <button [routerLink]="['/mis-inscripciones', userId, competicion._id]" class="btn-mis-inscripciones">
+                                    <i class="fas fa-user-check"></i> Mis Inscripciones
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div *ngIf="competicionesAgrupadas.length === 0" class="no-results">
+        <i class="fas fa-calendar-times"></i>
+        <p>No hay competiciones disponibles</p>
     </div>
 </section>

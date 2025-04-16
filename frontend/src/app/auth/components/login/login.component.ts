@@ -22,7 +22,7 @@ export class LoginComponent {
       response => {
         this.authService.saveToken(response.token);
         this.authService.saveUserData(response.user);
-        this.router.navigate(['posts']);
+        this.router.navigate(['home']);
       },
       error => {
         // Mostrar mensaje de error devuelto por el backend

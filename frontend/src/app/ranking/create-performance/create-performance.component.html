@@ -1,151 +1,230 @@
 <div class="container mt-4">
-    <h2>Crear Nueva Marca</h2>
+    <mat-card>
+        <mat-card-header>
+            <mat-card-title>Gestión de Datos de Ranking</mat-card-title>
+        </mat-card-header>
+        
+        <mat-card-content>
+            <mat-tab-group>
+                <!-- Pestaña de Crear Marca -->
+                <mat-tab label="Crear Marca">
+                    <div class="form-container">
+                        <form [formGroup]="performanceForm" (ngSubmit)="onSubmit()">
+                            <!-- Selector de atleta -->
+                            <div class="mb-3">
+                                <label for="atleta" class="form-label">Atleta</label>
+                                <app-search-atleta [nombreAtletaControl]="nombreAtletaControl"
+                                    (atletaSeleccionado)="onAtletaSelected($event)"></app-search-atleta>
+                                <div *ngIf="performanceForm.get('nombre_atleta')?.invalid && performanceForm.get('nombre_atleta')?.touched"
+                                    class="text-danger">
+                                    El nombre del atleta es requerido.
+                                </div>
+                            </div>
 
-    <form [formGroup]="performanceForm" (ngSubmit)="onSubmit()">
-        <!-- Selector de atleta -->
-        <!-- create-performance.component.html -->
-        <div class="mb-3">
-            <label for="atleta" class="form-label">Atleta</label>
-            <app-search-atleta [nombreAtletaControl]="nombreAtletaControl"
-                (atletaSeleccionado)="onAtletaSelected($event)"></app-search-atleta>
-            <div *ngIf="performanceForm.get('nombre_atleta')?.invalid && performanceForm.get('nombre_atleta')?.touched"
-                class="text-danger">
-                El nombre del atleta es requerido.
-            </div>
-        </div>
+                            <!-- Selector de sector -->
+                            <div class="mb-3">
+                                <label for="sector" class="form-label">Sector</label>
+                                <select id="sector" class="form-select" formControlName="nombre_sector" (change)="onSectorSelected()">
+                                    <option value="" disabled>Selecciona un sector</option>
+                                    <option *ngFor="let sector of sectores" [value]="sector._id">{{ sector.nombre_sector }}</option>
+                                </select>
+                                <div *ngIf="performanceForm.get('nombre_sector')?.invalid && performanceForm.get('nombre_sector')?.touched"
+                                    class="text-danger">
+                                    El sector es requerido.
+                                </div>
+                            </div>
 
+                            <!-- Selector de prueba -->
+                            <div class="mb-3">
+                                <label for="prueba" class="form-label">Prueba</label>
+                                <select id="prueba" class="form-select" formControlName="nombre_prueba" (change)="onPruebaSelected()">
+                                    <option value="" disabled>Selecciona una prueba</option>
+                                    <option *ngFor="let prueba of pruebas" [value]="prueba._id">{{ prueba.nombre_prueba }}</option>
+                                </select>
+                                <div *ngIf="performanceForm.get('nombre_prueba')?.invalid && performanceForm.get('nombre_prueba')?.touched"
+                                    class="text-danger">
+                                    La prueba es requerida.
+                                </div>
+                            </div>
 
+                            <!-- Campos de marca según el tipo de prueba -->
+                            <div *ngIf="mostrarCampoTiempo" class="mb-3">
+                                <label class="form-label">Tiempo</label>
+                                <div class="row">
+                                    <div class="col">
+                                        <input type="number" class="form-control" formControlName="horas" placeholder="Horas">
+                                    </div>
+                                    <div class="col">
+                                        <input type="number" class="form-control" formControlName="minutos" placeholder="Minutos">
+                                    </div>
+                                    <div class="col">
+                                        <input type="number" class="form-control" formControlName="segundos" placeholder="Segundos">
+                                    </div>
+                                </div>
+                                <div *ngIf="performanceForm.hasError('tiempoRequerido') && performanceForm.touched"
+                                    class="text-danger">
+                                    Debes introducir al menos un valor de tiempo (horas, minutos o segundos).
+                                </div>
+                            </div>
 
-        <!-- Selector de sector -->
-        <div class="mb-3">
-            <label for="sector" class="form-label">Sector</label>
-            <select id="sector" class="form-select" formControlName="nombre_sector" (change)="onSectorSelected()">
-                <option value="" disabled>Selecciona un sector</option>
-                <option *ngFor="let sector of sectores" [value]="sector._id">{{ sector.nombre_sector }}</option>
-            </select>
-            <div *ngIf="performanceForm.get('nombre_sector')?.invalid && performanceForm.get('nombre_sector')?.touched"
-                class="text-danger">
-                El sector es requerido.
-            </div>
-        </div>
+                            <div *ngIf="mostrarCampoMetros" class="mb-3">
+                                <label for="metros" class="form-label">Metros</label>
+                                <input type="number" id="metros" class="form-control" formControlName="metros" step="0.01">
+                            </div>
 
-        <!-- Selector de prueba, cargado dinámicamente según el sector -->
-        <div class="mb-3" *ngIf="sectorSeleccionado">
-            <label for="prueba" class="form-label">Prueba</label>
-            <select id="prueba" class="form-select" formControlName="nombre_prueba" (change)="onPruebaSelected()">
-                <option value="" disabled>Selecciona una prueba</option>
-                <option *ngFor="let prueba of pruebas" [value]="prueba._id">{{ prueba.nombre_prueba }}</option>
-            </select>
-            <div *ngIf="performanceForm.get('nombre_prueba')?.invalid && performanceForm.get('nombre_prueba')?.touched"
-                class="text-danger">
-                La prueba es requerida.
-            </div>
-        </div>
+                            <div *ngIf="mostrarCampoPuntos" class="mb-3">
+                                <label for="puntos" class="form-label">Puntos</label>
+                                <input type="number" id="puntos" class="form-control" formControlName="puntos">
+                            </div>
 
+                            <div *ngIf="mostrarCampoViento" class="mb-3">
+                                <label for="viento" class="form-label">Viento (m/s)</label>
+                                <input type="number" id="viento" class="form-control" formControlName="viento" step="0.1">
+                            </div>
 
-        <div *ngIf="pruebaSeleccionada">
-            <div *ngIf="mostrarCampoMetros">
-                <div class="mb-3">
-                    <label for="metros" class="form-label">Marca en metros</label>
-                    <input type="number" id="metros" class="form-control" formControlName="metros"
-                        placeholder="Marca en metros">
-                </div>
-            </div>
+                            <div *ngIf="mostrarCampoComentario" class="mb-3">
+                                <label for="comentario" class="form-label">Comentario</label>
+                                <textarea id="comentario" class="form-control" formControlName="comentario"></textarea>
+                            </div>
 
-            <div *ngIf="mostrarCampoPuntos">
-                <div class="mb-3">
-                    <label for="puntos" class="form-label">Puntos</label>
-                    <input type="number" id="puntos" class="form-control" formControlName="puntos" placeholder="Puntos">
-                </div>
-            </div>
+                            <!-- Selector de Categoría -->
+                            <div class="mb-3">
+                                <label for="categoria" class="form-label">Categoría</label>
+                                <select id="categoria" class="form-select" formControlName="categoria">
+                                    <option value="" disabled>Selecciona una categoría</option>
+                                    <option *ngFor="let categoria of categorias" [value]="categoria._id">{{ categoria.nombre_categoria }}</option>
+                                </select>
+                            </div>
 
-            <div *ngIf="mostrarCampoTiempo">
-                <div class="mb-3">
-                    <label for="tiempo" class="form-label">Tiempo</label>
-                    <input formControlName="horas" type="number" placeholder="Horas" class="form-control d-inline w-25">
-                    <input formControlName="minutos" type="number" placeholder="Minutos"
-                        class="form-control d-inline w-25 mx-2">
-                    <input formControlName="segundos" type="number" placeholder="Segundos"
-                        class="form-control d-inline w-25">
-                </div>
-            </div>
+                            <!-- Campo para Año -->
+                            <div class="mb-3">
+                                <label for="anio" class="form-label">Año</label>
+                                <input type="number" id="anio" class="form-control" formControlName="anyo" placeholder="Año de la marca">
+                            </div>
 
+                            <!-- Campo para Fecha de Realización -->
+                            <div class="mb-3">
+                                <label for="fecha_realizacion" class="form-label">Fecha de Realización</label>
+                                <input type="date" id="fecha_realizacion" class="form-control" formControlName="fecha_realizacion">
+                            </div>
 
+                            <!-- Campo para Lugar -->
+                            <div class="mb-3">
+                                <label for="lugar" class="form-label">Lugar</label>
+                                <input type="text" id="lugar" class="form-control" formControlName="lugar">
+                            </div>
 
-            <!-- Campo para Lugar -->
-            <div class="mb-3">
-                <label for="lugar" class="form-label">Lugar</label>
-                <input type="text" id="lugar" class="form-control" formControlName="lugar"
-                    placeholder="Lugar de la marca">
-            </div>
+                            <!-- Selector de PcAL -->
+                            <div class="mb-3">
+                                <label for="pcAL" class="form-label">PcAL</label>
+                                <select id="pcAL" class="form-select" formControlName="PcAL">
+                                    <option value="" disabled>Selecciona un PcAL</option>
+                                    <option *ngFor="let pcAL of PcAL" [value]="pcAL._id">{{ pcAL.PcAL }}</option>
+                                </select>
+                                <div *ngIf="performanceForm.get('PcAL')?.invalid && performanceForm.get('PcAL')?.touched"
+                                    class="text-danger">
+                                    El PcAL es requerido.
+                                </div>
+                            </div>
 
-            <div *ngIf="mostrarCampoViento">
-                <div class="mb-3">
-                    <label for="viento" class="form-label">Viento (m/s)</label>
-                    <input type="number" id="viento" class="form-control" formControlName="viento"
-                        placeholder="Viento en m/s">
-                </div>
-            </div>
+                            <button type="submit" class="btn btn-primary" [disabled]="!performanceForm.valid">Crear Marca</button>
+                        </form>
+                    </div>
+                </mat-tab>
 
-            <!-- Campo para Comentario -->
-            <div *ngIf="mostrarCampoComentario">
-                <div class="mb-3">
-                    <label for="comentario" class="form-label">Comentario</label>
-                    <textarea id="comentario" class="form-control" formControlName="comentario"
-                        placeholder="100m/Longi/Peso/Altura..."></textarea>
-                </div>
-            </div>
+                <!-- Pestaña de Crear Atleta -->
+                <mat-tab label="Crear Atleta">
+                    <div class="form-container">
+                        <form [formGroup]="atletaForm" (ngSubmit)="onSubmitAtleta()">
+                            <div class="mb-3">
+                                <label for="nombre" class="form-label">Nombre del atleta</label>
+                                <input type="text" id="nombre" class="form-control" formControlName="nombre">
+                                <div *ngIf="atletaForm.get('nombre')?.invalid && atletaForm.get('nombre')?.touched" class="text-danger">
+                                    El nombre del atleta es requerido.
+                                </div>
+                            </div>
 
-            <!-- Selector de Categoría -->
-            <div class="mb-3">
-                <label for="categoria" class="form-label">Categoría</label>
-                <select id="categoria" class="form-select" formControlName="categoria">
-                    <option value="" disabled>Selecciona una categoría</option>
-                    <option *ngFor="let categoria of categorias" [value]="categoria._id">{{ categoria.nombre_categoria
-                        }}</option>
-                </select>
-                <div *ngIf="performanceForm.get('categoria')?.invalid && performanceForm.get('categoria')?.touched"
-                    class="text-danger">
-                    La categoría es requerida.
-                </div>
-            </div>
+                            <div class="mb-3">
+                                <label for="fecha_nacimiento" class="form-label">Fecha de Nacimiento</label>
+                                <input type="date" id="fecha_nacimiento" class="form-control" formControlName="fecha_nacimiento" 
+                                    [max]="currentDate" />
+                                <div *ngIf="atletaForm.get('fecha_nacimiento')?.invalid && atletaForm.get('fecha_nacimiento')?.touched"
+                                    class="text-danger">
+                                    La fecha de nacimiento es requerida y no puede ser en el futuro.
+                                </div>
+                            </div>
 
-            <!-- Campo para Año -->
-            <div class="mb-3">
-                <label for="anio" class="form-label">Año</label>
-                <input type="number" id="anio" class="form-control" formControlName="anyo"
-                    placeholder="Año de la marca">
-                <div *ngIf="performanceForm.get('anyo')?.invalid && performanceForm.get('anyo')?.touched"
-                    class="text-danger">
-                    El campo Año es requerido.
-                </div>
-            </div>
+                            <button type="submit" class="btn btn-primary" [disabled]="atletaForm.invalid">Crear Atleta</button>
+                        </form>
+                    </div>
+                </mat-tab>
 
-            <!-- Campo para Fecha de Realización -->
-            <div class="mb-3">
-                <label for="fecha_realizacion" class="form-label">Fecha de Realización</label>
-                <input type="date" id="fecha_realizacion" class="form-control" formControlName="fecha_realizacion">
-                <div *ngIf="performanceForm.get('fecha_realizacion')?.invalid && performanceForm.get('fecha_realizacion')?.touched"
-                    class="text-danger">
-                    La fecha es requerida.
-                </div>
-            </div>
+                <!-- Pestaña de Crear Prueba -->
+                <mat-tab label="Crear Prueba">
+                    <div class="form-container">
+                        <form [formGroup]="pruebaForm" (ngSubmit)="onSubmitPrueba()">
+                            <div class="mb-3">
+                                <label for="nombre" class="form-label">Nombre de la prueba</label>
+                                <input type="text" id="nombre" class="form-control" formControlName="nombre_prueba">
+                                <div *ngIf="pruebaForm.get('nombre_prueba')?.invalid && pruebaForm.get('nombre_prueba')?.touched"
+                                    class="text-danger">
+                                    El nombre de la prueba es requerido.
+                                </div>
+                            </div>
 
-            <!-- Selector de PcAL -->
-            <div class="mb-3">
-                <label for="pcAL" class="form-label">PcAL</label>
-                <select id="pcAL" class="form-select" formControlName="PcAL">
-                    <option value="" disabled>Selecciona PcAL</option>
-                    <option *ngFor="let pcAL of PcAL" [value]="pcAL._id">{{ pcAL.PcAL }}</option>
-                </select>
-                <div *ngIf="performanceForm.get('PcAL')?.invalid && performanceForm.get('PcAL')?.touched"
-                    class="text-danger">
-                    El campo PcAL es requerido.
-                </div>
-            </div>
-        </div>
+                            <div class="mb-3">
+                                <label for="sector" class="form-label">Sector</label>
+                                <select id="sector" class="form-select" formControlName="sector_id">
+                                    <option value="" disabled>Selecciona un sector</option>
+                                    <option *ngFor="let sector of sectores" [value]="sector._id">{{ sector.nombre_sector }}</option>
+                                </select>
+                                <div *ngIf="pruebaForm.get('sector_id')?.invalid && pruebaForm.get('sector_id')?.touched"
+                                    class="text-danger">
+                                    El sector es requerido.
+                                </div>
+                            </div>
 
-        <!-- Botón de envío -->
-        <button type="submit" class="btn btn-primary" [disabled]="performanceForm.invalid">Crear Marca</button>
-    </form>
+                            <button type="submit" class="btn btn-primary" [disabled]="pruebaForm.invalid">Crear Prueba</button>
+                        </form>
+                    </div>
+                </mat-tab>
+
+                <!-- Pestaña de Crear Sector -->
+                <mat-tab label="Crear Sector">
+                    <div class="form-container">
+                        <form [formGroup]="sectorForm" (ngSubmit)="onSubmitSector()">
+                            <div class="mb-3">
+                                <label for="nombre_sector" class="form-label">Nombre del sector</label>
+                                <input type="text" id="nombre_sector" class="form-control" formControlName="nombre_sector">
+                                <div *ngIf="sectorForm.get('nombre_sector')?.invalid && sectorForm.get('nombre_sector')?.touched"
+                                    class="text-danger">
+                                    El nombre del sector es requerido.
+                                </div>
+                            </div>
+
+                            <button type="submit" class="btn btn-primary" [disabled]="sectorForm.invalid">Crear Sector</button>
+                        </form>
+                    </div>
+                </mat-tab>
+
+                <!-- Pestaña de Crear Categoría -->
+                <mat-tab label="Crear Categoría">
+                    <div class="form-container">
+                        <form [formGroup]="categoriaForm" (ngSubmit)="onSubmitCategoria()">
+                            <div class="mb-3">
+                                <label for="nombre_categoria" class="form-label">Nombre de la categoría</label>
+                                <input type="text" id="nombre_categoria" class="form-control" formControlName="nombre_categoria">
+                                <div *ngIf="categoriaForm.get('nombre_categoria')?.invalid && categoriaForm.get('nombre_categoria')?.touched"
+                                    class="text-danger">
+                                    El nombre de la categoría es requerido.
+                                </div>
+                            </div>
+
+                            <button type="submit" class="btn btn-primary" [disabled]="categoriaForm.invalid">Crear Categoría</button>
+                        </form>
+                    </div>
+                </mat-tab>
+            </mat-tab-group>
+        </mat-card-content>
+    </mat-card>
 </div>

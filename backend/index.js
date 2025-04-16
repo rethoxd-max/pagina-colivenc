@@ -68,16 +68,16 @@ app.use('/posts', postRoutes);
 
 app.use('/atletas', atletaRoutes);
 app.use('/pruebas', pruebaRoutes);
-app.use('/sectores', sectorRoutes);
 app.use('/marcas', marcaRoutes);
 app.use('/ranking', rankingRoutes);
+app.use('/sectores', sectorRoutes);
 app.use('/categorias', categoriaRoutes);
 app.use('/PcAL', PcALRoutes);
 app.use('/competiciones', competicionesRoutes);
-app.use('/inscripciones', inscripcionesRoutes);
 app.use('/pruebasCompeticion', pruebaCompeticionRoutes);
-app.use('/sectoresCompeticion', sectorCompeticionRoutes);
 app.use('/categoriasCompeticion', categoriaCompeticionRoutes);
+app.use('/sectoresCompeticion', sectorCompeticionRoutes);
+app.use('/inscripciones', inscripcionesRoutes);
 app.use('/perfil-atleta', perfilAtletaRoutes);
 
 app.use('/calendario-entrenamiento', calendarioEntrenamientoRoutes);

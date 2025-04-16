@@ -1,5 +1,3 @@
-/* To learn more about Typescript configuration file: https://www.typescriptlang.org/docs/handbook/tsconfig-json.html. */
-/* To learn more about Angular compiler options: https://angular.dev/reference/configs/angular-compiler-options. */
 {
   "compileOnSave": false,
   "compilerOptions": {
@@ -22,8 +20,17 @@
     "lib": [
       "ES2022",
       "dom"
-    ]
+    ],
+    "allowJs": true,
+    "checkJs": true
   },
+  "include": [
+    "*.js",
+    "routes/**/*.js",
+    "models/**/*.js",
+    "middleware/**/*.js"
+  ],
+  "exclude": ["node_modules", "dist"],
   "angularCompilerOptions": {
     "enableI18nLegacyMessageIdFormat": false,
     "strictInjectionParameters": true,

@@ -297,9 +297,19 @@ export class PerfilAtletaComponent implements OnInit {
       return '';
     }
 
-    const añoNacimiento = this.atleta.fecha_nacimiento;
-    const añoActual = new Date().getFullYear();
-    const edad = añoActual - añoNacimiento;
+    const fechaNacimiento = new Date(this.atleta.fecha_nacimiento);
+    const hoy = new Date();
+    let edad = hoy.getFullYear() - fechaNacimiento.getFullYear();
+    
+    // Ajustar la edad si aún no ha pasado el cumpleaños este año
+    const mesActual = hoy.getMonth();
+    const diaActual = hoy.getDate();
+    const mesNacimiento = fechaNacimiento.getMonth();
+    const diaNacimiento = fechaNacimiento.getDate();
+    
+    if (mesActual < mesNacimiento || (mesActual === mesNacimiento && diaActual < diaNacimiento)) {
+      edad--;
+    }
 
     if (edad < 10) {
       return 'Sub10';
@@ -322,8 +332,8 @@ export class PerfilAtletaComponent implements OnInit {
     }
   }
 
-  formatearTiempo(horas: number, minutos: number, segundos: number): string {
-    // Usamos ?? para asegurar que minutos y segundos no sean null o undefined.
+  formatearTiempo(horas?: number, minutos?: number, segundos?: number): string {
+    horas = horas ?? 0;
     minutos = minutos ?? 0;
     segundos = segundos ?? 0;
 
@@ -347,5 +357,24 @@ export class PerfilAtletaComponent implements OnInit {
     const segundosEnteros = Math.floor(segundos);
     const decimales = (segundos % 1).toFixed(2).substring(1);
     return `${this.pad(segundosEnteros)}${decimales}`;
+  }
+
+  convertirFecha(fecha: string | String): Date | null {
+    if (!fecha) return null;
+    
+    // Si la fecha ya está en formato dd/MM/yyyy, la convertimos a Date
+    const partes = fecha.toString().split('/');
+    if (partes.length === 3) {
+      const dia = parseInt(partes[0], 10);
+      const mes = parseInt(partes[1], 10) - 1; // Los meses en JavaScript van de 0 a 11
+      const año = parseInt(partes[2], 10);
+      
+      const date = new Date(año, mes, dia);
+      return isNaN(date.getTime()) ? null : date;
+    }
+    
+    // Si no está en el formato esperado, intentamos con el formato por defecto
+    const date = new Date(fecha.toString());
+    return isNaN(date.getTime()) ? null : date;
   }
 }

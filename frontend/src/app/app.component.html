@@ -25,61 +25,86 @@
 </nav>
 -->
 
-<nav class="navbar navbar-light bg-light fixed-top">
+<!-- Navbar principal -->
+<nav class="navbar fixed-top">
   <div class="container-fluid">
-    <!-- Botón para abrir el menú deslizable -->
-    <button class="navbar-toggler" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasMenu"
-      aria-controls="offcanvasMenu">
+    <button class="navbar-toggler" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasMenu" aria-controls="offcanvasMenu">
       <span class="navbar-toggler-icon"></span>
     </button>
+    
 
-    <div class="d-flex ms-auto">
-      <button *ngIf="isLoggedIn && atletaId" class="btn btn-outline-primary"
-        [routerLink]="['/entrenamientos']">
-        Entrenamientos
+    <div class="d-flex align-items-center gap-2">
+      <button *ngIf="isLoggedIn && atletaId" class="btn btn-nav" [routerLink]="['/entrenamientos']">
+        <i class="fas fa-running"></i>
+        <span class="d-none d-md-inline ms-1">Entrenamientos</span>
       </button>
-      <button *ngIf="isLoggedIn && atletaId" class="btn btn-outline-primary"
-        [routerLink]="['/perfil-atleta', atletaId]">
-        Perfil
+      <button *ngIf="isLoggedIn && atletaId" class="btn btn-nav" [routerLink]="['/perfil-atleta', atletaId]">
+        <i class="fas fa-user"></i>
+        <span class="d-none d-md-inline ms-1">Perfil</span>
       </button>
-      <button *ngIf="!isLoggedIn" class="btn btn-outline-primary" routerLink="/login">Acceder</button>
-      <button *ngIf="isLoggedIn" class="btn btn-outline-primary" (click)="logout()">Cerrar sesión</button>
+      <button *ngIf="!isLoggedIn" class="btn btn-nav" routerLink="/login">
+        <i class="fas fa-sign-in-alt"></i>
+        <span class="d-none d-md-inline ms-1">Acceder</span>
+      </button>
+      <button *ngIf="isLoggedIn" class="btn btn-nav" (click)="logout()">
+        <i class="fas fa-sign-out-alt"></i>
+        <span class="d-none d-md-inline ms-1">Cerrar sesión</span>
+      </button>
     </div>
   </div>
 </nav>
 
-
-<!-- Menú deslizable siempre visible al hacer clic en el botón -->
+<!-- Menú lateral -->
 <div class="offcanvas offcanvas-start" tabindex="-1" id="offcanvasMenu" aria-labelledby="offcanvasMenuLabel">
   <div class="offcanvas-header">
-    <h5 class="offcanvas-title" id="offcanvasMenuLabel">Menú</h5>
+    <div class="d-flex align-items-center">
+      <img src="./assets/logo-colivenc.jpg" alt="Logo Colivenc" class="sidebar-logo">
+    </div>
     <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
   </div>
   <div class="offcanvas-body">
     <ul class="nav flex-column">
       <li class="nav-item">
-        <a class="nav-link" routerLink="/home">Inicio</a>
+        <a class="nav-link" routerLink="/home" data-bs-dismiss="offcanvas">
+          <i class="fas fa-home"></i>
+          <span>Inicio</span>
+        </a>
       </li>
       <li class="nav-item">
-        <a class="nav-link" routerLink="/posts">Blog</a>
+        <a class="nav-link" routerLink="/noticias" data-bs-dismiss="offcanvas">
+          <i class="fas fa-newspaper"></i>
+          <span>Noticias</span>
+        </a>
       </li>
       <li class="nav-item">
-        <a class="nav-link" routerLink="/competiciones">Calendario</a>
+        <a class="nav-link" routerLink="/competiciones" data-bs-dismiss="offcanvas">
+          <i class="fas fa-calendar-alt"></i>
+          <span>Calendario</span>
+        </a>
       </li>
       <li class="nav-item">
-        <a class="nav-link" routerLink="/ranking">Ranking</a>
+        <a class="nav-link" routerLink="/ranking" data-bs-dismiss="offcanvas">
+          <i class="fas fa-trophy"></i>
+          <span>Ranking</span>
+        </a>
       </li>
       <li class="nav-item">
-        <a class="nav-link" routerLink="/buscador-atletas">Atletas</a>
+        <a class="nav-link" routerLink="/buscador-atletas" data-bs-dismiss="offcanvas">
+          <i class="fas fa-users"></i>
+          <span>Atletas</span>
+        </a>
       </li>
-      <li class="nav-item">
-        <a class="nav-link" routerLink="/formularioMarca">Insertar Marca</a>
+      <li class="nav-item" *ngIf="isAdmin()">
+        <a class="nav-link" routerLink="/ranking/create-performance" data-bs-dismiss="offcanvas">
+          <i class="fas fa-chart-line"></i>
+          <span>Gestionar Ranking</span>
+        </a>
       </li>
-      <li class="nav-item">
-        <a class="nav-link" routerLink="/formularioAtleta">Insertar Atleta</a>
-      </li>
-      <li class="nav-item">
-        <a class="nav-link" routerLink="/formularioPrueba">Insertar Prueba</a>
+      <li class="nav-item" *ngIf="isAdmin()">
+        <a class="nav-link" routerLink="/datos-competiciones" data-bs-dismiss="offcanvas">
+          <i class="fas fa-cog"></i>
+          <span>Gestionar Competiciones</span>
+        </a>
       </li>
     </ul>
   </div>

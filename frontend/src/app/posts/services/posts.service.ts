@@ -3,6 +3,7 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import { AuthService } from '../../auth/services/auth.service';
+import { environment } from '../../../environments/environment.development';
 
 @Injectable({
   providedIn: 'root'
@@ -10,18 +11,18 @@ import { AuthService } from '../../auth/services/auth.service';
 export class PostService {
   private http = inject(HttpClient);
   private authService = inject(AuthService);
-  private apiUrl = 'http://localhost:5000/posts';
+  private apiUrl = `${environment.apiUrl}/posts`;
 
-  getPosts(): Observable<any> {
-    return this.http.get(this.apiUrl);
+  getPosts(): Observable<any[]> {
+    return this.http.get<any[]>(this.apiUrl);
   }
 
   getUltimosPosts(): Observable<any[]> {
     return this.http.get<any[]>(`${this.apiUrl}/ultimos`); // Endpoint para traer las últimas noticias
   }
 
-  getPostById(id: string): Observable<any> {
-    return this.http.get(`${this.apiUrl}/${id}`);
+  getPost(id: string): Observable<any> {
+    return this.http.get<any>(`${this.apiUrl}/${id}`);
   }
 
   createPost(postData: FormData): Observable<any> {

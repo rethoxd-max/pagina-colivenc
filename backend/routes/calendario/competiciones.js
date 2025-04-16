@@ -25,7 +25,7 @@ const BASE_URL = 'http://localhost:5000';
 // Obtener todas las competiciones
 router.get('/', async (req, res) => {
     try {
-        const competiciones = await Competicion.find().sort({ fecha: 1 }); // Ordenar por fecha ascendente
+        const competiciones = await Competicion.find().sort({ fecha: -1 }); // Ordenar por fecha descendente
         res.json(competiciones);
     } catch (err) {
         res.status(500).json({ message: err.message });
