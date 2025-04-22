@@ -1,17 +1,29 @@
-<div *ngIf="gruposEntrenamiento.length; else noData">
-    <h2>Tus Grupos de Entrenamiento</h2>
-    <ul>
-        <li *ngFor="let grupo of gruposEntrenamiento" (click)="irAlCalendario(grupo._id)" style="cursor: pointer;">
-            
-            {{ grupo.nombre_grupo }} - Entrenador: {{ grupo.entrenador?.name }}
-        </li>
-    </ul>
-</div>
+<div class="container">
+    <!-- Título y botón -->
+    <div class="header">
+        <h1>Entrenamientos</h1>
+        <button *ngIf="isEntrenador" (click)="navigateToCrearGrupo()" class="btn-new">
+            <span>+</span> Nuevo
+        </button>
+    </div>
 
-<div *ngIf="isEntrenador">
-    <button (click)="navigateToCrearGrupo()">Crear grupo de entrenamiento</button>
-</div>
+    <!-- Lista de grupos -->
+    <div *ngIf="gruposEntrenamiento.length; else noData" class="groups-list">
+        <div *ngFor="let grupo of gruposEntrenamiento" 
+             (click)="irAlCalendario(grupo._id)"
+             class="group-item">
+            <div class="group-info">
+                <span class="group-name">{{ grupo.nombre_grupo }}</span>
+                <span class="group-trainer">{{ grupo.entrenador?.name }}</span>
+            </div>
+            <span class="view-btn">→</span>
+        </div>
+    </div>
 
-<ng-template #noData>
-    <p>No estás inscrito en ningún grupo de entrenamiento.</p>
-</ng-template>
+    <!-- Mensaje sin datos -->
+    <ng-template #noData>
+        <div class="no-data">
+            <p>No estás inscrito en ningún grupo</p>
+        </div>
+    </ng-template>
+</div>

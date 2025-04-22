@@ -3,7 +3,7 @@
   "version": 1,
   "newProjectRoot": "projects",
   "projects": {
-    "blog-app": {
+    "pagina-colivenc": {
       "projectType": "application",
       "schematics": {},
       "root": "",
@@ -11,9 +11,9 @@
       "prefix": "app",
       "architect": {
         "build": {
-          "builder": "@angular-devkit/build-angular:application",
+          "builder": "@angular-devkit/build-angular:browser",
           "options": {
-            "outputPath": "dist/blog-app",
+            "outputPath": "dist/pagina-colivenc",
             "index": "src/index.html",
             "browser": "src/main.ts",
             "polyfills": [
@@ -49,7 +49,8 @@
                   "maximumError": "4kB"
                 }
               ],
-              "outputHashing": "all"
+              "outputHashing": "all",
+              "buildTarget": "pagina-colivenc:build:production"
             },
             "development": {
               "optimization": false,
@@ -60,7 +61,8 @@
                   "replace": "src/environments/environment.ts",
                   "with": "src/environments/environment.development.ts"
                 }
-              ]
+              ],
+              "buildTarget": "pagina-colivenc:build:development"
             }
           },
           "defaultConfiguration": "production"
@@ -69,10 +71,10 @@
           "builder": "@angular-devkit/build-angular:dev-server",
           "configurations": {
             "production": {
-              "buildTarget": "blog-app:build:production"
+              "buildTarget": "pagina-colivenc:build:production"
             },
             "development": {
-              "buildTarget": "blog-app:build:development"
+              "buildTarget": "pagina-colivenc:build:development"
             }
           },
           "defaultConfiguration": "development"

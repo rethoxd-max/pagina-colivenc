@@ -8,6 +8,12 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
     const authService = inject(AuthService); // Utiliza la función inject para obtener dependencias
     const router = inject(Router);
 
+    // Si la petición es para el calendario, no requerir autenticación
+    if (req.url.includes('/calendarios-entrenamiento/') || 
+        req.url.includes('/dias-entrenamiento/')) {
+        return next(req);
+    }
+
     const authToken = authService.getToken();
 
     let authReq = req;

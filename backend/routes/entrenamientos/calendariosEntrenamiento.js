@@ -4,48 +4,76 @@ const CalendarioEntrenamiento = require('../../models/entrenamientos/CalendarioE
 const mongoose = require('mongoose');
 const Atleta = require('../../models/ranking/Atleta');
 const GrupoEntrenamiento = require('../../models/entrenamientos/GrupoEntrenamiento');
-
+const User = require('../../models/User');
 
 // Obtener todos los calendarios de entrenamiento
 router.get('/', async (req, res) => {
     try {
-        const calendarios = await CalendarioEntrenamiento.find().populate('grupo_entrenamiento diasEntrenamiento');
+        const calendarios = await CalendarioEntrenamiento.find()
+            .populate('grupo_entrenamiento')
+            .populate({
+                path: 'diasEntrenamiento',
+                populate: {
+                    path: 'entrenamientos'
+                }
+            });
         res.json(calendarios);
     } catch (err) {
         res.status(500).json({ message: err.message });
     }
 });
 
-// Endpoint para obtener el grupo y calendario de un atleta
-router.get('/:atletaId', async (req, res) => {
-    const { atletaId } = req.params;
+// Endpoint para obtener el calendario de un grupo de entrenamiento
+router.get('/:grupoId', async (req, res) => {
+    const { grupoId } = req.params;
 
     try {
-        // 1. Busca el atleta para confirmar si tiene usuario asignado
-        const atleta = await Atleta.findById(atletaId).populate('usuario');
-        if (!atleta) return res.status(404).json({ message: 'Atleta no encontrado' });
+        // 1. Verificar que el grupo existe
+        const grupo = await GrupoEntrenamiento.findById(grupoId);
+        if (!grupo) {
+            return res.status(404).json({ message: 'Grupo de entrenamiento no encontrado' });
+        }
 
-        // 2. Encuentra el grupo de entrenamiento al que pertenece el atleta
-        const grupo = await GrupoEntrenamiento.findOne({ atletas: atleta._id });
-        if (!grupo) return res.status(404).json({ message: 'Grupo de entrenamiento no encontrado' });
+        // 2. Buscar el calendario asociado al grupo
+        let calendario = await CalendarioEntrenamiento.findOne({ grupo_entrenamiento: grupoId })
+            .populate({
+                path: 'diasEntrenamiento',
+                populate: {
+                    path: 'entrenamientos'
+                }
+            });
 
-        // 3. Busca el calendario de entrenamiento asociado al grupo
-        const calendario = await CalendarioEntrenamiento.findOne({ grupo_entrenamiento: grupo._id })
-            .populate('diasEntrenamiento') || { diasEntrenamiento: [] }; // Si no existe, devuelve un array vacío
+        // 3. Si no existe el calendario, crear uno nuevo
+        if (!calendario) {
+            calendario = await CalendarioEntrenamiento.create({
+                nombre_calendario: `Calendario de ${grupo.nombre_grupo}`,
+                grupo_entrenamiento: grupoId,
+                diasEntrenamiento: []
+            });
+        }
 
-        // 4. Devolver siempre un objeto calendario con diasEntrenamiento, aunque esté vacío
+        // 4. Devolver el grupo y el calendario
         res.status(200).json({ grupo, calendario });
     } catch (error) {
+        console.error('Error en calendariosEntrenamiento:', error);
         res.status(500).json({ message: error.message });
     }
 });
 
-
 // Obtener un calendario de entrenamiento por ID
-router.get('/:id', async (req, res) => {
+router.get('/calendario/:id', async (req, res) => {
     try {
-        const calendario = await CalendarioEntrenamiento.findById(req.params.id).populate('grupo_entrenamiento diasEntrenamiento');
-        if (!calendario) return res.status(404).json({ message: 'Calendario no encontrado' });
+        const calendario = await CalendarioEntrenamiento.findById(req.params.id)
+            .populate('grupo_entrenamiento')
+            .populate({
+                path: 'diasEntrenamiento',
+                populate: {
+                    path: 'entrenamientos'
+                }
+            });
+        if (!calendario) {
+            return res.status(404).json({ message: 'Calendario no encontrado' });
+        }
         res.json(calendario);
     } catch (err) {
         res.status(500).json({ message: err.message });
@@ -54,8 +82,8 @@ router.get('/:id', async (req, res) => {
 
 // Crear un nuevo calendario de entrenamiento
 router.post('/', async (req, res) => {
-    const calendario = new CalendarioEntrenamiento(req.body);
     try {
+        const calendario = new CalendarioEntrenamiento(req.body);
         const nuevoCalendario = await calendario.save();
         res.status(201).json(nuevoCalendario);
     } catch (err) {
@@ -66,8 +94,15 @@ router.post('/', async (req, res) => {
 // Actualizar un calendario de entrenamiento por ID
 router.put('/:id', async (req, res) => {
     try {
-        const calendario = await CalendarioEntrenamiento.findByIdAndUpdate(req.params.id, req.body, { new: true });
-        if (!calendario) return res.status(404).json({ message: 'Calendario no encontrado' });
+        const calendario = await CalendarioEntrenamiento.findByIdAndUpdate(
+            req.params.id,
+            req.body,
+            { new: true }
+        ).populate('grupo_entrenamiento diasEntrenamiento');
+        
+        if (!calendario) {
+            return res.status(404).json({ message: 'Calendario no encontrado' });
+        }
         res.json(calendario);
     } catch (err) {
         res.status(400).json({ message: err.message });
@@ -77,9 +112,20 @@ router.put('/:id', async (req, res) => {
 // Eliminar un calendario de entrenamiento por ID
 router.delete('/:id', async (req, res) => {
     try {
-        const calendario = await CalendarioEntrenamiento.findByIdAndDelete(req.params.id);
-        if (!calendario) return res.status(404).json({ message: 'Calendario no encontrado' });
-        res.json({ message: 'Calendario eliminado' });
+        const calendario = await CalendarioEntrenamiento.findById(req.params.id);
+        if (!calendario) {
+            return res.status(404).json({ message: 'Calendario no encontrado' });
+        }
+
+        // Eliminar todos los días de entrenamiento asociados
+        await DiaEntrenamiento.deleteMany({ 
+            _id: { $in: calendario.diasEntrenamiento } 
+        });
+
+        // Eliminar el calendario
+        await calendario.remove();
+        
+        res.json({ message: 'Calendario y días de entrenamiento eliminados' });
     } catch (err) {
         res.status(500).json({ message: err.message });
     }

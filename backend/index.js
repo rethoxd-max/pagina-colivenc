@@ -57,11 +57,11 @@ const sectorCompeticionRoutes = require('./routes/calendario/competiciones/secto
 const inscripcionesRoutes = require('./routes/calendario/inscripciones');
 const perfilAtletaRoutes = require('./routes/perfil-atleta');
 
-const calendarioEntrenamientoRoutes = require('./routes/entrenamientos/gruposEntrenamiento');
-const diaEntrenamientoRoutes = require('./routes/entrenamientos/diasEntrenamiento');
-const entrenamientoRoutes = require('./routes/entrenamientos/entrenamientos');
-const grupoEntrenamientoRoutes = require('./routes/entrenamientos/gruposEntrenamiento');
-
+// Rutas de entrenamiento
+const calendarioEntrenamientoRoutes = require('./routes/entrenamientos/calendariosEntrenamiento');
+const diasEntrenamientoRoutes = require('./routes/entrenamientos/diasEntrenamiento');
+const entrenamientosRoutes = require('./routes/entrenamientos/entrenamientos');
+const gruposEntrenamientoRoutes = require('./routes/entrenamientos/gruposEntrenamiento');
 
 app.use('/auth', authRoutes);
 app.use('/posts', postRoutes);
@@ -80,12 +80,11 @@ app.use('/sectoresCompeticion', sectorCompeticionRoutes);
 app.use('/inscripciones', inscripcionesRoutes);
 app.use('/perfil-atleta', perfilAtletaRoutes);
 
-app.use('/calendario-entrenamiento', calendarioEntrenamientoRoutes);
-app.use('/dia-entrenamiento', diaEntrenamientoRoutes);
-app.use('/entrenamiento', entrenamientoRoutes);
-app.use('/grupo-entrenamiento', grupoEntrenamientoRoutes);
-
-
+// Rutas de entrenamiento
+app.use('/calendarios-entrenamiento', calendarioEntrenamientoRoutes);
+app.use('/dias-entrenamiento', diasEntrenamientoRoutes);
+app.use('/entrenamientos', entrenamientosRoutes);
+app.use('/grupos-entrenamiento', gruposEntrenamientoRoutes);
 
 // Iniciar el servidor
 app.listen(PORT, () => {

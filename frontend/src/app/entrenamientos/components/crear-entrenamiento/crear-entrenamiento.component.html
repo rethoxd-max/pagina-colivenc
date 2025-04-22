@@ -1,31 +1,337 @@
+<div class="dialog-container">
+  <h2>Crear Entrenamiento</h2>
+  
 <form [formGroup]="entrenamientoForm" (ngSubmit)="onSubmit()">
-    <label for="tipo">Tipo de Entrenamiento:</label>
-    <select id="tipo" formControlName="tipo">
-        <option *ngFor="let tipo of tiposEntrenamiento" [value]="tipo">{{ tipo }}</option>
-    </select>
+    <mat-dialog-content>
+      <mat-form-field appearance="outline">
+        <mat-label>Tipo de Entrenamiento</mat-label>
+        <mat-select formControlName="tipo">
+          <mat-option *ngFor="let tipo of tiposEntrenamiento" [value]="tipo">
+            {{ tipo }}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
 
+      <!-- Técnica -->
     <div *ngIf="entrenamientoForm.get('tipo')?.value === 'Técnica'" formArrayName="tecnica">
-        <h3>Técnica</h3>
-        <div *ngFor="let item of tecnica.controls; let i = index" [formGroupName]="i">
-            <select formControlName="descripcion">
-                <option value="" disabled>Selecciona una técnica</option>
-                <option *ngFor="let tecnica of tecnicas" [value]="tecnica">{{ tecnica }}</option>
-            </select>
+        <div *ngFor="let item of getFormArray('tecnica').controls; let i = index" [formGroupName]="i">
+          <div class="form-field">
+            <mat-form-field appearance="outline">
+              <mat-label>Técnica</mat-label>
+              <input matInput formControlName="tecnica">
+            </mat-form-field>
+            <button mat-icon-button type="button" (click)="eliminarCampo('tecnica', i)">
+              <mat-icon>delete</mat-icon>
+            </button>
+          </div>
         </div>
-        <button type="button" (click)="addField('tecnica')">Añadir Técnica</button>
+        <button mat-button type="button" (click)="agregarCampo('tecnica')">
+          <mat-icon>add</mat-icon> Agregar Técnica
+        </button>
     </div>
 
-
+      <!-- Pesas -->
     <div *ngIf="entrenamientoForm.get('tipo')?.value === 'Pesas'" formArrayName="pesas">
-        <h3>Pesas</h3>
-        <div *ngFor="let pesasItem of pesas.controls; let i = index" [formGroupName]="i">
-            <input formControlName="series" placeholder="Series">
-            <input formControlName="repeticiones" placeholder="Repeticiones">
-            <input formControlName="porcentaje" placeholder="Porcentaje (%)">
-            <input formControlName="comentario" placeholder="Comentario">
+        <div *ngFor="let item of getFormArray('pesas').controls; let i = index" [formGroupName]="i">
+          <div class="form-field">
+            <mat-form-field appearance="outline">
+              <mat-label>Series</mat-label>
+              <input matInput formControlName="series">
+            </mat-form-field>
+            <mat-form-field appearance="outline">
+              <mat-label>Repeticiones</mat-label>
+              <input matInput formControlName="repeticiones">
+            </mat-form-field>
+            <mat-form-field appearance="outline">
+              <mat-label>Porcentaje</mat-label>
+              <input matInput formControlName="porcentaje">
+            </mat-form-field>
+            <mat-form-field appearance="outline">
+              <mat-label>Comentario</mat-label>
+              <input matInput formControlName="comentario">
+            </mat-form-field>
+            <button mat-icon-button type="button" (click)="eliminarCampo('pesas', i)">
+              <mat-icon>delete</mat-icon>
+            </button>
+          </div>
         </div>
-        <button type="button" (click)="addField('pesas')">Añadir Pesas</button>
+        <button mat-button type="button" (click)="agregarCampo('pesas')">
+          <mat-icon>add</mat-icon> Agregar Ejercicio
+        </button>
+      </div>
+
+      <!-- Series -->
+      <div *ngIf="entrenamientoForm.get('tipo')?.value === 'Series'" formArrayName="serie">
+        <div *ngFor="let item of getFormArray('serie').controls; let i = index" [formGroupName]="i">
+          <div class="form-field">
+            <mat-form-field appearance="outline">
+              <mat-label>Número de Series</mat-label>
+              <input matInput formControlName="numeroSeries">
+            </mat-form-field>
+            <mat-form-field appearance="outline">
+              <mat-label>Metros</mat-label>
+              <input matInput formControlName="metros">
+            </mat-form-field>
+            <mat-form-field appearance="outline">
+              <mat-label>Recuperación</mat-label>
+              <input matInput formControlName="recuperacion">
+            </mat-form-field>
+            <mat-form-field appearance="outline">
+              <mat-label>Tiempo Objetivo</mat-label>
+              <input matInput formControlName="tiempoObjetivo">
+            </mat-form-field>
+            <mat-form-field appearance="outline">
+              <mat-label>Comentario</mat-label>
+              <input matInput formControlName="comentario">
+            </mat-form-field>
+            <button mat-icon-button type="button" (click)="eliminarCampo('serie', i)">
+              <mat-icon>delete</mat-icon>
+            </button>
+          </div>
+        </div>
+        <button mat-button type="button" (click)="agregarCampo('serie')">
+          <mat-icon>add</mat-icon> Agregar Serie
+        </button>
+      </div>
+
+      <!-- Velocidad -->
+      <div *ngIf="entrenamientoForm.get('tipo')?.value === 'Velocidad'" formArrayName="velocidad">
+        <div *ngFor="let item of getFormArray('velocidad').controls; let i = index" [formGroupName]="i">
+          <div class="form-field">
+            <mat-form-field appearance="outline">
+              <mat-label>Número de Series</mat-label>
+              <input matInput formControlName="numeroSeries">
+            </mat-form-field>
+            <mat-form-field appearance="outline">
+              <mat-label>Metros</mat-label>
+              <input matInput formControlName="metros">
+            </mat-form-field>
+            <mat-form-field appearance="outline">
+              <mat-label>Recuperación</mat-label>
+              <input matInput formControlName="recuperacion">
+            </mat-form-field>
+            <mat-form-field appearance="outline">
+              <mat-label>Porcentaje</mat-label>
+              <input matInput formControlName="porcentaje">
+            </mat-form-field>
+            <mat-form-field appearance="outline">
+              <mat-label>Comentario</mat-label>
+              <input matInput formControlName="comentario">
+            </mat-form-field>
+            <button mat-icon-button type="button" (click)="eliminarCampo('velocidad', i)">
+              <mat-icon>delete</mat-icon>
+            </button>
+          </div>
+        </div>
+        <button mat-button type="button" (click)="agregarCampo('velocidad')">
+          <mat-icon>add</mat-icon> Agregar Ejercicio
+        </button>
+      </div>
+
+      <!-- Vallas -->
+      <div *ngIf="entrenamientoForm.get('tipo')?.value === 'Vallas'" formArrayName="vallas">
+        <div *ngFor="let item of getFormArray('vallas').controls; let i = index" [formGroupName]="i">
+          <div class="form-field">
+            <mat-form-field appearance="outline">
+              <mat-label>Número de Series</mat-label>
+              <input matInput formControlName="numeroSeries">
+            </mat-form-field>
+            <mat-form-field appearance="outline">
+              <mat-label>Número de Vallas</mat-label>
+              <input matInput formControlName="numeroVallas">
+            </mat-form-field>
+            <mat-form-field appearance="outline">
+              <mat-label>Recuperación</mat-label>
+              <input matInput formControlName="recuperacion">
+            </mat-form-field>
+            <mat-form-field appearance="outline">
+              <mat-label>Comentario</mat-label>
+              <input matInput formControlName="comentario">
+            </mat-form-field>
+            <button mat-icon-button type="button" (click)="eliminarCampo('vallas', i)">
+              <mat-icon>delete</mat-icon>
+            </button>
+          </div>
+        </div>
+        <button mat-button type="button" (click)="agregarCampo('vallas')">
+          <mat-icon>add</mat-icon> Agregar Ejercicio
+        </button>
+      </div>
+
+      <!-- Multisaltos -->
+      <div *ngIf="entrenamientoForm.get('tipo')?.value === 'Multisaltos'" formArrayName="multisaltos">
+        <div *ngFor="let item of getFormArray('multisaltos').controls; let i = index" [formGroupName]="i">
+          <div class="form-field">
+            <mat-form-field appearance="outline">
+              <mat-label>Número de Saltos</mat-label>
+              <input matInput formControlName="numeroSaltos">
+            </mat-form-field>
+            <mat-form-field appearance="outline">
+              <mat-label>Tipo</mat-label>
+              <mat-select formControlName="tipo">
+                <mat-option *ngFor="let tipo of tiposMultisaltos" [value]="tipo">
+                  {{ tipo }}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+            <mat-form-field appearance="outline">
+              <mat-label>Comentario</mat-label>
+              <input matInput formControlName="comentario">
+            </mat-form-field>
+            <button mat-icon-button type="button" (click)="eliminarCampo('multisaltos', i)">
+              <mat-icon>delete</mat-icon>
+            </button>
+          </div>
+        </div>
+        <button mat-button type="button" (click)="agregarCampo('multisaltos')">
+          <mat-icon>add</mat-icon> Agregar Ejercicio
+        </button>
+      </div>
+
+      <!-- Multilanzamientos -->
+      <div *ngIf="entrenamientoForm.get('tipo')?.value === 'Multilanzamientos'" formArrayName="multilanzamientos">
+        <div *ngFor="let item of getFormArray('multilanzamientos').controls; let i = index" [formGroupName]="i">
+          <div class="form-field">
+            <mat-form-field appearance="outline">
+              <mat-label>Número de Lanzamientos</mat-label>
+              <input matInput formControlName="numeroLanzamientos">
+            </mat-form-field>
+            <mat-form-field appearance="outline">
+              <mat-label>Tipo</mat-label>
+              <mat-select formControlName="tipo">
+                <mat-option *ngFor="let tipo of tiposMultilanzamientos" [value]="tipo">
+                  {{ tipo }}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+            <mat-form-field appearance="outline">
+              <mat-label>Comentario</mat-label>
+              <input matInput formControlName="comentario">
+            </mat-form-field>
+            <button mat-icon-button type="button" (click)="eliminarCampo('multilanzamientos', i)">
+              <mat-icon>delete</mat-icon>
+            </button>
+          </div>
+        </div>
+        <button mat-button type="button" (click)="agregarCampo('multilanzamientos')">
+          <mat-icon>add</mat-icon> Agregar Ejercicio
+        </button>
+      </div>
+
+      <!-- Rodaje -->
+      <div *ngIf="entrenamientoForm.get('tipo')?.value === 'Rodaje'" formGroupName="rodaje">
+        <div class="form-field">
+          <mat-form-field appearance="outline">
+            <mat-label>Tiempo</mat-label>
+            <input matInput formControlName="tiempo">
+          </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>Comentario</mat-label>
+            <input matInput formControlName="comentario">
+          </mat-form-field>
+        </div>
+      </div>
+
+      <!-- Cuestas -->
+      <div *ngIf="entrenamientoForm.get('tipo')?.value === 'Cuestas'" formArrayName="cuestas">
+        <div *ngFor="let item of getFormArray('cuestas').controls; let i = index" [formGroupName]="i">
+          <div class="form-field">
+            <mat-form-field appearance="outline">
+              <mat-label>Número de Cuestas</mat-label>
+              <input matInput formControlName="numeroCuestas">
+            </mat-form-field>
+            <mat-form-field appearance="outline">
+              <mat-label>Metros</mat-label>
+              <input matInput formControlName="metros">
+            </mat-form-field>
+            <mat-form-field appearance="outline">
+              <mat-label>Recuperación</mat-label>
+              <input matInput formControlName="recuperacion">
+            </mat-form-field>
+            <mat-form-field appearance="outline">
+              <mat-label>Comentario</mat-label>
+              <input matInput formControlName="comentario">
+            </mat-form-field>
+            <button mat-icon-button type="button" (click)="eliminarCampo('cuestas', i)">
+              <mat-icon>delete</mat-icon>
+            </button>
+          </div>
+        </div>
+        <button mat-button type="button" (click)="agregarCampo('cuestas')">
+          <mat-icon>add</mat-icon> Agregar Ejercicio
+        </button>
+      </div>
+
+      <!-- Lastre -->
+      <div *ngIf="entrenamientoForm.get('tipo')?.value === 'Lastre'" formArrayName="lastre">
+        <div *ngFor="let item of getFormArray('lastre').controls; let i = index" [formGroupName]="i">
+          <div class="form-field">
+            <mat-form-field appearance="outline">
+              <mat-label>Número de Series</mat-label>
+              <input matInput formControlName="numeroSeries">
+            </mat-form-field>
+            <mat-form-field appearance="outline">
+              <mat-label>Metros</mat-label>
+              <input matInput formControlName="metros">
+            </mat-form-field>
+            <mat-form-field appearance="outline">
+              <mat-label>Kilos</mat-label>
+              <input matInput formControlName="kilos">
+            </mat-form-field>
+            <mat-form-field appearance="outline">
+              <mat-label>Recuperación</mat-label>
+              <input matInput formControlName="recuperacion">
+            </mat-form-field>
+            <mat-form-field appearance="outline">
+              <mat-label>Comentario</mat-label>
+              <input matInput formControlName="comentario">
+            </mat-form-field>
+            <button mat-icon-button type="button" (click)="eliminarCampo('lastre', i)">
+              <mat-icon>delete</mat-icon>
+            </button>
+          </div>
+        </div>
+        <button mat-button type="button" (click)="agregarCampo('lastre')">
+          <mat-icon>add</mat-icon> Agregar Ejercicio
+        </button>
+      </div>
+
+      <!-- Extras -->
+      <div *ngIf="entrenamientoForm.get('tipo')?.value === 'Extras'" formArrayName="extras">
+        <div *ngFor="let item of getFormArray('extras').controls; let i = index" [formGroupName]="i">
+          <div class="form-field">
+            <mat-form-field appearance="outline">
+              <mat-label>Comentario</mat-label>
+              <input matInput formControlName="comentario">
+            </mat-form-field>
+            <button mat-icon-button type="button" (click)="eliminarCampo('extras', i)">
+              <mat-icon>delete</mat-icon>
+            </button>
+          </div>
+        </div>
+        <button mat-button type="button" (click)="agregarCampo('extras')">
+          <mat-icon>add</mat-icon> Agregar Comentario
+        </button>
+      </div>
+
+      <!-- Competición -->
+      <div *ngIf="entrenamientoForm.get('tipo')?.value === 'Competición'">
+        <mat-form-field appearance="outline">
+          <mat-label>Competición</mat-label>
+          <input type="text" matInput [matAutocomplete]="auto" [formControl]="competicionControl">
+          <mat-autocomplete #auto="matAutocomplete" [displayWith]="displayCompeticion">
+            <mat-option *ngFor="let competicion of filteredCompeticiones | async" [value]="competicion" (click)="selectCompeticion(competicion)">
+              {{ competicion.nombre }} - {{ competicion.lugar }}
+            </mat-option>
+          </mat-autocomplete>
+        </mat-form-field>
     </div>
 
-    <button type="submit" [disabled]="!entrenamientoForm.valid">Guardar Entrenamiento</button>
+    </mat-dialog-content>
+
+    <mat-dialog-actions align="end">
+      <button mat-button type="button" (click)="onCancel()">Cancelar</button>
+      <button mat-raised-button color="primary" type="submit" [disabled]="!entrenamientoForm.valid">Guardar</button>
+    </mat-dialog-actions>
 </form>
+</div>

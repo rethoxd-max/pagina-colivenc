@@ -11,6 +11,7 @@ import { PerfilAtletaService } from './ranking/services/perfil-atleta.service';
   templateUrl: './app.component.html',
 })
 export class AppComponent implements OnInit {
+  title = 'pagina-colivenc';
   isLoggedIn: boolean = false;  // Variable para almacenar el estado de autenticación
   atletaId: string | null = null; // Variable para almacenar el ID del atleta
 

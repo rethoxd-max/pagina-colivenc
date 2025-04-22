@@ -61,15 +61,21 @@ router.get('/pruebas/atleta/:atletaId/anyo/:anyo', async (req, res) => {
             return res.status(400).json({ message: 'ID de atleta no válido.' });
         }
 
+        // Validar y convertir el año a número
+        const anyoNumero = parseInt(anyo);
+        if (isNaN(anyoNumero)) {
+            return res.status(400).json({ message: 'El año debe ser un número válido.' });
+        }
+
         // Buscar todas las marcas del atleta en el año especificado y obtener las pruebas junto con su sector
         const marcas = await Marca.find({
             nombre_atleta: new mongoose.Types.ObjectId(atletaId),
-            anyo: anyo
+            anyo: anyoNumero
         }).populate({
             path: 'nombre_prueba',
             populate: {
                 path: 'sector_id',
-                model: 'Sector'  // Asegúrate de que 'Sector' sea el modelo correcto del esquema
+                model: 'Sector'
             }
         }).lean();
 

@@ -11,3 +11,151 @@ li {
     padding: 8px;
     border-bottom: 1px solid #ddd;
 }
+
+/* Estilos generales */
+.container {
+    padding: 8px;
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+}
+
+h1 {
+    font-size: 16px;
+    font-weight: 600;
+    color: #333;
+    margin: 0;
+}
+
+.btn-new {
+    background: #2563eb;
+    color: white;
+    border: none;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.btn-new:hover {
+    background: #1d4ed8;
+}
+
+.groups-list {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.group-item {
+    background: white;
+    padding: 8px;
+    border-radius: 4px;
+    border: 1px solid #e5e7eb;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.group-item:hover {
+    background: #f8fafc;
+}
+
+.group-info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.group-name {
+    font-size: 13px;
+    font-weight: 500;
+    color: #111827;
+}
+
+.group-trainer {
+    font-size: 11px;
+    color: #6b7280;
+}
+
+.view-btn {
+    color: #2563eb;
+    font-size: 14px;
+}
+
+.no-data {
+    text-align: center;
+    padding: 12px;
+    background: #f9fafb;
+    border-radius: 4px;
+    margin-top: 8px;
+}
+
+.no-data p {
+    font-size: 13px;
+    color: #6b7280;
+    margin: 0;
+}
+
+/* Animaciones */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(3px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Aplicar animación a las tarjetas */
+.space-y-2 > div {
+    animation: fadeIn 0.15s ease-out forwards;
+}
+
+/* Estilos para las tarjetas de grupo */
+.space-y-2 > div {
+    transition: all 0.15s ease;
+}
+
+.space-y-2 > div:hover {
+    background-color: #f8fafc;
+    transform: translateX(3px);
+}
+
+/* Estilos para el botón de crear grupo */
+button {
+    transition: all 0.15s ease;
+}
+
+button:hover {
+    transform: translateY(-1px);
+}
+
+/* Estilos para el mensaje de no datos */
+.text-center {
+    animation: fadeIn 0.2s ease-out;
+    background-color: #ffffff;
+    border: 1px solid #e5e7eb;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .container {
+        padding: 0.75rem;
+    }
+    
+    h1 {
+        font-size: 1.25rem;
+    }
+    
+    h2 {
+        font-size: 1rem;
+    }
+}

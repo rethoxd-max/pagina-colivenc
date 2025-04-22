@@ -2,7 +2,15 @@ const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
 const diaEntrenamientoSchema = new Schema({
-    fecha: Date,
+    fecha: {
+        type: Date,
+        required: true
+    },
+    calendario_entrenamiento: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'CalendarioEntrenamiento',
+        required: true
+    },
     entrenamientos: [
         {
             type: mongoose.Schema.Types.ObjectId,
@@ -10,6 +18,5 @@ const diaEntrenamientoSchema = new Schema({
         }
     ],
 });
-
 
 module.exports = mongoose.model('DiaEntrenamiento', diaEntrenamientoSchema);

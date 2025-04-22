@@ -8,7 +8,7 @@ const entrenamientoSchema = new mongoose.Schema({
     },
     tipo: {
         type: String,
-        enum: ['Técnica', 'Pesas', 'Series', 'Velocidad', 'Vallas', 'Multisaltos', 'Multilanzamientos', 'Rodaje', 'Cuestas', 'Lastre', 'Extras', 'Test'],
+        enum: ['Técnica', 'Pesas', 'Series', 'Velocidad', 'Vallas', 'Multisaltos', 'Multilanzamientos', 'Rodaje', 'Cuestas', 'Lastre', 'Extras', 'Test', 'Competición'],
         required: true
     },
     tecnica: [{
@@ -85,7 +85,14 @@ const entrenamientoSchema = new mongoose.Schema({
 
     extras: [{
         comentario: String
-    }]
+    }],
+
+    competicion: {
+        nombre: String,
+        fecha: Date,
+        lugar: String,
+        competicionId: String
+    }
 });
 
 module.exports = mongoose.model('Entrenamiento', entrenamientoSchema);
