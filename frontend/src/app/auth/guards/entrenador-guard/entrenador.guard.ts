@@ -9,7 +9,7 @@ export const entrenadorGuard: CanActivateFn = (route, state) => {
   if (authService.isEntrenador()) {
     return true; // El usuario es admin, permite el acceso
   } else {
-    router.navigate(['/posts']); // Redirige al login si no es admin
+    router.navigate(['/home']); // Redirige al login si no es admin
     return false; // Bloquea el acceso
   }
 };

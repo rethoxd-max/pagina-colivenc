@@ -1047,3 +1047,566 @@
 .cancel-button:hover {
     background-color: #5a6268;
 }
+
+.calendar-wrapper {
+    display: flex;
+    gap: 2rem;
+    padding: 2rem;
+    min-height: 100vh;
+    background-color: #f5f7fa;
+}
+
+.filters-panel {
+    width: 350px;
+    background: white;
+    padding: 1.5rem;
+    border-radius: 12px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    height: fit-content;
+    position: sticky;
+    top: 2rem;
+}
+
+.filters-panel h3 {
+    color: #2c3e50;
+    margin-bottom: 1.5rem;
+    font-size: 1.5rem;
+    font-weight: 600;
+    padding-bottom: 0.75rem;
+    border-bottom: 2px solid #e2e8f0;
+}
+
+.filters-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.filter-section {
+    background: #f8fafc;
+    padding: 1.25rem;
+    border-radius: 8px;
+    border: 1px solid #e2e8f0;
+    transition: all 0.3s ease;
+}
+
+.filter-section:hover {
+    border-color: #cbd5e1;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.form-group {
+    margin-bottom: 1rem;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    color: #4a5568;
+    font-weight: 500;
+    font-size: 0.9rem;
+}
+
+.form-control {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    font-size: 0.95rem;
+    transition: all 0.3s ease;
+    background-color: white;
+}
+
+.form-control:focus {
+    outline: none;
+    border-color: #4299e1;
+    box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.1);
+}
+
+.form-control::placeholder {
+    color: #a0aec0;
+}
+
+.form-actions {
+    display: flex;
+    gap: 1rem;
+    margin-top: 1.5rem;
+}
+
+.apply-button, .clear-button {
+    flex: 1;
+    padding: 0.75rem;
+    border: none;
+    border-radius: 6px;
+    font-weight: 500;
+    font-size: 0.95rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+.apply-button {
+    background-color: #4299e1;
+    color: white;
+}
+
+.clear-button {
+    background-color: #edf2f7;
+    color: #4a5568;
+}
+
+.apply-button:hover {
+    background-color: #3182ce;
+    transform: translateY(-1px);
+}
+
+.clear-button:hover {
+    background-color: #e2e8f0;
+    transform: translateY(-1px);
+}
+
+.filter-results {
+    margin-top: 2rem;
+    background: white;
+    border-radius: 8px;
+    padding: 1.25rem;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.filter-results h4 {
+    color: #2c3e50;
+    margin-bottom: 1rem;
+    font-size: 1.1rem;
+    font-weight: 600;
+}
+
+.results-container {
+    max-height: 400px;
+    overflow-y: auto;
+    padding-right: 0.5rem;
+}
+
+.result-card {
+    background: #f8fafc;
+    border-radius: 8px;
+    padding: 1rem;
+    margin-bottom: 1rem;
+    border: 1px solid #e2e8f0;
+    transition: all 0.3s ease;
+}
+
+.result-card:hover {
+    border-color: #cbd5e1;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    transform: translateY(-1px);
+}
+
+.result-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.75rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.day-name {
+    font-weight: 600;
+    color: #2c3e50;
+}
+
+.day-date {
+    color: #718096;
+    font-size: 0.9rem;
+}
+
+.result-content {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.result-content .training-item {
+    background: white;
+    padding: 0.75rem;
+    border-radius: 6px;
+    border: 1px solid #e2e8f0;
+}
+
+.result-content .training-type {
+    font-weight: 600;
+    color: #4299e1;
+    margin-bottom: 0.5rem;
+    font-size: 0.95rem;
+}
+
+.result-content .training-details {
+    color: #4a5568;
+    font-size: 0.9rem;
+}
+
+.result-content .training-details ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.result-content .training-details li {
+    padding: 0.25rem 0;
+}
+
+.result-content .training-details p {
+    margin: 0.25rem 0;
+}
+
+/* Estilos para la barra de desplazamiento */
+.results-container::-webkit-scrollbar {
+    width: 6px;
+}
+
+.results-container::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 3px;
+}
+
+.results-container::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 3px;
+}
+
+.results-container::-webkit-scrollbar-thumb:hover {
+    background: #a0aec0;
+}
+
+/* Estilos para el select de tipo de entrenamiento */
+select.form-control {
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%234a5568' d='M6 8.825L1.175 4 2.238 2.938 6 6.7l3.763-3.762L10.825 4z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 0.75rem center;
+    padding-right: 2rem;
+}
+
+/* Estilos responsivos */
+@media (max-width: 768px) {
+    .calendar-wrapper {
+        flex-direction: column;
+        padding: 1rem;
+    }
+
+    .filters-panel {
+        width: 100%;
+        position: relative;
+        top: 0;
+    }
+}
+
+/* Estilos para el buscador de competiciones */
+.competicion-search {
+  margin-bottom: 20px;
+}
+
+.competicion-list {
+  max-height: 300px;
+  overflow-y: auto;
+  margin-top: 10px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.competicion-item {
+  padding: 10px;
+  border-bottom: 1px solid #eee;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.competicion-item:hover {
+  background-color: #f5f5f5;
+}
+
+.competicion-item.selected {
+  background-color: #e3f2fd;
+}
+
+.competicion-name {
+  font-weight: bold;
+  margin-bottom: 5px;
+}
+
+.competicion-details {
+  display: flex;
+  justify-content: space-between;
+  color: #666;
+  font-size: 0.9em;
+}
+
+.competicion-date {
+  margin-right: 10px;
+}
+
+.no-results {
+  padding: 10px;
+  text-align: center;
+  color: #666;
+  font-style: italic;
+}
+
+.selected-competicion {
+  margin-top: 20px;
+  padding: 15px;
+  background-color: #f8f9fa;
+  border-radius: 4px;
+}
+
+.competicion-info {
+  margin-top: 10px;
+}
+
+.competicion-info p {
+  margin: 5px 0;
+}
+
+/* Estilos para los botones de resultados */
+.add-result-button,
+.view-results-button {
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-left: 8px;
+}
+
+.add-result-button:hover,
+.view-results-button:hover {
+    background-color: #45a049;
+}
+
+/* Estilos para los modales de resultados */
+.result-modal,
+.results-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.result-modal .modal-content,
+.results-modal .modal-content {
+    background-color: white;
+    border-radius: 8px;
+    width: 90%;
+    max-width: 500px;
+    max-height: 90vh;
+    overflow-y: auto;
+}
+
+.result-modal .modal-header,
+.results-modal .modal-header {
+    padding: 16px;
+    border-bottom: 1px solid #eee;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.result-modal .modal-body,
+.results-modal .modal-body {
+    padding: 16px;
+}
+
+.result-modal .modal-footer,
+.results-modal .modal-footer {
+    padding: 16px;
+    border-top: 1px solid #eee;
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+}
+
+/* Estilos para la lista de resultados */
+.results-list {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.result-item {
+    background-color: #f5f5f5;
+    border-radius: 4px;
+    padding: 12px;
+}
+
+.result-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+.atleta-name {
+    font-weight: bold;
+    color: #333;
+}
+
+.result-date {
+    color: #666;
+    font-size: 0.9em;
+}
+
+.result-content {
+    color: #444;
+    white-space: pre-wrap;
+}
+
+.no-results {
+    text-align: center;
+    color: #666;
+    padding: 32px;
+}
+
+/* Estilos para el textarea de resultado */
+textarea.form-control {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    resize: vertical;
+    min-height: 100px;
+}
+
+/* Estilos para los botones del modal */
+.save-button,
+.cancel-button {
+    padding: 8px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.save-button {
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+}
+
+.save-button:hover {
+    background-color: #45a049;
+}
+
+.save-button:disabled {
+    background-color: #cccccc;
+    cursor: not-allowed;
+}
+
+.cancel-button {
+    background-color: #f44336;
+    color: white;
+    border: none;
+}
+
+.cancel-button:hover {
+    background-color: #da190b;
+}
+
+.mi-resultado {
+  margin-top: 15px;
+  padding: 12px;
+  background-color: #f3f6fc;
+  border-left: 4px solid #3498db;
+  border-radius: 4px;
+}
+
+.mi-resultado h5 {
+  color: #2c3e50;
+  margin: 0 0 8px 0;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.resultado-content {
+  color: #34495e;
+  font-size: 14px;
+  white-space: pre-line;
+  line-height: 1.5;
+}
+
+/* Estilos para los resultados de búsqueda */
+.result-card {
+  background: white;
+  border-radius: 8px;
+  padding: 15px;
+  margin-bottom: 15px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+}
+
+.result-card:hover {
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+  transform: translateY(-2px);
+}
+
+.result-header {
+  display: flex;
+  justify-content: space-between;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #e0e0e0;
+  margin-bottom: 10px;
+}
+
+.day-name {
+  font-weight: 600;
+  color: #2c3e50;
+  text-transform: capitalize;
+}
+
+.day-date {
+  color: #7f8c8d;
+}
+
+.training-item {
+  margin-bottom: 12px;
+  padding-bottom: 12px;
+  border-bottom: 1px dashed #e0e0e0;
+}
+
+.training-item:last-child {
+  margin-bottom: 0;
+  padding-bottom: 0;
+  border-bottom: none;
+}
+
+.training-type {
+  font-weight: 600;
+  color: #3498db;
+  margin-bottom: 8px;
+}
+
+.training-details ul {
+  margin: 0;
+  padding-left: 20px;
+}
+
+.training-details li {
+  margin-bottom: 5px;
+}
+
+.training-details p {
+  margin: 5px 0;
+}

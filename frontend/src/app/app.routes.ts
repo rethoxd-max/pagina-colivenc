@@ -22,6 +22,7 @@ import { EntrenamientosComponent } from './entrenamientos/components/entrenamien
 import { CrearGrupoEntrenamientoComponent } from './entrenamientos/components/crear-grupo-entrenamiento/crear-grupo-entrenamiento.component';
 import { CalendarioEntrenamientoComponent } from './entrenamientos/components/calendario-entrenamiento/calendario-entrenamiento.component';
 import { CrearEntrenamientoComponent } from './entrenamientos/components/crear-entrenamiento/crear-entrenamiento.component';
+import { EditarGrupoComponent } from './entrenamientos/components/editar-grupo/editar-grupo.component';
 import { HomeComponent } from './home/home.component';
 import { CreateDatosCompeticionesComponent } from './calendario/components/create-datos-competiciones/create-datos-competiciones.component';
 import { BuscadorAtletasComponent } from './buscador-atletas/buscador-atletas.component';
@@ -30,7 +31,7 @@ import { PostDetailComponent } from './posts/components/post-detail/post-detail.
 export const routes: Routes = [
     { path: 'home', component: HomeComponent },
     { path: 'login', component: LoginComponent },
-    { path: 'register', component: RegisterComponent },
+    { path: 'register', component: RegisterComponent, canActivate: [AuthGuard, adminGuard] },
     
     // Rutas de posts/noticias
     { path: 'noticias', component: PostListComponent },
@@ -64,8 +65,9 @@ export const routes: Routes = [
     { path: 'entrenamientos', component: EntrenamientosComponent, canActivate: [AuthGuard] },
     { path: 'calendario/:atletaId', component: CalendarioEntrenamientoComponent, canActivate: [AuthGuard] },
     { path: 'crear-grupo', component: CrearGrupoEntrenamientoComponent, canActivate: [AuthGuard, entrenadorGuard] },
+    { path: 'editar-grupo/:id', component: EditarGrupoComponent, canActivate: [AuthGuard, entrenadorGuard] },
     { path: 'crear-entrenamiento/:diaEntrenamientoId', component: CrearEntrenamientoComponent, canActivate: [AuthGuard, entrenadorGuard] },
     
     // Ruta por defecto
-    { path: '', redirectTo: '/ranking/create-performance', pathMatch: 'full' }
+    { path: '', redirectTo: '/home', pathMatch: 'full' }
 ];

@@ -1,14 +1,26 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Observable, BehaviorSubject, catchError, map, of, tap } from 'rxjs';
 import { environment } from '../../../environments/environment.development';
 import { CalendarioEntrenamientoComponent } from '../components/calendario-entrenamiento/calendario-entrenamiento.component';
+import { AuthService } from '../../auth/services/auth.service';
 
 export interface GrupoEntrenamiento {
   _id: string;
   nombre_grupo: string;
-  entrenador: string;
-  atletas: string[];
+  entrenador: {
+    _id: string;
+    name: string;
+  };
+  atletas: Array<{
+    _id: string;
+    nombre: string;
+    fecha_nacimiento: Date;
+    usuario?: {
+      _id: string;
+      name: string;
+    };
+  }>;
 }
 
 export interface DiaEntrenamiento {
@@ -102,29 +114,69 @@ export interface Entrenamiento {
   };
 }
 
+export interface ResultadoEntrenamiento {
+  _id?: string;
+  entrenamiento: string;
+  atleta: {
+    _id: string;
+    usuario: string;
+    nombre: string;
+    apellidos: string;
+  };
+  resultado: string;
+  fecha: Date;
+}
+
 @Injectable({
   providedIn: 'root'
 })
 export class EntrenamientosService {
   private apiUrl = `${environment.apiUrl}`;
+  private authService = inject(AuthService);
+  private currentUserIdSubject = new BehaviorSubject<string | null>(this.authService.getUserId());
 
-  constructor(private http: HttpClient) { }
+  constructor(private http: HttpClient) {
+    // Suscribirse a cambios en la autenticación
+    this.authService.getIsLoggedIn().subscribe(isLoggedIn => {
+      if (isLoggedIn) {
+        this.currentUserIdSubject.next(this.authService.getUserId());
+      } else {
+        this.currentUserIdSubject.next(null);
+      }
+    });
+  }
+
+  // Método para obtener el ID del usuario actual
+  getCurrentUserId(): string | null {
+    return this.currentUserIdSubject.value;
+  }
 
   getGruposEntrenamiento(atletaId: string): Observable<GrupoEntrenamiento[]> {
     return this.http.get<GrupoEntrenamiento[]>(`${this.apiUrl}/grupos-entrenamiento/atleta/${atletaId}`);
   }
 
-  getGrupoEntrenamientoById(grupoEntrenamientoId: string): Observable<GrupoEntrenamiento> {
-    return this.http.get<GrupoEntrenamiento>(`${this.apiUrl}/grupos-entrenamiento/${grupoEntrenamientoId}`);
+  getGruposEntrenamientoByEntrenador(entrenadorId: string): Observable<GrupoEntrenamiento[]> {
+    return this.http.get<GrupoEntrenamiento[]>(`${this.apiUrl}/grupos-entrenamiento/entrenador/${entrenadorId}`);
+  }
+
+  getGrupoEntrenamiento(grupoId: string): Observable<GrupoEntrenamiento> {
+    return this.http.get<GrupoEntrenamiento>(`${this.apiUrl}/grupos-entrenamiento/${grupoId}`);
   }
 
   createGrupoEntrenamiento(grupo: GrupoEntrenamiento): Observable<GrupoEntrenamiento> {
     return this.http.post<GrupoEntrenamiento>(`${this.apiUrl}/grupos-entrenamiento`, grupo);
   }
 
-  updateGrupoEntrenamiento(grupo: GrupoEntrenamiento): Observable<GrupoEntrenamiento> {
-    const grupoId = grupo._id;
-    return this.http.put<GrupoEntrenamiento>(`${this.apiUrl}/grupos-entrenamiento/${grupoId}`, grupo);
+  actualizarGrupo(grupoId: string, datos: { nombre_grupo: string }): Observable<GrupoEntrenamiento> {
+    return this.http.put<GrupoEntrenamiento>(`${this.apiUrl}/grupos-entrenamiento/${grupoId}`, datos);
+  }
+
+  agregarAtletaAlGrupo(grupoId: string, atletaId: string): Observable<GrupoEntrenamiento> {
+    return this.http.post<GrupoEntrenamiento>(`${this.apiUrl}/grupos-entrenamiento/${grupoId}/atletas`, { atletaId });
+  }
+
+  eliminarAtletaDelGrupo(grupoId: string, atletaId: string): Observable<GrupoEntrenamiento> {
+    return this.http.delete<GrupoEntrenamiento>(`${this.apiUrl}/grupos-entrenamiento/${grupoId}/atletas/${atletaId}`);
   }
 
   getCalendarioPorAtleta(atletaId: string): Observable<any> {
@@ -223,5 +275,59 @@ export class EntrenamientosService {
         break;
     }
     return '';
+  }
+
+  addResultado(entrenamientoId: string, atletaId: string, resultado: string): Observable<any> {
+    // Utilizar el ID del usuario actual si está disponible
+    const userId = this.getCurrentUserId();
+    if (userId && (!atletaId || atletaId === 'current')) {
+      atletaId = userId;
+    }
+
+    const resultadoData = {
+      atletaId: atletaId,
+      resultado
+    };
+
+    // Usar la ruta correcta del backend: /entrenamientos/:id/resultados
+    return this.http.post<any>(`${this.apiUrl}/entrenamientos/${entrenamientoId}/resultados`, resultadoData)
+      .pipe(
+        tap(response => {
+          console.log('Resultado guardado correctamente:', response);
+        }),
+        catchError(error => {
+          console.error('Error al guardar resultado:', error);
+          throw error;
+        })
+      );
+  }
+
+  getResultados(entrenamientoId: string): Observable<any[]> {
+    // Usar la ruta correcta del backend: /entrenamientos/:id/resultados
+    return this.http.get<any[]>(`${this.apiUrl}/entrenamientos/${entrenamientoId}/resultados`)
+      .pipe(
+        catchError(error => {
+          console.error('Error al obtener resultados:', error);
+          return of([]);
+        }),
+        map(resultados => {
+          // Verificar si hay algún resultado para el usuario actual
+          const currentUserId = this.getCurrentUserId();
+          console.log(`Verificando resultados para el usuario: ${currentUserId}`);
+          if (currentUserId) {
+            const miResultado = resultados.find(r => {
+              // La estructura del resultado es diferente en el backend
+              // r.atleta es un ObjectId, no un objeto
+              const atletaMatch = r.atleta && (
+                (r.atleta.usuario && r.atleta.usuario === currentUserId) || 
+                (typeof r.atleta === 'string' && r.atleta === currentUserId)
+              );
+              return atletaMatch;
+            });
+            console.log(`Resultado encontrado:`, miResultado);
+          }
+          return resultados;
+        })
+      );
   }
 }

@@ -9,7 +9,7 @@ export const adminGuard: CanActivateFn = () => {
   if (authService.isAdmin()) {
     return true; // El usuario es admin, permite el acceso
   } else {
-    router.navigate(['/posts']); // Redirige al login si no es admin
+    router.navigate(['/home']); // Redirige al login si no es admin
     return false; // Bloquea el acceso
   }
 };

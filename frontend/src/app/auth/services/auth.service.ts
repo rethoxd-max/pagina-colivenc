@@ -1,7 +1,8 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable } from 'rxjs';
-
+import { tap } from 'rxjs/operators';
+import { environment } from '../../../environments/environment';
 
 export interface Usuario {
   id: string;
@@ -16,8 +17,9 @@ export interface Usuario {
 })
 
 export class AuthService {
-  private apiUrl = 'http://localhost:5000/auth';
+  private apiUrl = `${environment.apiUrl}/auth`;
   private isLoggedInSubject = new BehaviorSubject<boolean>(this.isAuthenticated());
+  private userDataSubject = new BehaviorSubject<any>(this.getUser());
 
   constructor(private http: HttpClient) { }
 
@@ -26,10 +28,24 @@ export class AuthService {
   }
 
   login(userData: any): Observable<any> {
-    return this.http.post(`${this.apiUrl}/login`, userData);
+    // Limpiar datos previos para evitar mezcla de información entre usuarios
+    this.clearUserData();
+    
+    return this.http.post(`${this.apiUrl}/login`, userData)
+      .pipe(
+        tap((response: any) => {
+          if (response.token) {
+            this.saveToken(response.token);
+            // Asegurarse de guardar solo los datos del usuario actual
+            this.saveUserData(response.user);
+            this.userDataSubject.next(response.user);
+            this.isLoggedInSubject.next(true);
+          }
+        })
+      );
   }
 
-  saveToken(token: string) {
+  saveToken(token: string): void {
     localStorage.setItem('authToken', token);
     this.isLoggedInSubject.next(true);
   }
@@ -40,6 +56,7 @@ export class AuthService {
 
   saveUserData(userData: any): void {
     localStorage.setItem('userData', JSON.stringify(userData));
+    this.userDataSubject.next(userData);
   }
 
   getUserData(): string | null {
@@ -51,7 +68,6 @@ export class AuthService {
     return user ? user.id : null;  // Si el usuario está disponible, devolver el id. Si no, devolver null
   }
 
-
   isAuthenticated(): boolean {
     const token = this.getToken();  // Verifica si el token existe
     return !!token;
@@ -61,9 +77,19 @@ export class AuthService {
     return this.isLoggedInSubject.asObservable();  // Devuelve un observable para que los componentes puedan suscribirse
   }
 
-  logout(): void {
+  getUserObservable(): Observable<any> {
+    return this.userDataSubject.asObservable();
+  }
+
+  clearUserData(): void {
     localStorage.removeItem('authToken');
-    this.isLoggedInSubject.next(false);  // Emitir el cambio de estado de autenticación
+    localStorage.removeItem('userData');
+    this.userDataSubject.next(null);
+    this.isLoggedInSubject.next(false);
+  }
+
+  logout(): void {
+    this.clearUserData();
   }
 
   getUser(): any {
@@ -100,4 +126,16 @@ export class AuthService {
     return user && user.userTypes.includes('Viewer');
   }
 
+  refreshUserState(): void {
+    // Este método se puede llamar para forzar una actualización del estado
+    const isAuthenticated = this.isAuthenticated();
+    this.isLoggedInSubject.next(isAuthenticated);
+    
+    if (isAuthenticated) {
+      const userData = this.getUser();
+      this.userDataSubject.next(userData);
+    } else {
+      this.userDataSubject.next(null);
+    }
+  }
 }

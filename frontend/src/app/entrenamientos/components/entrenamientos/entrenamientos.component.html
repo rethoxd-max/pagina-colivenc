@@ -9,14 +9,17 @@
 
     <!-- Lista de grupos -->
     <div *ngIf="gruposEntrenamiento.length; else noData" class="groups-list">
-        <div *ngFor="let grupo of gruposEntrenamiento" 
-             (click)="irAlCalendario(grupo._id)"
-             class="group-item">
-            <div class="group-info">
+        <div *ngFor="let grupo of gruposEntrenamiento" class="group-item">
+            <div class="group-info" (click)="irAlCalendario(grupo._id)">
                 <span class="group-name">{{ grupo.nombre_grupo }}</span>
                 <span class="group-trainer">{{ grupo.entrenador?.name }}</span>
             </div>
-            <span class="view-btn">→</span>
+            <div class="group-actions">
+                <button *ngIf="puedeEditarGrupo(grupo)" (click)="editarGrupo(grupo._id)" class="btn-edit">
+                    <mat-icon>edit</mat-icon>
+                </button>
+                <span class="view-btn" (click)="irAlCalendario(grupo._id)">→</span>
+            </div>
         </div>
     </div>
 

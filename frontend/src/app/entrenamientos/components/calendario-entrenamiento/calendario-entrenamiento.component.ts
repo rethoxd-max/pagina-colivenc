@@ -1,6 +1,6 @@
 import { Component, inject, OnInit, OnDestroy } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
-import { DiaEntrenamiento, Entrenamiento, EntrenamientosService } from '../../services/entrenamientos.service';
+import { DiaEntrenamiento, Entrenamiento as EntrenamientoService, EntrenamientosService } from '../../services/entrenamientos.service';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { FormBuilder, FormGroup, FormArray, Validators } from '@angular/forms';
@@ -8,10 +8,42 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { CrearEntrenamientoComponent } from '../crear-entrenamiento/crear-entrenamiento.component';
 import { trigger, transition, style, animate } from '@angular/animations';
+import { CompeticionService } from '../../../calendario/services/competicion.service';
+import { AuthService } from '../../../auth/services/auth.service';
+import { forkJoin, of } from 'rxjs';
+import { map, catchError } from 'rxjs/operators';
 
 interface CalendarDay {
   date: Date;
   diaEntrenamiento?: any;
+}
+
+interface EntrenamientoFiltro {
+    tipo: string;
+    _id?: string;
+    tecnica?: Array<{ tecnica: string }>;
+    pesas?: Array<{ series: string; repeticiones: string; porcentaje: string }>;
+    serie?: Array<{ numeroSeries: string; metros: string; recuperacion: string }>;
+    velocidad?: Array<{ numeroSeries: string; metros: string; porcentaje: string }>;
+    vallas?: Array<{ numeroSeries: string; numeroVallas: string }>;
+    multisaltos?: Array<{ numeroSaltos: string; tipo: string }>;
+    multilanzamientos?: Array<{ numeroLanzamientos: string; tipo: string }>;
+    rodaje?: { tiempo: string };
+    cuestas?: Array<{ numeroCuestas: string; metros: string }>;
+    lastre?: Array<{ numeroSeries: string; metros: string; kilos: string }>;
+    comentario?: string;
+    competicion?: { nombre: string; lugar: string };
+}
+
+interface Resultado {
+    atleta?: {
+        _id: string;
+        usuario: string;
+        nombre: string;
+        apellidos: string;
+    };
+    resultado: string;
+    fecha: Date;
 }
 
 @Component({
@@ -54,12 +86,34 @@ export class CalendarioEntrenamientoComponent implements OnInit, OnDestroy {
   showEditModal = false;
   isEditing = false;
   trainingForm: FormGroup;
+  filtersForm!: FormGroup;
+  filteredDays: any[] = [];
+  competiciones: any[] = [];
+  competicionesFiltradas: any[] = [];
+  searchCompeticion: string = '';
+  selectedCompeticion: any = null;
+  isAdmin: boolean = false;
+  isEntrenador: boolean = false;
+  userId: string | null = null;
+  grupoId: string | null = null;
+
+  showResultadosModal = false;
+  showAddResultadoModal = false;
+  currentResultado = '';
+  resultados: any[] = [];
+  isAddingResultado = false;
+  miResultado: any = null;
+
+  // Añadir un mapa para almacenar los resultados por entrenamiento
+  entrenamientoResultados: Map<string, string> = new Map();
 
   constructor(
     private route: ActivatedRoute,
     private router: Router,
     private fb: FormBuilder,
-    private dialog: MatDialog
+    private dialog: MatDialog,
+    private competicionService: CompeticionService,
+    private authService: AuthService
   ) {
     this.trainingForm = this.fb.group({
       tipo: ['', Validators.required],
@@ -86,12 +140,71 @@ export class CalendarioEntrenamientoComponent implements OnInit, OnDestroy {
         lugar: ['']
       })
     });
+    this.initializeFiltersForm();
+  }
+
+  private initializeFiltersForm() {
+    this.filtersForm = this.fb.group({
+      tipo: [''],
+      // Campos para Técnica
+      tecnica: [''],
+      // Campos para Pesas
+      pesas_series: [''],
+      pesas_repeticiones: [''],
+      pesas_porcentaje: [''],
+      // Campos para Series
+      series_numeroSeries: [''],
+      series_metros: [''],
+      series_recuperacion: [''],
+      // Campos para Velocidad
+      velocidad_numeroSeries: [''],
+      velocidad_metros: [''],
+      velocidad_porcentaje: [''],
+      // Campos para Vallas
+      vallas_numeroSeries: [''],
+      vallas_numeroVallas: [''],
+      // Campos para Multisaltos
+      multisaltos_numeroSaltos: [''],
+      multisaltos_tipo: [''],
+      // Campos para Multilanzamientos
+      multilanzamientos_numeroLanzamientos: [''],
+      multilanzamientos_tipo: [''],
+      // Campos para Rodaje
+      rodaje_tiempo: [''],
+      // Campos para Cuestas
+      cuestas_numeroCuestas: [''],
+      cuestas_metros: [''],
+      // Campos para Lastre
+      lastre_numeroSeries: [''],
+      lastre_metros: [''],
+      lastre_kilos: [''],
+      // Campos para Extras y Test
+      comentario: [''],
+      // Campos para Competición
+      competicion_nombre: [''],
+      competicion_lugar: ['']
+    });
   }
 
   ngOnInit(): void {
+    // Obtener información del usuario
+    const user = this.authService.getUser();
+    if (user) {
+      this.userId = user.id;
+      console.log('Usuario logueado:', {
+        id: user.id,
+        name: user.name,
+        email: user.email
+      });
+    } else {
+      console.error('No hay usuario logueado');
+    }
+    
     this.route.params.subscribe(params => {
       this.atletaId = params['atletaId'];
+      this.grupoId = params['grupoId'];
       this.loadCalendar();
+      this.checkUserPermissions();
     });
 
     // Agregar listener para cerrar el popup al hacer clic fuera
@@ -210,21 +323,13 @@ export class CalendarioEntrenamientoComponent implements OnInit, OnDestroy {
     }
     
     // Añadir días del mes siguiente para completar la última semana
-    const daysFromNextMonth = 6 - lastDayOfWeek;
+    const daysFromNextMonth = 7 - (lastDayOfWeek === 0 ? 7 : lastDayOfWeek);
     for (let i = 1; i <= daysFromNextMonth; i++) {
       const day = new Date(this.currentYear, this.currentMonth + 1, i);
       days.push({
         date: day,
         diaEntrenamiento: this.getDiaEntrenamiento(day)
       });
-    }
-    
-    // Añadir días nulos para completar la última semana si es necesario
-    const remainingDays = 7 - (days.length % 7);
-    if (remainingDays < 7) {
-      for (let i = 0; i < remainingDays; i++) {
-        days.push(null);
-      }
     }
     
     this.daysInMonth = days;
@@ -450,6 +555,7 @@ export class CalendarioEntrenamientoComponent implements OnInit, OnDestroy {
   openTrainingDetails(entrenamiento: any): void {
     this.currentTraining = entrenamiento;
     this.showTrainingModal = true;
+    this.loadResultados();
   }
 
   closeTrainingDetails() {
@@ -787,7 +893,9 @@ export class CalendarioEntrenamientoComponent implements OnInit, OnDestroy {
   onTrainingTypeChange(event: any) {
     const tipo = event.target.value;
     // Limpiar los arrays y grupos según el tipo seleccionado
-    // ...
+    if (tipo === 'Competición') {
+      this.loadCompeticiones();
+    }
   }
 
   get tecnicaArray() {
@@ -996,5 +1104,357 @@ export class CalendarioEntrenamientoComponent implements OnInit, OnDestroy {
 
   removeExtras(index: number) {
     this.extrasArray.removeAt(index);
+  }
+
+  applyFilters() {
+    const filters = this.filtersForm.value;
+    console.log('Aplicando filtros:', filters);
+    
+    this.filteredDays = this.daysInMonth.filter(day => {
+      if (!day || !day.diaEntrenamiento?.entrenamientos) return false;
+
+      console.log(`Día ${day.date.toLocaleDateString()}, entrenamientos:`, day.diaEntrenamiento.entrenamientos);
+      
+      const matchingEntrenamientos = day.diaEntrenamiento.entrenamientos.filter((entrenamiento: EntrenamientoFiltro) => {
+        if (filters.tipo && entrenamiento.tipo !== filters.tipo) return false;
+
+        // Verificamos si el entrenamiento cumple con los filtros
+        const matchesFilters = this.matchesEntrenamientoFilters(entrenamiento, filters);
+
+        // Si el entrenamiento cumple con los filtros, obtenemos su resultado
+        if (matchesFilters && entrenamiento._id) {
+          console.log('Entrenamiento coincide con filtros:', entrenamiento);
+          this.loadEntrenamientoResultado(entrenamiento._id);
+        }
+
+        return matchesFilters;
+      });
+      
+      console.log(`Día ${day.date.toLocaleDateString()}, entrenamientos que coinciden:`, matchingEntrenamientos.length);
+      
+      return matchingEntrenamientos.length > 0;
+    });
+    
+    console.log('Días filtrados:', this.filteredDays.length);
+  }
+
+  // Método auxiliar para evaluar si un entrenamiento cumple con los filtros
+  private matchesEntrenamientoFilters(entrenamiento: EntrenamientoFiltro, filters: any): boolean {
+    switch (entrenamiento.tipo) {
+      case 'Técnica':
+        return !filters.tecnica || 
+               (entrenamiento.tecnica?.some(t => t.tecnica.toLowerCase().includes(filters.tecnica.toLowerCase())) ?? false);
+      
+      case 'Pesas':
+        return (!filters.pesas_series || (entrenamiento.pesas?.some(p => p.series.toString().includes(filters.pesas_series)) ?? false)) &&
+               (!filters.pesas_repeticiones || (entrenamiento.pesas?.some(p => p.repeticiones.toString().includes(filters.pesas_repeticiones)) ?? false)) &&
+               (!filters.pesas_porcentaje || (entrenamiento.pesas?.some(p => p.porcentaje.toString().includes(filters.pesas_porcentaje)) ?? false));
+      
+      case 'Series':
+        return (!filters.series_numeroSeries || (entrenamiento.serie?.some(s => s.numeroSeries.toString().includes(filters.series_numeroSeries)) ?? false)) &&
+               (!filters.series_metros || (entrenamiento.serie?.some(s => s.metros.toString().includes(filters.series_metros)) ?? false)) &&
+               (!filters.series_recuperacion || (entrenamiento.serie?.some(s => s.recuperacion.toLowerCase().includes(filters.series_recuperacion.toLowerCase())) ?? false));
+      
+      case 'Velocidad':
+        return (!filters.velocidad_numeroSeries || (entrenamiento.velocidad?.some(v => v.numeroSeries.toString().includes(filters.velocidad_numeroSeries)) ?? false)) &&
+               (!filters.velocidad_metros || (entrenamiento.velocidad?.some(v => v.metros.toString().includes(filters.velocidad_metros)) ?? false)) &&
+               (!filters.velocidad_porcentaje || (entrenamiento.velocidad?.some(v => v.porcentaje.toString().includes(filters.velocidad_porcentaje)) ?? false));
+      
+      case 'Vallas':
+        return (!filters.vallas_numeroSeries || (entrenamiento.vallas?.some(v => v.numeroSeries.toString().includes(filters.vallas_numeroSeries)) ?? false)) &&
+               (!filters.vallas_numeroVallas || (entrenamiento.vallas?.some(v => v.numeroVallas.toString().includes(filters.vallas_numeroVallas)) ?? false));
+      
+      case 'Multisaltos':
+        return (!filters.multisaltos_numeroSaltos || (entrenamiento.multisaltos?.some(m => m.numeroSaltos.toString().includes(filters.multisaltos_numeroSaltos)) ?? false)) &&
+               (!filters.multisaltos_tipo || (entrenamiento.multisaltos?.some(m => m.tipo.toLowerCase().includes(filters.multisaltos_tipo.toLowerCase())) ?? false));
+      
+      case 'Multilanzamientos':
+        return (!filters.multilanzamientos_numeroLanzamientos || (entrenamiento.multilanzamientos?.some(m => m.numeroLanzamientos.toString().includes(filters.multilanzamientos_numeroLanzamientos)) ?? false)) &&
+               (!filters.multilanzamientos_tipo || (entrenamiento.multilanzamientos?.some(m => m.tipo.toLowerCase().includes(filters.multilanzamientos_tipo.toLowerCase())) ?? false));
+      
+      case 'Rodaje':
+        return !filters.rodaje_tiempo || (entrenamiento.rodaje?.tiempo.toLowerCase().includes(filters.rodaje_tiempo.toLowerCase()) ?? false);
+      
+      case 'Cuestas':
+        return (!filters.cuestas_numeroCuestas || (entrenamiento.cuestas?.some(c => c.numeroCuestas.toString().includes(filters.cuestas_numeroCuestas)) ?? false)) &&
+               (!filters.cuestas_metros || (entrenamiento.cuestas?.some(c => c.metros.toString().includes(filters.cuestas_metros)) ?? false));
+      
+      case 'Lastre':
+        return (!filters.lastre_numeroSeries || (entrenamiento.lastre?.some(l => l.numeroSeries.toString().includes(filters.lastre_numeroSeries)) ?? false)) &&
+               (!filters.lastre_metros || (entrenamiento.lastre?.some(l => l.metros.toString().includes(filters.lastre_metros)) ?? false)) &&
+               (!filters.lastre_kilos || (entrenamiento.lastre?.some(l => l.kilos.toString().includes(filters.lastre_kilos)) ?? false));
+      
+      case 'Extras':
+      case 'Test':
+        return !filters.comentario || (entrenamiento.comentario?.toLowerCase().includes(filters.comentario.toLowerCase()) ?? false);
+      
+      case 'Competición':
+        return (!filters.competicion_nombre || (entrenamiento.competicion?.nombre.toLowerCase().includes(filters.competicion_nombre.toLowerCase()) ?? false)) &&
+               (!filters.competicion_lugar || (entrenamiento.competicion?.lugar.toLowerCase().includes(filters.competicion_lugar.toLowerCase()) ?? false));
+      
+      default:
+        return true;
+    }
+  }
+
+  // Método para cargar el resultado del atleta logeado para un entrenamiento específico
+  loadEntrenamientoResultado(entrenamientoId: string) {
+    if (!entrenamientoId) {
+      console.error('loadEntrenamientoResultado: No se proporcionó ID de entrenamiento');
+      return;
+    }
+    
+    if (this.entrenamientoResultados.has(entrenamientoId)) {
+      // Ya tenemos el resultado, no es necesario cargarlo nuevamente
+      return;
+    }
+
+    console.log(`Cargando resultado para entrenamiento: ${entrenamientoId}`);
+    
+    // Obtener información del usuario actual
+    const user = this.authService.getUser();
+    if (!user) {
+      console.error('loadEntrenamientoResultado: No hay usuario logueado');
+      return;
+    }
+    
+    console.log('Usuario actual:', {
+      id: user.id,
+      name: user.name,
+      email: user.email
+    });
+    
+    this.entrenamientosService.getResultados(entrenamientoId)
+      .subscribe({
+        next: (resultados: Resultado[]) => {
+          console.log(`Resultados recibidos para entrenamiento ${entrenamientoId}:`, resultados);
+          
+          // Buscar mi resultado por usuario o nombre
+          const miResultado = resultados.find(r => {
+            const matchByUserId = r.atleta?.usuario === user.id;
+            const matchByName = r.atleta?.nombre?.toLowerCase() === user.name?.toLowerCase();
+            
+            console.log(`Comparando resultado:`, {
+              resultadoAtleta: r.atleta,
+              matchByUserId,
+              matchByName
+            });
+            
+            return matchByUserId || matchByName;
+          });
+          
+          console.log('Mi resultado encontrado:', miResultado);
+          
+          if (miResultado) {
+            this.entrenamientoResultados.set(entrenamientoId, miResultado.resultado);
+            console.log(`Resultado guardado para entrenamiento ${entrenamientoId}:`, miResultado.resultado);
+          } else {
+            // Incluso si no hay resultado, guardamos una entrada vacía para evitar múltiples consultas
+            this.entrenamientoResultados.set(entrenamientoId, '');
+          }
+        },
+        error: (err) => {
+          console.error('Error al cargar resultado:', err);
+          // En caso de error, guardamos una entrada vacía para evitar múltiples consultas
+          this.entrenamientoResultados.set(entrenamientoId, '');
+        }
+      });
+  }
+
+  // Método para obtener el resultado de un entrenamiento específico
+  getEntrenamientoResultado(entrenamientoId: string): string {
+    const resultado = this.entrenamientoResultados.get(entrenamientoId);
+    console.log(`Obteniendo resultado para ${entrenamientoId}:`, resultado);
+    return resultado || '';
+  }
+
+  clearFilters() {
+    this.filtersForm.reset();
+    this.filteredDays = [];
+    this.entrenamientoResultados.clear();
+  }
+
+  onFilterTypeChange(event: any) {
+    const tipo = event.target.value;
+    // Limpiar todos los campos excepto el tipo
+    Object.keys(this.filtersForm.controls).forEach(key => {
+      if (key !== 'tipo') {
+        this.filtersForm.get(key)?.setValue('');
+      }
+    });
+  }
+
+  loadCompeticiones() {
+    this.competicionService.getCompeticiones().subscribe({
+      next: (competiciones) => {
+        this.competiciones = competiciones;
+        this.filterCompeticiones();
+      },
+      error: (error) => {
+        console.error('Error al cargar las competiciones:', error);
+      }
+    });
+  }
+
+  filterCompeticiones() {
+    if (!this.searchCompeticion) {
+      this.competicionesFiltradas = this.competiciones;
+      return;
+    }
+
+    const searchTerm = this.searchCompeticion.toLowerCase();
+    this.competicionesFiltradas = this.competiciones.filter(competicion => 
+      competicion.nombre.toLowerCase().includes(searchTerm) ||
+      competicion.lugar.toLowerCase().includes(searchTerm)
+    );
+  }
+
+  selectCompeticion(competicion: any) {
+    this.selectedCompeticion = competicion;
+    this.trainingForm.patchValue({
+      competicion: {
+        nombre: competicion.nombre,
+        fecha: competicion.fecha,
+        lugar: competicion.lugar,
+        competicionId: competicion._id
+      }
+    });
+  }
+
+  private checkUserPermissions() {
+    const user = this.authService.getUser();
+    if (user) {
+      this.userId = user.id;
+      this.isAdmin = this.authService.isAdmin();
+      
+      // Si hay un grupoId, verificar si el usuario es el entrenador
+      if (this.grupoId) {
+        this.entrenamientosService.getGrupoEntrenamiento(this.grupoId).subscribe({
+          next: (grupo) => {
+            // Verificar si el usuario es el entrenador del grupo
+            this.isEntrenador = grupo.entrenador?._id === this.userId;
+            console.log('Permisos verificados:', {
+              userId: this.userId,
+              grupoEntrenadorId: grupo.entrenador?._id,
+              isAdmin: this.isAdmin,
+              isEntrenador: this.isEntrenador
+            });
+          },
+          error: (error) => {
+            console.error('Error al verificar el grupo:', error);
+          }
+        });
+      }
+    }
+  }
+
+  canAddTraining(): boolean {
+    return this.isAdmin || this.isEntrenador;
+  }
+
+  loadResultados(): void {
+    if (!this.currentTraining?._id) return;
+
+    // Limpiar resultados anteriores para evitar mezclar datos de diferentes usuarios
+    this.resultados = [];
+    this.miResultado = null;
+    this.currentResultado = '';
+    
+    this.entrenamientosService.getResultados(this.currentTraining._id)
+      .subscribe({
+        next: (resultados: any[]) => {
+          console.log('Resultados obtenidos del servidor:', resultados);
+          this.resultados = resultados;
+          
+          const user = this.authService.getUser();
+          if (!user) {
+            console.warn('No hay usuario logueado para verificar resultados');
+            return;
+          }
+          
+          console.log('Buscando resultados para usuario:', user.id, user.name);
+          
+          // Buscar mi resultado - la estructura puede variar según cómo estén diseñados los endpoints
+          this.miResultado = resultados.find((r: any) => {
+            if (r.atleta) {
+              if (typeof r.atleta === 'object') {
+                // Si atleta es un objeto (probablemente populado)
+                return r.atleta.usuario === user.id || 
+                      (r.atleta.nombre && user.name && 
+                       r.atleta.nombre.toLowerCase() === user.name.toLowerCase());
+              } else if (typeof r.atleta === 'string') {
+                // Si atleta es un string (probablemente un ID)
+                return r.atleta === user.id;
+              }
+            }
+            return false;
+          });
+          
+          console.log('Resultado encontrado para el usuario actual:', this.miResultado);
+          
+          if (this.miResultado) {
+            this.currentResultado = this.miResultado.resultado;
+          }
+        },
+        error: (error) => {
+          console.error('Error al cargar los resultados:', error);
+          alert('Error al cargar los resultados. Por favor, inténtalo de nuevo más tarde.');
+        }
+      });
+  }
+
+  toggleAddResultado(): void {
+    this.showAddResultadoModal = !this.showAddResultadoModal;
+    if (!this.showAddResultadoModal) {
+      this.currentResultado = '';
+    } else if (this.miResultado) {
+      // Si hay un resultado existente, cargarlo en el textarea
+      this.currentResultado = this.miResultado.resultado;
+    }
+  }
+
+  toggleResultadosModal(): void {
+    this.showResultadosModal = !this.showResultadosModal;
+    if (this.showResultadosModal) {
+      this.loadResultados();
+    }
+  }
+
+  addResultado(): void {
+    if (!this.currentTraining?._id || !this.currentResultado.trim()) return;
+
+    this.isAddingResultado = true;
+    const userId = this.authService.getUserId();
+    if (!userId) {
+      console.error('No se pudo obtener el ID del usuario');
+      this.isAddingResultado = false;
+      return;
+    }
+
+    this.entrenamientosService.addResultado(this.currentTraining._id, userId, this.currentResultado)
+      .subscribe({
+        next: (response) => {
+          console.log('Resultado guardado correctamente:', response);
+          // Para asegurar que se recarga con la estructura correcta
+          setTimeout(() => {
+            this.loadResultados(); // Recargar resultados para actualizar la vista
+          }, 500);
+          this.toggleAddResultado();
+          this.currentResultado = '';
+        },
+        error: (error) => {
+          console.error('Error al añadir/actualizar el resultado:', error);
+          alert('Hubo un error al guardar tu resultado. Por favor, inténtalo de nuevo.');
+          this.isAddingResultado = false;
+        },
+        complete: () => {
+          this.isAddingResultado = false;
+        }
+      });
+  }
+
+  // Método para verificar si el atleta en un resultado es un objeto
+  isAtletaObject(resultado: any): boolean {
+    return resultado && resultado.atleta && typeof resultado.atleta === 'object';
   }
 }

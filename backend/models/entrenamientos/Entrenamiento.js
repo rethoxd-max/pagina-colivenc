@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
+const Schema = mongoose.Schema;
 
-const entrenamientoSchema = new mongoose.Schema({
+const entrenamientoSchema = new Schema({
     dia_entrenamiento: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'DiaEntrenamiento',
@@ -87,12 +88,31 @@ const entrenamientoSchema = new mongoose.Schema({
         comentario: String
     }],
 
+    test: {
+        comentario: String
+    },
+
     competicion: {
         nombre: String,
         fecha: Date,
         lugar: String,
-        competicionId: String
-    }
+        competicionId: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'Competicion'
+        }
+    },
+
+    resultados: [{
+        atleta: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'Atleta'
+        },
+        resultado: String,
+        fecha: {
+            type: Date,
+            default: Date.now
+        }
+    }]
 });
 
 module.exports = mongoose.model('Entrenamiento', entrenamientoSchema);

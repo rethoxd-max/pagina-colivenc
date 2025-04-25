@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { AuthService } from '../../services/auth.service';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
@@ -11,11 +11,17 @@ import { RouterLink } from '@angular/router';
   imports: [FormsModule, CommonModule, RouterLink],
   templateUrl: './login.component.html',
 })
-export class LoginComponent {
+export class LoginComponent implements OnInit {
   user = { email: '', password: '' };
   errorMessage: string | null = null;
 
   constructor(private authService: AuthService, private router: Router) { }
+
+  ngOnInit() {
+    if (this.authService.isLoggedIn()) {
+      this.router.navigate(['/home']);
+    }
+  }
 
   onSubmit() {
     this.authService.login(this.user).subscribe(

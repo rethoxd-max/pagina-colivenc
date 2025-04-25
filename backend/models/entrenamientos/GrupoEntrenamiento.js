@@ -13,7 +13,7 @@ const grupoEntrenamientoSchema = new Schema({
     atletas: [
         {
             type: mongoose.Schema.Types.ObjectId,
-            ref: 'User'
+            ref: 'Atleta'
         }
     ]
 });

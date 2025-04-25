@@ -10,7 +10,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatButtonToggleModule } from '@angular/material/button-toggle';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { EntrenamientosService, Entrenamiento } from '../../services/entrenamientos.service';
-import { CompeticionService, Competicion } from '../../../competiciones/services/competicion.service';
+import { CompeticionService, Competicion } from '../../../calendario/services/competicion.service';
 import { Observable } from 'rxjs';
 import { map, startWith } from 'rxjs/operators';
 import { MatDatepickerModule } from '@angular/material/datepicker';
@@ -420,8 +420,8 @@ export class CrearEntrenamientoComponent implements OnInit {
   }
 
   loadCompeticiones() {
-    this.competicionService.getCompeticionesByAtleta('ID_DEL_ATLETA').subscribe(
-      (competiciones: Competicion[]) => {
+    this.competicionService.getCompeticiones().subscribe(
+      (competiciones: any[]) => {
         this.competiciones = competiciones;
         this.filtrarCompeticionesPorFecha();
       },

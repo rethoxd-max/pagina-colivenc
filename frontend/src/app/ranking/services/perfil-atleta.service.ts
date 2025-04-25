@@ -7,7 +7,11 @@ import { environment } from '../../../environments/environment.development';
 export interface Atleta {
   _id: string;
   nombre: string;
-  fecha_nacimiento: number;
+  fecha_nacimiento: Date;
+  usuario?: {
+    _id: string;
+    name: string;
+  };
 }
 
 export interface Prueba {
@@ -151,6 +155,36 @@ export class PerfilAtletaService {
 
   getAllMarcasPorAnyoYPrueba(atletaId: string, pruebaId: string, anyo: number): Observable<Marca[]> {
     return this.http.get<Marca[]>(`${this.apiUrl}/perfil-atleta/marcas/prueba/${pruebaId}/anyo/${anyo}/atleta/${atletaId}`);
+  }
+
+  // Obtener la mejor marca con viento legal por prueba de cada atleta
+  getMejorMarcaLegalPorPrueba(atletaId: string, pruebaId: string): Observable<Marca> {
+    return this.http.get<Marca>(`${this.apiUrl}/perfil-atleta/mejor-marca-legal/prueba/${pruebaId}/atleta/${atletaId}`);
+  }
+
+  // Obtener la mejor marca con viento legal por prueba y categoría de cada atleta
+  getMejorMarcaLegalPorPruebaYCategoria(atletaId: string, pruebaId: string, categoriaId: string): Observable<Marca> {
+    return this.http.get<Marca>(`${this.apiUrl}/perfil-atleta/mejor-marca-legal/prueba/${pruebaId}/categoria/${categoriaId}/atleta/${atletaId}`);
+  }
+
+  // Obtener la mejor marca con viento legal por prueba y PcAL de cada atleta
+  getMejorMarcaLegalPorPruebaYPcAL(atletaId: string, pruebaId: string, PcALId: string): Observable<Marca> {
+    return this.http.get<Marca>(`${this.apiUrl}/perfil-atleta/mejor-marca-legal/prueba/${pruebaId}/PcAL/${PcALId}/atleta/${atletaId}`);
+  }
+
+  // Obtener la mejor marca con viento legal por prueba, categoría y PcAL de cada atleta
+  getMejorMarcaLegalPorPruebaCategoriaPcAL(atletaId: string, pruebaId: string, categoriaId: string, PcALId: string): Observable<Marca> {
+    return this.http.get<Marca>(`${this.apiUrl}/perfil-atleta/mejor-marca-legal/prueba/${pruebaId}/categoria/${categoriaId}/PcAL/${PcALId}/atleta/${atletaId}`);
+  }
+
+  // Obtener la mejor marca con viento legal por prueba y año de cada atleta
+  getMejorMarcaLegalPorPruebaYAnyo(atletaId: string, pruebaId: string, anyo: number): Observable<Marca> {
+    return this.http.get<Marca>(`${this.apiUrl}/perfil-atleta/mejor-marca-legal/prueba/${pruebaId}/anyo/${anyo}/atleta/${atletaId}`);
+  }
+
+  // Obtener la mejor marca con viento legal por prueba, PcAL y año de cada atleta
+  getMejorMarcaLegalPorPruebaPcALYAnyo(atletaId: string, pruebaId: string, PcALId: string, anyo: number): Observable<Marca> {
+    return this.http.get<Marca>(`${this.apiUrl}/perfil-atleta/mejor-marca-legal/prueba/${pruebaId}/PcAL/${PcALId}/anyo/${anyo}/atleta/${atletaId}`);
   }
 
 }

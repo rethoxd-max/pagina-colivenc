@@ -1,10 +1,11 @@
-import { Component, OnInit } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { Component, OnInit, OnDestroy } from '@angular/core';
+import { ActivatedRoute, Router } from '@angular/router';
 import { Atleta, Categoria, Marca, PcAL, Prueba, RankingService } from '../ranking/services/ranking.service';
 import { CommonModule } from '@angular/common';
 import { PerfilAtletaService } from '../ranking/services/perfil-atleta.service';
 import { FormsModule } from '@angular/forms';
-import { Observer } from 'rxjs';
+import { Observer, Subscription } from 'rxjs';
+import { AuthService } from '../auth/services/auth.service';
 
 @Component({
   selector: 'app-perfil-atleta',
@@ -13,7 +14,7 @@ import { Observer } from 'rxjs';
   standalone: true,
   imports: [CommonModule, FormsModule]
 })
-export class PerfilAtletaComponent implements OnInit {
+export class PerfilAtletaComponent implements OnInit, OnDestroy {
   atleta: any;
   pruebas: Prueba[] = [];
   marcas: Marca[] = [];
@@ -26,58 +27,140 @@ export class PerfilAtletaComponent implements OnInit {
   anyos: any[] = [];  // Lista de años en los que el atleta ha competido
   PcAL: PcAL[] = []; // Lista de PcAL disponibles
 
-
-  
   filtroCategoria: string = '';
   filtroPcAL: string = '';
-  filtroAnyo!: number;
+  filtroAnyo: number | undefined;
   anyosPorPrueba!: { [pruebaId: string]: number[]; };
+  mejoresMarcasLegales: { [key: string]: Marca } = {};
+  
+  private routeSubscription!: Subscription;
+  private authSubscription!: Subscription;
 
   constructor(
     private rankingService: RankingService,
     private perfilAtletaService: PerfilAtletaService,
-    private route: ActivatedRoute
+    private route: ActivatedRoute,
+    private router: Router,
+    private authService: AuthService
   ) { }
 
   ngOnInit() {
+    // Suscribirse a los cambios de parámetros de la ruta
+    this.routeSubscription = this.route.paramMap.subscribe(params => {
+      const atletaId = params.get('atletaId');
+      this.loadAtletaData(atletaId);
+    });
 
-    const atletaId = this.route.snapshot.paramMap.get('atletaId');
-    if (atletaId) {
-      // Cargar los datos del atleta
-      this.rankingService.getAtletaById(atletaId).subscribe((atleta: Atleta) => {
+    // Suscribirse a los cambios en el estado de autenticación
+    this.authSubscription = this.authService.getIsLoggedIn().subscribe(isLoggedIn => {
+      if (isLoggedIn) {
+        // Si no hay atletaId en la ruta y el usuario está logueado, cargar su perfil
+        if (!this.route.snapshot.paramMap.get('atletaId')) {
+          this.loadCurrentUserAtleta();
+        }
+      } else {
+        // Si el usuario se desloguea, limpiar los datos
+        this.clearAtletaData();
+      }
+    });
+  }
+
+  ngOnDestroy() {
+    // Cancelar las suscripciones al destruir el componente
+    if (this.routeSubscription) {
+      this.routeSubscription.unsubscribe();
+    }
+    if (this.authSubscription) {
+      this.authSubscription.unsubscribe();
+    }
+  }
+
+  // Método para cargar el atleta del usuario actual
+  loadCurrentUserAtleta() {
+    const userId = this.authService.getUserId();
+    if (userId) {
+      this.perfilAtletaService.getAtletaByUserId(userId).subscribe({
+        next: (atleta) => {
+          if (atleta && atleta._id) {
+            // Redirigir a la página del perfil con el ID correcto del atleta
+            this.router.navigate(['/perfil-atleta', atleta._id]);
+          } else {
+            console.error('No se encontró el atleta para el usuario actual');
+          }
+        },
+        error: (error) => {
+          console.error('Error al obtener el perfil del atleta:', error);
+        }
+      });
+    }
+  }
+
+  // Método para limpiar los datos del atleta
+  clearAtletaData() {
+    this.atleta = null;
+    this.pruebas = [];
+    this.marcas = [];
+    this.mejoresMarcas = [];
+    this.marcasPorPrueba = {};
+    this.marcasPorPruebaAnyo = {};
+    this.anyos = [];
+    this.anyosPorPrueba = {};
+    this.mejoresMarcasLegales = {};
+  }
+
+  // Método para cargar los datos del atleta
+  loadAtletaData(atletaId: string | null) {
+    if (!atletaId) {
+      console.error('No se proporcionó un ID de atleta válido');
+      return;
+    }
+
+    // Reiniciar los datos antes de cargar nuevos
+    this.clearAtletaData();
+
+    // Cargar los datos del atleta utilizando el ID
+    this.rankingService.getAtletaById(atletaId).subscribe({
+      next: (atleta: Atleta) => {
         this.atleta = atleta;
 
         // Cargar las marcas del atleta usando su ID
-        this.perfilAtletaService.getMarcasByAtletaId(this.atleta._id).subscribe((marcas: Marca[]) => {
-          this.marcas = marcas;
+        this.perfilAtletaService.getMarcasByAtletaId(this.atleta._id).subscribe({
+          next: (marcas: Marca[]) => {
+            this.marcas = marcas;
 
-          // Agrupa los años disponibles por prueba
-          // Obtener los años únicos y ordenarlos de mayor a menor
-          this.anyos = [...new Set(marcas.map((marca: Marca) => marca.anyo))].sort((a, b) => b - a);
+            // Agrupa los años disponibles por prueba
+            // Obtener los años únicos y ordenarlos de mayor a menor
+            this.anyos = [...new Set(marcas.map((marca: Marca) => marca.anyo))].sort((a, b) => b - a);
 
-          // Crear el objeto anyosPorPrueba y ordenar los años de cada prueba de mayor a menor
-          this.anyosPorPrueba = marcas.reduce((acc: { [pruebaId: string]: number[] }, marca: Marca) => {
-            if (!acc[marca.nombre_prueba._id]) {
-              acc[marca.nombre_prueba._id] = [];
+            // Crear el objeto anyosPorPrueba y ordenar los años de cada prueba de mayor a menor
+            this.anyosPorPrueba = marcas.reduce((acc: { [pruebaId: string]: number[] }, marca: Marca) => {
+              if (!acc[marca.nombre_prueba._id]) {
+                acc[marca.nombre_prueba._id] = [];
+              }
+              // Añadir el año si no está ya presente
+              if (!acc[marca.nombre_prueba._id].includes(marca.anyo)) {
+                acc[marca.nombre_prueba._id].push(marca.anyo);
+              }
+              // Ordenar los años de mayor a menor después de agregar un nuevo año
+              acc[marca.nombre_prueba._id].sort((a, b) => b - a);
+
+              return acc;
+            }, {});
+
+            // Inicializa el filtro de año con el más reciente para cada prueba (opcional)
+            if (this.anyos.length > 0) {
+              this.filtroAnyo = Math.max(...this.anyos);
             }
-            // Añadir el año si no está ya presente
-            if (!acc[marca.nombre_prueba._id].includes(marca.anyo)) {
-              acc[marca.nombre_prueba._id].push(marca.anyo);
-            }
-            // Ordenar los años de mayor a menor después de agregar un nuevo año
-            acc[marca.nombre_prueba._id].sort((a, b) => b - a);
-
-            return acc;
-          }, {});
-
-          // Inicializa el filtro de año con el más reciente para cada prueba (opcional)
-          this.filtroAnyo = Math.max(...this.anyos);
+          },
+          error: (error) => {
+            console.error('Error al cargar las marcas del atleta:', error);
+          }
         });
-      });
-    } else {
-      console.error('El ID del atleta no está disponible.');
-      // Manejo del error o redirección
-    }
+      },
+      error: (error) => {
+        console.error('Error al cargar los datos del atleta:', error);
+      }
+    });
 
     this.getCategorias();
     this.getPcAL();
@@ -89,10 +172,18 @@ export class PerfilAtletaComponent implements OnInit {
   onTabChange(tab: string): void {
     this.activeTab = tab;
     this.getPruebasPorAtleta(this.atleta._id);
-    if (this.activeTab === "resultados") {
+    
+    // Resetear el filtro de año cuando se cambia a marcas personales
+    if (this.activeTab === 'marcasPersonales') {
+      this.filtroAnyo = undefined;
+    } else if (this.activeTab === 'mejoresAnyo' && this.anyos.length > 0) {
+      // Seleccionar automáticamente el año más reciente
+      this.filtroAnyo = Math.max(...this.anyos);
+    }
+    
+    if (this.activeTab === "resultados" && this.filtroAnyo) {
       this.getPruebasPorAtletaYAnyo(this.atleta._id, this.filtroAnyo);
     }
-
   }
 
   getPcAL(): void {
@@ -119,16 +210,14 @@ export class PerfilAtletaComponent implements OnInit {
     this.cargarMejoresMarcas();
   }
 
-
-  onAnyoChange(anyoSeleccionado: number): void {
+  onAnyoChange(anyoSeleccionado: number | undefined): void {
     this.filtroAnyo = anyoSeleccionado;
 
-    if (this.activeTab === "resultados") {
+    if (this.activeTab === "resultados" && this.filtroAnyo) {
       this.getPruebasPorAtletaYAnyo(this.atleta._id, this.filtroAnyo);
     }
     this.cargarMejoresMarcas();
   }
-
 
   getPcALById(PcALId: string): void {
     this.perfilAtletaService.getPcALById(PcALId).subscribe((PcALData: PcAL) => {
@@ -140,7 +229,6 @@ export class PerfilAtletaComponent implements OnInit {
     });
   }
 
-
   getCategoriaById(categoriaId: string): void {
     this.perfilAtletaService.getCategoriaById(categoriaId).subscribe((CategoriaData: Categoria) => {
       if (CategoriaData) {
@@ -151,10 +239,7 @@ export class PerfilAtletaComponent implements OnInit {
     });
   }
 
-
   getPruebasPorAtleta(atletaId: string | null): void {
-
-
     this.perfilAtletaService.getPruebasPorAtleta(atletaId!).subscribe((pruebas) => {
       if (pruebas && Array.isArray(pruebas)) {
         this.pruebas = pruebas;
@@ -177,8 +262,6 @@ export class PerfilAtletaComponent implements OnInit {
     });
   }
 
-
-
   cargarMejorMarcaPorAnyo(pruebaId: string, anyo: number) {
     const key = `${pruebaId}-${anyo}`;
 
@@ -186,10 +269,18 @@ export class PerfilAtletaComponent implements OnInit {
       this.perfilAtletaService.getMejorMarcaPorPruebaYAnyo(this.atleta._id, pruebaId, anyo)
         .subscribe((marca: Marca) => {
           this.marcasPorPruebaAnyo[key] = marca; // Guardar la marca en el objeto de cache
+          
+          // Si la marca tiene viento ilegal, cargar la mejor marca legal
+          if (this.esVientoIlegal(marca.viento)) {
+            const keyLegal = `${pruebaId}-${anyo}-legal`;
+            this.perfilAtletaService.getMejorMarcaLegalPorPruebaYAnyo(this.atleta._id, pruebaId, anyo)
+              .subscribe((marcaLegal: Marca) => {
+                this.marcasPorPruebaAnyo[keyLegal] = marcaLegal;
+              });
+          }
         });
     }
   }
-
 
   cargarTodasLasMarcasPorAnyoYPrueba(): void {
     // Reiniciar el objeto de marcas
@@ -197,41 +288,44 @@ export class PerfilAtletaComponent implements OnInit {
 
     // Recorrer todas las pruebas
     this.pruebas.forEach((prueba) => {
-      // Llamada al servicio para obtener las marcas por año y prueba
-      const observableMarcas = this.perfilAtletaService.getAllMarcasPorAnyoYPrueba(
-        this.atleta._id,
-        prueba._id, // Asegúrate de que estás pasando el ID correcto de la prueba
-        this.filtroAnyo
-      );
+      // Solo cargar marcas si hay un año seleccionado
+      if (this.filtroAnyo) {
+        // Llamada al servicio para obtener las marcas por año y prueba
+        const observableMarcas = this.perfilAtletaService.getAllMarcasPorAnyoYPrueba(
+          this.atleta._id,
+          prueba._id,
+          this.filtroAnyo
+        );
 
-      // Definir el observer
-      const observer: Observer<Marca[]> = {
-        next: (data: Marca[]) => {
-          // Guardar los datos obtenidos en el objeto utilizando el ID de la prueba como clave
-          this.marcasPorPrueba[prueba._id] = data;
-        },
-        error: (error) => {
-          console.error('Error al obtener las marcas para la prueba:', prueba._id, error);
-        },
-        complete: function (): void {
-        }
-      };
+        // Definir el observer
+        const observer: Observer<Marca[]> = {
+          next: (data: Marca[]) => {
+            // Guardar los datos obtenidos en el objeto utilizando el ID de la prueba como clave
+            this.marcasPorPrueba[prueba._id] = data;
+          },
+          error: (error) => {
+            console.error('Error al obtener las marcas para la prueba:', prueba._id, error);
+          },
+          complete: function (): void {
+          }
+        };
 
-      // Subscribirse al observable para obtener las marcas
-      observableMarcas.subscribe(observer);
+        // Subscribirse al observable para obtener las marcas
+        observableMarcas.subscribe(observer);
+      }
     });
   }
-
-
 
   cargarMejoresMarcas() {
     const pruebaIds = this.pruebas.map(prueba => prueba._id);
     this.mejoresMarcas = [];
+    this.mejoresMarcasLegales = {};
 
     pruebaIds.forEach((pruebaId) => {
       let observableMarca: any;
-      // Lógica para obtener las mejores marcas si se selecciona un año
-      if (this.filtroAnyo && (this.activeTab === "mejoresAnyo")) {
+      
+      // Solo aplicar filtro de año en las pestañas de 'mejoresAnyo' y 'resultados'
+      if ((this.activeTab === 'mejoresAnyo' || this.activeTab === 'resultados') && this.filtroAnyo) {
         if (this.filtroPcAL) {
           observableMarca = this.perfilAtletaService.getMejorMarcaPorPruebaPcALYAnyo(
             this.atleta._id,
@@ -247,6 +341,7 @@ export class PerfilAtletaComponent implements OnInit {
           );
         }
       } else {
+        // Para otras pestañas sin filtro de año, mantenemos la lógica original
         if (this.filtroCategoria && this.filtroPcAL) {
           observableMarca = this.perfilAtletaService.getMejorMarcaPorPruebaCategoriaPcAL(
             this.atleta._id,
@@ -276,8 +371,63 @@ export class PerfilAtletaComponent implements OnInit {
 
       observableMarca.subscribe((mejorMarca: Marca | null) => {
         if (mejorMarca && !this.mejoresMarcas.some(m => m._id === mejorMarca._id)) {
-          // Solo agregar la marca si no está ya en la lista
           this.mejoresMarcas.push(mejorMarca);
+          
+          // Si la mejor marca tiene viento ilegal, buscamos la mejor marca legal
+          if (this.esVientoIlegal(mejorMarca.viento)) {
+            let observableMarcaLegal: any;
+            
+            // Solo aplicar filtro de año en las pestañas de 'mejoresAnyo' y 'resultados'
+            if ((this.activeTab === 'mejoresAnyo' || this.activeTab === 'resultados') && this.filtroAnyo) {
+              if (this.filtroPcAL) {
+                observableMarcaLegal = this.perfilAtletaService.getMejorMarcaLegalPorPruebaPcALYAnyo(
+                  this.atleta._id,
+                  pruebaId,
+                  this.filtroPcAL,
+                  this.filtroAnyo
+                );
+              } else {
+                observableMarcaLegal = this.perfilAtletaService.getMejorMarcaLegalPorPruebaYAnyo(
+                  this.atleta._id,
+                  pruebaId,
+                  this.filtroAnyo
+                );
+              }
+            } else {
+              // Para otras pestañas sin filtro de año, mantenemos la lógica original
+              if (this.filtroCategoria && this.filtroPcAL) {
+                observableMarcaLegal = this.perfilAtletaService.getMejorMarcaLegalPorPruebaCategoriaPcAL(
+                  this.atleta._id,
+                  pruebaId,
+                  this.filtroCategoria,
+                  this.filtroPcAL
+                );
+              } else if (this.filtroCategoria) {
+                observableMarcaLegal = this.perfilAtletaService.getMejorMarcaLegalPorPruebaYCategoria(
+                  this.atleta._id,
+                  pruebaId,
+                  this.filtroCategoria
+                );
+              } else if (this.filtroPcAL) {
+                observableMarcaLegal = this.perfilAtletaService.getMejorMarcaLegalPorPruebaYPcAL(
+                  this.atleta._id,
+                  pruebaId,
+                  this.filtroPcAL
+                );
+              } else {
+                observableMarcaLegal = this.perfilAtletaService.getMejorMarcaLegalPorPrueba(
+                  this.atleta._id,
+                  pruebaId
+                );
+              }
+            }
+
+            observableMarcaLegal.subscribe((marcaLegal: Marca | null) => {
+              if (marcaLegal) {
+                this.mejoresMarcasLegales[pruebaId] = marcaLegal;
+              }
+            });
+          }
         }
       }, (error: any) => {
         if (error.status !== 404) {
@@ -286,11 +436,6 @@ export class PerfilAtletaComponent implements OnInit {
       });
     });
   }
-
-
-
-
-
 
   calcularCategoria(): string {
     if (!this.atleta || !this.atleta.fecha_nacimiento) {
@@ -376,5 +521,9 @@ export class PerfilAtletaComponent implements OnInit {
     // Si no está en el formato esperado, intentamos con el formato por defecto
     const date = new Date(fecha.toString());
     return isNaN(date.getTime()) ? null : date;
+  }
+
+  esVientoIlegal(viento: number | undefined): boolean {
+    return viento !== undefined && Math.abs(viento) > 2.0;
   }
 }

@@ -102,4 +102,73 @@ router.delete('/:id', async (req, res) => {
     }
 });
 
+// Agregar un atleta al grupo
+router.post('/:id/atletas', async (req, res) => {
+    try {
+        const { atletaId } = req.body;
+        const grupo = await GrupoEntrenamiento.findById(req.params.id);
+        
+        if (!grupo) {
+            return res.status(404).json({ message: 'Grupo no encontrado' });
+        }
+
+        // Verificar si el atleta ya está en el grupo
+        if (grupo.atletas.includes(atletaId)) {
+            return res.status(400).json({ message: 'El atleta ya está en el grupo' });
+        }
+
+        // Agregar el atleta al grupo
+        grupo.atletas.push(atletaId);
+        await grupo.save();
+
+        // Obtener el grupo actualizado con los datos del atleta
+        const grupoActualizado = await GrupoEntrenamiento.findById(req.params.id)
+            .populate('entrenador atletas');
+
+        res.json(grupoActualizado);
+    } catch (err) {
+        res.status(500).json({ message: err.message });
+    }
+});
+
+// Eliminar un atleta del grupo
+router.delete('/:id/atletas/:atletaId', async (req, res) => {
+    try {
+        const grupo = await GrupoEntrenamiento.findById(req.params.id);
+        
+        if (!grupo) {
+            return res.status(404).json({ message: 'Grupo no encontrado' });
+        }
+
+        // Eliminar el atleta del grupo
+        grupo.atletas = grupo.atletas.filter(atletaId => atletaId.toString() !== req.params.atletaId);
+        await grupo.save();
+
+        // Obtener el grupo actualizado con los datos del atleta
+        const grupoActualizado = await GrupoEntrenamiento.findById(req.params.id)
+            .populate('entrenador atletas');
+
+        res.json(grupoActualizado);
+    } catch (err) {
+        res.status(500).json({ message: err.message });
+    }
+});
+
+// Obtener grupos de entrenamiento por entrenador
+router.get('/entrenador/:entrenadorId', async (req, res) => {
+  try {
+    const grupos = await GrupoEntrenamiento.find({ entrenador: req.params.entrenadorId })
+      .populate('entrenador')
+      .populate('atletas');
+    
+    if (grupos.length === 0) {
+      return res.status(404).json({ message: 'No se encontraron grupos para este entrenador' });
+    }
+
+    res.json(grupos);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
 module.exports = router;

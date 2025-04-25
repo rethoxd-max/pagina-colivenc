@@ -7,7 +7,11 @@ import { environment } from '../../../environments/environment.development';
 export interface Atleta {
   _id: string;
   nombre: string;
-  fecha_nacimiento: number;
+  fecha_nacimiento: Date;
+  usuario?: {
+    _id: string;
+    name: string;
+  };
 }
 
 export interface Prueba {

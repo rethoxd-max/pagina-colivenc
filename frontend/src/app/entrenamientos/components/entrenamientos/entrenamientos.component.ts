@@ -5,11 +5,12 @@ import { AuthService } from '../../../auth/services/auth.service';
 import { RankingService } from '../../../ranking/services/ranking.service';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { PerfilAtletaService } from '../../../ranking/services/perfil-atleta.service';
+import { MatIconModule } from '@angular/material/icon';
 
 @Component({
   selector: 'app-entrenamientos',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, MatIconModule],
   templateUrl: './entrenamientos.component.html',
   styleUrls: ['./entrenamientos.component.css']
 })
@@ -19,9 +20,9 @@ export class EntrenamientosComponent implements OnInit {
   private authService = inject(AuthService);
   private perfilAtletaService = inject(PerfilAtletaService);
   isEntrenador: boolean = false;
+  isAdmin: boolean = false;
   atletaId = '';
-
-
+  userId: string | null = null;
 
   constructor(
     private router: Router,
@@ -29,31 +30,74 @@ export class EntrenamientosComponent implements OnInit {
   ) { }
 
   ngOnInit() {
-    const userId = this.authService.getUserId();
-    // Obtenemos el atleta como observable, suscribiéndonos para acceder al ID del atleta
-    this.perfilAtletaService.getAtletaByUserId(userId).subscribe({
-      next: (atleta) => {
-        this.atletaId = atleta._id; // Asegúrate de que este sea el campo correcto que contiene el ID del atleta
-
-        // Llama al servicio de entrenamientos para obtener los grupos usando el atletaId
-        this.entrenamientosService.getGruposEntrenamiento(this.atletaId).subscribe({
-          next: (grupos) => this.gruposEntrenamiento = grupos,
-          error: (error) => console.error('Error al obtener los grupos:', error)
-        });
-      },
-      error: (error) => console.error('Error al obtener el atleta:', error)
-    });
-
+    this.userId = this.authService.getUserId();
     this.isEntrenador = this.authService.isEntrenador();
+    this.isAdmin = this.authService.isAdmin();
+
+    if (!this.userId) {
+      console.error('No se encontró el ID del usuario');
+      return;
+    }
+
+    this.cargarGrupos();
   }
 
+  cargarGrupos() {
+    if (!this.userId) {
+      console.error('No se puede cargar grupos sin ID de usuario');
+      return;
+    }
+
+    if (this.isEntrenador) {
+      console.log('Cargando grupos como entrenador con ID:', this.userId);
+      this.entrenamientosService.getGruposEntrenamientoByEntrenador(this.userId).subscribe({
+        next: (grupos) => {
+          console.log('Grupos obtenidos como entrenador:', grupos);
+          this.gruposEntrenamiento = grupos;
+        },
+        error: (error) => {
+          console.error('Error al obtener los grupos como entrenador:', error);
+          this.gruposEntrenamiento = [];
+        }
+      });
+    } else {
+      console.log('Cargando grupos como atleta');
+      this.perfilAtletaService.getAtletaByUserId(this.userId).subscribe({
+        next: (atleta) => {
+          this.atletaId = atleta._id;
+          console.log('Cargando grupos para atleta con ID:', this.atletaId);
+          this.entrenamientosService.getGruposEntrenamiento(this.atletaId).subscribe({
+            next: (grupos) => {
+              console.log('Grupos obtenidos como atleta:', grupos);
+              this.gruposEntrenamiento = grupos;
+            },
+            error: (error) => {
+              console.error('Error al obtener los grupos como atleta:', error);
+              this.gruposEntrenamiento = [];
+            }
+          });
+        },
+        error: (error) => {
+          console.error('Error al obtener el atleta:', error);
+          this.gruposEntrenamiento = [];
+        }
+      });
+    }
+  }
+
+  puedeEditarGrupo(grupo: any): boolean {
+    return this.isAdmin || (this.isEntrenador && grupo.entrenador === this.userId);
+  }
 
   navigateToCrearGrupo() {
     this.router.navigate(['/crear-grupo']);
   }
 
-  irAlCalendario(atletaId: string): void {
-    // Redirige al usuario a la ruta del calendario correspondiente al grupo seleccionado
-    this.router.navigate(['/calendario', atletaId]);
+  editarGrupo(grupoId: string) {
+    this.router.navigate(['/editar-grupo', grupoId]);
+  }
+
+  irAlCalendario(grupoId: string): void {
+    this.router.navigate(['/calendario', grupoId]);
   }
 }

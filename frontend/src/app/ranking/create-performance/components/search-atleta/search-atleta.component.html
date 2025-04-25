@@ -1,10 +1,15 @@
 <div class="mb-3">
-    <mat-form-field appearance="fill">
-        <mat-label>Atleta</mat-label>
-        <input matInput #filterInput [formControl]="nombreAtletaControl" [matAutocomplete]="auto" />
-        <mat-autocomplete #auto="matAutocomplete" (optionSelected)="onOptionSelected($event.option.value)">
-            <mat-option *ngFor="let atleta of filteredAtletas$ | async" [value]="atleta.nombre">
-                {{ atleta.nombre }}
+    <mat-form-field class="example-full-width">
+        <mat-label>Buscar atleta</mat-label>
+        <input type="text"
+               matInput
+               [formControl]="nombreAtletaControl"
+               [matAutocomplete]="auto">
+        <mat-autocomplete #auto="matAutocomplete" 
+                         (optionSelected)="onOptionSelected($event.option.value)"
+                         [displayWith]="displayFn">
+            <mat-option *ngFor="let atleta of filteredAtletas$ | async" [value]="atleta">
+                {{atleta.nombre}}
             </mat-option>
         </mat-autocomplete>
     </mat-form-field>

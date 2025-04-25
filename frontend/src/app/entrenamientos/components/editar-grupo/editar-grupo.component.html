@@ -1,0 +1,37 @@
+<div class="container">
+    <h1>Editar Grupo de Entrenamiento</h1>
+    
+    <div class="form-group">
+        <label for="nombreGrupo">Nombre del Grupo</label>
+        <input type="text" id="nombreGrupo" [(ngModel)]="nombreGrupo" class="form-control">
+    </div>
+
+    <div class="atletas-section">
+        <h2>Atletas en el Grupo</h2>
+        <div class="atletas-list">
+            <div *ngFor="let atleta of atletas" class="atleta-item">
+                <span>{{ atleta.nombre }}</span>
+                <button (click)="eliminarAtleta(atleta._id)" class="btn-remove">
+                    <mat-icon>remove_circle</mat-icon>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="search-section">
+        <h2>Agregar Atletas</h2>
+        <div class="search-box">
+            <input type="text" [(ngModel)]="searchTerm" (input)="buscarAtletas()" placeholder="Buscar atletas...">
+        </div>
+        <div class="atletas-disponibles">
+            <div *ngFor="let atleta of atletasDisponibles" class="atleta-item" (click)="agregarAtleta(atleta)">
+                <span>{{ atleta.nombre }}</span>
+                <mat-icon>add_circle</mat-icon>
+            </div>
+        </div>
+    </div>
+
+    <div class="actions">
+        <button (click)="guardarCambios()" class="btn-save">Guardar Cambios</button>
+    </div>
+</div> 

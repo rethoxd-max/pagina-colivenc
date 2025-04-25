@@ -29,10 +29,24 @@ router.get('/:id', async (req, res) => {
 router.get('/usuario/:userId', async (req, res) => {
   try {
     const { userId } = req.params;
-    const atleta = await Atleta.findOne({ usuario: userId });
+    
+    // Primero obtener el usuario
+    const usuario = await User.findById(userId);
+    if (!usuario) {
+      return res.status(404).json({ message: 'Usuario no encontrado' });
+    }
+
+    // Buscar el atleta por el nombre del usuario
+    const atleta = await Atleta.findOne({ nombre: usuario.name });
 
     if (!atleta) {
       return res.status(404).json({ message: 'Atleta no encontrado para este usuario.' });
+    }
+
+    // Si encontramos el atleta, actualizamos su referencia al usuario
+    if (!atleta.usuario) {
+      atleta.usuario = userId;
+      await atleta.save();
     }
 
     res.json(atleta);

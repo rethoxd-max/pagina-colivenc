@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const Entrenamiento = require('../../models/entrenamientos/Entrenamiento');
 const DiaEntrenamiento = require('../../models/entrenamientos/DiaEntrenamiento');
+const Atleta = require('../../models/ranking/Atleta');
 const mongoose = require('mongoose');
 
 // Obtener todos los entrenamientos de un día específico
@@ -91,6 +92,65 @@ router.delete('/:id', async (req, res) => {
         await Entrenamiento.deleteOne({ _id: req.params.id });
         
         res.json({ message: 'Entrenamiento eliminado' });
+    } catch (err) {
+        res.status(500).json({ message: err.message });
+    }
+});
+
+// Añadir resultado a un entrenamiento
+router.post('/:id/resultados', async (req, res) => {
+    try {
+        const { atletaId, resultado } = req.body;
+        
+        const entrenamiento = await Entrenamiento.findById(req.params.id);
+        if (!entrenamiento) {
+            return res.status(404).json({ message: 'Entrenamiento no encontrado' });
+        }
+
+        // Buscar el atleta asociado al usuario
+        const atleta = await Atleta.findOne({ usuario: atletaId });
+        if (!atleta) {
+            return res.status(404).json({ message: 'Atleta no encontrado' });
+        }
+
+        // Verificar si el atleta ya tiene un resultado
+        const resultadoExistente = entrenamiento.resultados.find(r => r.atleta && r.atleta.toString() === atleta._id.toString());
+        
+        if (resultadoExistente) {
+            // Actualizar resultado existente
+            resultadoExistente.resultado = resultado;
+            resultadoExistente.fecha = new Date();
+        } else {
+            // Añadir nuevo resultado
+            entrenamiento.resultados.push({
+                atleta: atleta._id,
+                resultado: resultado,
+                fecha: new Date()
+            });
+        }
+
+        await entrenamiento.save();
+        res.json(entrenamiento);
+    } catch (err) {
+        res.status(500).json({ message: err.message });
+    }
+});
+
+// Obtener resultados de un entrenamiento
+router.get('/:id/resultados', async (req, res) => {
+    try {
+        const entrenamiento = await Entrenamiento.findById(req.params.id)
+            .populate({
+                path: 'resultados.atleta',
+                select: 'nombre apellidos',
+                model: 'Atleta'
+            });
+        
+        if (!entrenamiento) {
+            return res.status(404).json({ message: 'Entrenamiento no encontrado' });
+        }
+
+        res.json(entrenamiento.resultados);
     } catch (err) {
         res.status(500).json({ message: err.message });
     }

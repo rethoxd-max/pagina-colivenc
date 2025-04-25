@@ -10,7 +10,8 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
 
     // Si la petición es para el calendario, no requerir autenticación
     if (req.url.includes('/calendarios-entrenamiento/') || 
-        req.url.includes('/dias-entrenamiento/')) {
+        req.url.includes('/dias-entrenamiento/') ||
+        req.url.includes('/competiciones')) {
         return next(req);
     }
 
@@ -27,11 +28,7 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
 
     return next(authReq).pipe(
         catchError(err => {
-            if (err.status === 401) {
-                // Si la respuesta es 401, redirige al login y limpia el token
-                authService.logout();
-                router.navigate(['/login']);
-            }
+            // Ya no deslogueamos automáticamente al usuario
             return throwError(err);
         })
     );

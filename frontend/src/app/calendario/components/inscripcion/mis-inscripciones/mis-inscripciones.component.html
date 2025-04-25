@@ -1,22 +1,43 @@
-<div *ngIf="inscripcionesEntrenador.length > 0; else noInscripciones">
-    <h3>Mis Inscripciones</h3>
-    <ul>
-        <li *ngFor="let inscripcion of inscripcionesEntrenador">
-            {{ inscripcion.nombre_atleta }} -
+<div class="mis-inscripciones-container" *ngIf="inscripcionesEntrenador.length > 0; else noInscripciones">
+    <h2 class="mis-inscripciones-title">Mis Inscripciones</h2>
+    <ul class="mis-inscripciones-list">
+        <li class="inscripcion-card" *ngFor="let inscripcion of inscripcionesEntrenador">
+            <div class="atleta-info">
+                <div class="atleta-avatar">
+                    {{ inscripcion.nombre_atleta.charAt(0) }}
+                </div>
+                <div class="atleta-details">
+                    <h3 class="atleta-nombre">{{ inscripcion.nombre_atleta }}</h3>
+                </div>
+            </div>
 
-            <!-- Recorrer las pruebas seleccionadas y mostrar su nombre -->
-            <span *ngFor="let prueba of inscripcion.pruebasSeleccionadas">
-                {{ prueba.nombre_prueba }} {{ prueba.categoria_id.nombre_categoria }} <span *ngIf="!isLastElement(prueba, inscripcion.pruebasSeleccionadas)">,
-                </span>
-            </span>
+            <div class="pruebas-section">
+                <h4 class="pruebas-title">Pruebas Inscritas</h4>
+                <div class="pruebas-grid">
+                    <div class="prueba-card" *ngFor="let prueba of inscripcion.pruebasSeleccionadas">
+                        <div class="prueba-nombre">{{ prueba.nombre_prueba }}</div>
+                        <div class="prueba-categoria">{{ prueba.categoria_id.nombre_categoria }}</div>
+                    </div>
+                </div>
+            </div>
 
-            <button (click)="editarInscripcion(inscripcion._id)">Editar</button>
-            <button (click)="borrarInscripcion(inscripcion._id)">Borrar</button>
+            <div class="acciones-section">
+                <button class="btn-accion btn-editar" (click)="editarInscripcion(inscripcion._id)">
+                    <i class="fas fa-edit"></i>
+                    Editar
+                </button>
+                <button class="btn-accion btn-borrar" (click)="borrarInscripcion(inscripcion._id)">
+                    <i class="fas fa-trash"></i>
+                    Borrar
+                </button>
+            </div>
         </li>
-
     </ul>
 </div>
 
 <ng-template #noInscripciones>
-    <p>No tienes inscripciones realizadas.</p>
+    <div class="no-inscripciones">
+        <i class="fas fa-info-circle"></i>
+        <p>No tienes inscripciones realizadas.</p>
+    </div>
 </ng-template>

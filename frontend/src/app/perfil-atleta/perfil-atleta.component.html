@@ -13,7 +13,7 @@
                     </span>
                     <span class="meta-item">
                         <i class="fas fa-running"></i>
-                        {{ calcularCategoria() }}
+                        Categoría: {{ calcularCategoria() }}
                     </span>
                 </div>
             </div>
@@ -91,20 +91,49 @@
                             <div class="record-mark">
                                 <ng-container *ngIf="marca.metros">
                                     {{marca.metros}}m
+                                    <span *ngIf="esVientoIlegal(marca.viento)" class="wind-warning">*</span>
                                 </ng-container>
                                 <ng-container *ngIf="marca.horas || marca.minutos || marca.segundos">
                                     {{formatearTiempo(marca.horas, marca.minutos, marca.segundos)}}
+                                    <span *ngIf="esVientoIlegal(marca.viento)" class="wind-warning">*</span>
                                 </ng-container>
                                 <ng-container *ngIf="marca.puntos">
                                     {{marca.puntos}} pts
+                                    <span *ngIf="esVientoIlegal(marca.viento)" class="wind-warning">*</span>
                                 </ng-container>
                             </div>
                             <div class="record-details">
                                 <span><i class="fas fa-calendar"></i> {{(convertirFecha(marca.fecha_realizacion) | date:'dd/MM/yyyy') ?? 'Fecha no disponible'}}</span>
                                 <span><i class="fas fa-map-marker-alt"></i> {{marca.lugar || 'Lugar no disponible'}}</span>
-                                <span *ngIf="marca.segundos && !marca.horas && !marca.minutos && marca.viento" class="wind-info">
+                                <span *ngIf="marca.segundos && !marca.horas && !marca.minutos && marca.viento !== undefined" class="wind-info">
                                     <i class="fas fa-wind"></i> {{marca.viento}} m/s
                                 </span>
+                            </div>
+                            <!-- Mostrar la mejor marca legal si la mejor marca es con viento ilegal -->
+                            <div *ngIf="esVientoIlegal(marca.viento) && mejoresMarcasLegales[marca.nombre_prueba._id]" class="legal-mark">
+                                <div class="legal-mark-label">Mejor marca con viento legal:</div>
+                                <div class="legal-mark-value">
+                                    <ng-container *ngIf="mejoresMarcasLegales[marca.nombre_prueba._id].metros">
+                                        {{mejoresMarcasLegales[marca.nombre_prueba._id].metros}}m
+                                    </ng-container>
+                                    <ng-container *ngIf="mejoresMarcasLegales[marca.nombre_prueba._id].horas || mejoresMarcasLegales[marca.nombre_prueba._id].minutos || mejoresMarcasLegales[marca.nombre_prueba._id].segundos">
+                                        {{formatearTiempo(
+                                            mejoresMarcasLegales[marca.nombre_prueba._id].horas,
+                                            mejoresMarcasLegales[marca.nombre_prueba._id].minutos,
+                                            mejoresMarcasLegales[marca.nombre_prueba._id].segundos
+                                        )}}
+                                    </ng-container>
+                                    <ng-container *ngIf="mejoresMarcasLegales[marca.nombre_prueba._id].puntos">
+                                        {{mejoresMarcasLegales[marca.nombre_prueba._id].puntos}} pts
+                                    </ng-container>
+                                </div>
+                                <div class="legal-mark-details">
+                                    <span><i class="fas fa-calendar"></i> {{(convertirFecha(mejoresMarcasLegales[marca.nombre_prueba._id].fecha_realizacion) | date:'dd/MM/yyyy') ?? 'Fecha no disponible'}}</span>
+                                    <span><i class="fas fa-map-marker-alt"></i> {{mejoresMarcasLegales[marca.nombre_prueba._id].lugar || 'Lugar no disponible'}}</span>
+                                    <span *ngIf="mejoresMarcasLegales[marca.nombre_prueba._id].viento" class="wind-info">
+                                        <i class="fas fa-wind"></i> {{mejoresMarcasLegales[marca.nombre_prueba._id].viento}} m/s
+                                    </span>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -144,20 +173,49 @@
                             <div class="record-mark">
                                 <ng-container *ngIf="marca.metros">
                                     {{marca.metros}}m
+                                    <span *ngIf="esVientoIlegal(marca.viento)" class="wind-warning">*</span>
                                 </ng-container>
                                 <ng-container *ngIf="marca.horas || marca.minutos || marca.segundos">
                                     {{formatearTiempo(marca.horas, marca.minutos, marca.segundos)}}
+                                    <span *ngIf="esVientoIlegal(marca.viento)" class="wind-warning">*</span>
                                 </ng-container>
                                 <ng-container *ngIf="marca.puntos">
                                     {{marca.puntos}} pts
+                                    <span *ngIf="esVientoIlegal(marca.viento)" class="wind-warning">*</span>
                                 </ng-container>
                             </div>
                             <div class="record-details">
                                 <span><i class="fas fa-calendar"></i> {{(convertirFecha(marca.fecha_realizacion) | date:'dd/MM/yyyy') ?? 'Fecha no disponible'}}</span>
                                 <span><i class="fas fa-map-marker-alt"></i> {{marca.lugar || 'Lugar no disponible'}}</span>
-                                <span *ngIf="marca.segundos && !marca.horas && !marca.minutos && marca.viento" class="wind-info">
+                                <span *ngIf="marca.segundos && !marca.horas && !marca.minutos && marca.viento !== undefined" class="wind-info">
                                     <i class="fas fa-wind"></i> {{marca.viento}} m/s
                                 </span>
+                            </div>
+                            <!-- Mostrar la mejor marca legal si la mejor marca es con viento ilegal -->
+                            <div *ngIf="esVientoIlegal(marca.viento) && mejoresMarcasLegales[marca.nombre_prueba._id]" class="legal-mark">
+                                <div class="legal-mark-label">Mejor marca con viento legal:</div>
+                                <div class="legal-mark-value">
+                                    <ng-container *ngIf="mejoresMarcasLegales[marca.nombre_prueba._id].metros">
+                                        {{mejoresMarcasLegales[marca.nombre_prueba._id].metros}}m
+                                    </ng-container>
+                                    <ng-container *ngIf="mejoresMarcasLegales[marca.nombre_prueba._id].horas || mejoresMarcasLegales[marca.nombre_prueba._id].minutos || mejoresMarcasLegales[marca.nombre_prueba._id].segundos">
+                                        {{formatearTiempo(
+                                            mejoresMarcasLegales[marca.nombre_prueba._id].horas,
+                                            mejoresMarcasLegales[marca.nombre_prueba._id].minutos,
+                                            mejoresMarcasLegales[marca.nombre_prueba._id].segundos
+                                        )}}
+                                    </ng-container>
+                                    <ng-container *ngIf="mejoresMarcasLegales[marca.nombre_prueba._id].puntos">
+                                        {{mejoresMarcasLegales[marca.nombre_prueba._id].puntos}} pts
+                                    </ng-container>
+                                </div>
+                                <div class="legal-mark-details">
+                                    <span><i class="fas fa-calendar"></i> {{(convertirFecha(mejoresMarcasLegales[marca.nombre_prueba._id].fecha_realizacion) | date:'dd/MM/yyyy') ?? 'Fecha no disponible'}}</span>
+                                    <span><i class="fas fa-map-marker-alt"></i> {{mejoresMarcasLegales[marca.nombre_prueba._id].lugar || 'Lugar no disponible'}}</span>
+                                    <span *ngIf="mejoresMarcasLegales[marca.nombre_prueba._id].viento" class="wind-info">
+                                        <i class="fas fa-wind"></i> {{mejoresMarcasLegales[marca.nombre_prueba._id].viento}} m/s
+                                    </span>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -172,24 +230,107 @@
                         <div class="progression-years">
                             <div class="year-mark" *ngFor="let anyo of anyosPorPrueba[prueba._id]">
                                 <div class="year">{{anyo}}</div>
-                                <div class="mark">
-                                    {{cargarMejorMarcaPorAnyo(prueba._id, anyo)}}
-                                    <ng-container *ngIf="marcasPorPruebaAnyo[prueba._id + '-' + anyo]?.metros">
-                                        {{marcasPorPruebaAnyo[prueba._id + '-' + anyo].metros}}m
-                                    </ng-container>
-                                    <ng-container *ngIf="marcasPorPruebaAnyo[prueba._id + '-' + anyo]?.horas || marcasPorPruebaAnyo[prueba._id + '-' + anyo]?.minutos || marcasPorPruebaAnyo[prueba._id + '-' + anyo]?.segundos">
-                                        {{formatearTiempo(
-                                            marcasPorPruebaAnyo[prueba._id + '-' + anyo].horas,
-                                            marcasPorPruebaAnyo[prueba._id + '-' + anyo].minutos,
-                                            marcasPorPruebaAnyo[prueba._id + '-' + anyo].segundos
-                                        )}}
-                                        <span *ngIf="marcasPorPruebaAnyo[prueba._id + '-' + anyo].segundos && !marcasPorPruebaAnyo[prueba._id + '-' + anyo].horas && !marcasPorPruebaAnyo[prueba._id + '-' + anyo].minutos && marcasPorPruebaAnyo[prueba._id + '-' + anyo].viento" class="wind-info-small">
-                                            <i class="fas fa-wind"></i> {{marcasPorPruebaAnyo[prueba._id + '-' + anyo].viento}} m/s
-                                        </span>
-                                    </ng-container>
-                                    <ng-container *ngIf="marcasPorPruebaAnyo[prueba._id + '-' + anyo]?.puntos">
-                                        {{marcasPorPruebaAnyo[prueba._id + '-' + anyo].puntos}} pts
-                                    </ng-container>
+                                <div class="marks-container">
+                                    <div class="mark">
+                                        {{cargarMejorMarcaPorAnyo(prueba._id, anyo)}}
+                                        <ng-container *ngIf="marcasPorPruebaAnyo[prueba._id + '-' + anyo]?.metros">
+                                            {{marcasPorPruebaAnyo[prueba._id + '-' + anyo].metros}}m
+                                            <span *ngIf="marcasPorPruebaAnyo[prueba._id + '-' + anyo].segundos && !marcasPorPruebaAnyo[prueba._id + '-' + anyo].horas && !marcasPorPruebaAnyo[prueba._id + '-' + anyo].minutos && marcasPorPruebaAnyo[prueba._id + '-' + anyo].viento !== undefined" class="wind-info-small">
+                                                <i class="fas fa-wind"></i> {{marcasPorPruebaAnyo[prueba._id + '-' + anyo].viento}} m/s
+                                            </span>
+                                            <span *ngIf="esVientoIlegal(marcasPorPruebaAnyo[prueba._id + '-' + anyo].viento)" class="wind-warning">*</span>
+                                        </ng-container>
+                                        <ng-container *ngIf="marcasPorPruebaAnyo[prueba._id + '-' + anyo]?.horas || marcasPorPruebaAnyo[prueba._id + '-' + anyo]?.minutos || marcasPorPruebaAnyo[prueba._id + '-' + anyo]?.segundos">
+                                            {{formatearTiempo(
+                                                marcasPorPruebaAnyo[prueba._id + '-' + anyo].horas,
+                                                marcasPorPruebaAnyo[prueba._id + '-' + anyo].minutos,
+                                                marcasPorPruebaAnyo[prueba._id + '-' + anyo].segundos
+                                            )}}
+                                            <span *ngIf="marcasPorPruebaAnyo[prueba._id + '-' + anyo].segundos && !marcasPorPruebaAnyo[prueba._id + '-' + anyo].horas && !marcasPorPruebaAnyo[prueba._id + '-' + anyo].minutos && marcasPorPruebaAnyo[prueba._id + '-' + anyo].viento !== undefined" class="wind-info-small">
+                                                <i class="fas fa-wind"></i> {{marcasPorPruebaAnyo[prueba._id + '-' + anyo].viento}} m/s
+                                            </span>
+                                            <span *ngIf="esVientoIlegal(marcasPorPruebaAnyo[prueba._id + '-' + anyo].viento)" class="wind-warning">*</span>
+                                        </ng-container>
+                                        <ng-container *ngIf="marcasPorPruebaAnyo[prueba._id + '-' + anyo]?.puntos">
+                                            {{marcasPorPruebaAnyo[prueba._id + '-' + anyo].puntos}} pts
+                                            <span *ngIf="esVientoIlegal(marcasPorPruebaAnyo[prueba._id + '-' + anyo].viento)" class="wind-warning">*</span>
+                                        </ng-container>
+                                    </div>
+                                    <!-- Marca legal como elemento independiente -->
+                                    <div *ngIf="esVientoIlegal(marcasPorPruebaAnyo[prueba._id + '-' + anyo]?.viento) && marcasPorPruebaAnyo[prueba._id + '-' + anyo + '-legal']" class="mark legal">
+                                        <div class="legal-mark-label">Legal:</div>
+                                        <ng-container *ngIf="marcasPorPruebaAnyo[prueba._id + '-' + anyo + '-legal'].metros">
+                                            {{marcasPorPruebaAnyo[prueba._id + '-' + anyo + '-legal'].metros}}m
+                                            <span class="wind-info-small">
+                                                <i class="fas fa-wind"></i> {{marcasPorPruebaAnyo[prueba._id + '-' + anyo + '-legal'].viento}} m/s
+                                            </span>
+                                        </ng-container>
+                                        <ng-container *ngIf="marcasPorPruebaAnyo[prueba._id + '-' + anyo + '-legal'].horas || marcasPorPruebaAnyo[prueba._id + '-' + anyo + '-legal'].minutos || marcasPorPruebaAnyo[prueba._id + '-' + anyo + '-legal'].segundos">
+                                            {{formatearTiempo(
+                                                marcasPorPruebaAnyo[prueba._id + '-' + anyo + '-legal'].horas,
+                                                marcasPorPruebaAnyo[prueba._id + '-' + anyo + '-legal'].minutos,
+                                                marcasPorPruebaAnyo[prueba._id + '-' + anyo + '-legal'].segundos
+                                            )}}
+                                            <span class="wind-info-small">
+                                                <i class="fas fa-wind"></i> {{marcasPorPruebaAnyo[prueba._id + '-' + anyo + '-legal'].viento}} m/s
+                                            </span>
+                                        </ng-container>
+                                        <ng-container *ngIf="marcasPorPruebaAnyo[prueba._id + '-' + anyo + '-legal'].puntos">
+                                            {{marcasPorPruebaAnyo[prueba._id + '-' + anyo + '-legal'].puntos}} pts
+                                            <span class="wind-info-small">
+                                                <i class="fas fa-wind"></i> {{marcasPorPruebaAnyo[prueba._id + '-' + anyo + '-legal'].viento}} m/s
+                                            </span>
+                                        </ng-container>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Resultados -->
+            <div *ngIf="activeTab === 'resultados'" class="tab-pane active">
+                <div class="filters-container">
+                    <div class="filter-group">
+                        <label for="anyo">
+                            <i class="fas fa-calendar-alt"></i> Año
+                        </label>
+                        <select id="anyo" [(ngModel)]="filtroAnyo" (ngModelChange)="onAnyoChange($event)">
+                            <option *ngFor="let anyo of anyos" [value]="anyo">{{anyo}}</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="results-container">
+                    <div class="results-grid">
+                        <div class="result-card" *ngFor="let prueba of pruebas">
+                            <h3 class="result-title">{{prueba.nombre_prueba}}</h3>
+                            <div class="result-marks">
+                                <div class="mark-item" *ngFor="let marca of marcasPorPrueba[prueba._id]">
+                                    <div class="mark-details">
+                                        <div class="mark-value">
+                                            <ng-container *ngIf="marca.metros">
+                                                {{marca.metros}}m
+                                                <span *ngIf="esVientoIlegal(marca.viento)" class="wind-warning">*</span>
+                                            </ng-container>
+                                            <ng-container *ngIf="marca.horas || marca.minutos || marca.segundos">
+                                                {{formatearTiempo(marca.horas, marca.minutos, marca.segundos)}}
+                                                <span *ngIf="esVientoIlegal(marca.viento)" class="wind-warning">*</span>
+                                            </ng-container>
+                                            <ng-container *ngIf="marca.puntos">
+                                                {{marca.puntos}} pts
+                                                <span *ngIf="esVientoIlegal(marca.viento)" class="wind-warning">*</span>
+                                            </ng-container>
+                                        </div>
+                                        <div class="mark-info">
+                                            <span><i class="fas fa-calendar"></i> {{(convertirFecha(marca.fecha_realizacion) | date:'dd/MM/yyyy') ?? 'Fecha no disponible'}}</span>
+                                            <span><i class="fas fa-map-marker-alt"></i> {{marca.lugar || 'Lugar no disponible'}}</span>
+                                            <span *ngIf="marca.segundos && !marca.horas && !marca.minutos && marca.viento !== undefined" class="wind-info">
+                                                <i class="fas fa-wind"></i> {{marca.viento}} m/s
+                                            </span>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>

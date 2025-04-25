@@ -1,281 +1,892 @@
-<div class="calendar-container">
+<div class="calendar-wrapper">
+  <!-- Panel de filtros -->
+  <div class="filters-panel">
+    <h3>Filtros de Entrenamiento</h3>
+    <form [formGroup]="filtersForm" class="filters-form">
+      <div class="form-group">
+        <label for="tipo">Tipo de Entrenamiento</label>
+        <select
+          id="tipo"
+          formControlName="tipo"
+          class="form-control"
+          (change)="onFilterTypeChange($event)"
+        >
+          <option value="">Todos los tipos</option>
+          <option value="Técnica">Técnica</option>
+          <option value="Pesas">Pesas</option>
+          <option value="Series">Series</option>
+          <option value="Velocidad">Velocidad</option>
+          <option value="Vallas">Vallas</option>
+          <option value="Multisaltos">Multisaltos</option>
+          <option value="Multilanzamientos">Multilanzamientos</option>
+          <option value="Rodaje">Rodaje</option>
+          <option value="Cuestas">Cuestas</option>
+          <option value="Lastre">Lastre</option>
+          <option value="Extras">Extras</option>
+          <option value="Test">Test</option>
+          <option value="Competición">Competición</option>
+        </select>
+      </div>
+
+      <!-- Campos específicos según el tipo de entrenamiento -->
+      <div class="filter-fields" *ngIf="filtersForm.get('tipo')?.value">
+        <!-- Técnica -->
+        <div
+          class="filter-section"
+          *ngIf="filtersForm.get('tipo')?.value === 'Técnica'"
+        >
+          <div class="form-group">
+            <label>Técnica</label>
+            <input
+              type="text"
+              formControlName="tecnica"
+              class="form-control"
+              placeholder="Buscar técnica..."
+            />
+          </div>
+        </div>
+
+        <!-- Pesas -->
+        <div
+          class="filter-section"
+          *ngIf="filtersForm.get('tipo')?.value === 'Pesas'"
+        >
+          <div class="form-group">
+            <label>Series</label>
+            <input
+              type="text"
+              formControlName="pesas_series"
+              class="form-control"
+              placeholder="Número de series..."
+            />
+          </div>
+          <div class="form-group">
+            <label>Repeticiones</label>
+            <input
+              type="text"
+              formControlName="pesas_repeticiones"
+              class="form-control"
+              placeholder="Número de repeticiones..."
+            />
+          </div>
+          <div class="form-group">
+            <label>Porcentaje</label>
+            <input
+              type="text"
+              formControlName="pesas_porcentaje"
+              class="form-control"
+              placeholder="Porcentaje..."
+            />
+          </div>
+        </div>
+
+        <!-- Series -->
+        <div
+          class="filter-section"
+          *ngIf="filtersForm.get('tipo')?.value === 'Series'"
+        >
+          <div class="form-group">
+            <label>Número de Series</label>
+            <input
+              type="text"
+              formControlName="series_numeroSeries"
+              class="form-control"
+              placeholder="Número de series..."
+            />
+          </div>
+          <div class="form-group">
+            <label>Metros</label>
+            <input
+              type="text"
+              formControlName="series_metros"
+              class="form-control"
+              placeholder="Metros..."
+            />
+          </div>
+          <div class="form-group">
+            <label>Recuperación</label>
+            <input
+              type="text"
+              formControlName="series_recuperacion"
+              class="form-control"
+              placeholder="Tiempo de recuperación..."
+            />
+          </div>
+        </div>
+
+        <!-- Velocidad -->
+        <div
+          class="filter-section"
+          *ngIf="filtersForm.get('tipo')?.value === 'Velocidad'"
+        >
+          <div class="form-group">
+            <label>Número de Series</label>
+            <input
+              type="text"
+              formControlName="velocidad_numeroSeries"
+              class="form-control"
+              placeholder="Número de series..."
+            />
+          </div>
+          <div class="form-group">
+            <label>Metros</label>
+            <input
+              type="text"
+              formControlName="velocidad_metros"
+              class="form-control"
+              placeholder="Metros..."
+            />
+          </div>
+          <div class="form-group">
+            <label>Porcentaje</label>
+            <input
+              type="text"
+              formControlName="velocidad_porcentaje"
+              class="form-control"
+              placeholder="Porcentaje..."
+            />
+          </div>
+        </div>
+
+        <!-- Vallas -->
+        <div
+          class="filter-section"
+          *ngIf="filtersForm.get('tipo')?.value === 'Vallas'"
+        >
+          <div class="form-group">
+            <label>Número de Series</label>
+            <input
+              type="text"
+              formControlName="vallas_numeroSeries"
+              class="form-control"
+              placeholder="Número de series..."
+            />
+          </div>
+          <div class="form-group">
+            <label>Número de Vallas</label>
+            <input
+              type="text"
+              formControlName="vallas_numeroVallas"
+              class="form-control"
+              placeholder="Número de vallas..."
+            />
+          </div>
+        </div>
+
+        <!-- Multisaltos -->
+        <div
+          class="filter-section"
+          *ngIf="filtersForm.get('tipo')?.value === 'Multisaltos'"
+        >
+          <div class="form-group">
+            <label>Número de Saltos</label>
+            <input
+              type="text"
+              formControlName="multisaltos_numeroSaltos"
+              class="form-control"
+              placeholder="Número de saltos..."
+            />
+          </div>
+          <div class="form-group">
+            <label>Tipo</label>
+            <input
+              type="text"
+              formControlName="multisaltos_tipo"
+              class="form-control"
+              placeholder="Tipo de salto..."
+            />
+          </div>
+        </div>
+
+        <!-- Multilanzamientos -->
+        <div
+          class="filter-section"
+          *ngIf="filtersForm.get('tipo')?.value === 'Multilanzamientos'"
+        >
+          <div class="form-group">
+            <label>Número de Lanzamientos</label>
+            <input
+              type="text"
+              formControlName="multilanzamientos_numeroLanzamientos"
+              class="form-control"
+              placeholder="Número de lanzamientos..."
+            />
+          </div>
+          <div class="form-group">
+            <label>Tipo</label>
+            <input
+              type="text"
+              formControlName="multilanzamientos_tipo"
+              class="form-control"
+              placeholder="Tipo de lanzamiento..."
+            />
+          </div>
+        </div>
+
+        <!-- Rodaje -->
+        <div
+          class="filter-section"
+          *ngIf="filtersForm.get('tipo')?.value === 'Rodaje'"
+        >
+          <div class="form-group">
+            <label>Tiempo</label>
+            <input
+              type="text"
+              formControlName="rodaje_tiempo"
+              class="form-control"
+              placeholder="Tiempo de rodaje..."
+            />
+          </div>
+        </div>
+
+        <!-- Cuestas -->
+        <div
+          class="filter-section"
+          *ngIf="filtersForm.get('tipo')?.value === 'Cuestas'"
+        >
+          <div class="form-group">
+            <label>Número de Cuestas</label>
+            <input
+              type="text"
+              formControlName="cuestas_numeroCuestas"
+              class="form-control"
+              placeholder="Número de cuestas..."
+            />
+          </div>
+          <div class="form-group">
+            <label>Metros</label>
+            <input
+              type="text"
+              formControlName="cuestas_metros"
+              class="form-control"
+              placeholder="Metros..."
+            />
+          </div>
+        </div>
+
+        <!-- Lastre -->
+        <div
+          class="filter-section"
+          *ngIf="filtersForm.get('tipo')?.value === 'Lastre'"
+        >
+          <div class="form-group">
+            <label>Número de Series</label>
+            <input
+              type="text"
+              formControlName="lastre_numeroSeries"
+              class="form-control"
+              placeholder="Número de series..."
+            />
+          </div>
+          <div class="form-group">
+            <label>Metros</label>
+            <input
+              type="text"
+              formControlName="lastre_metros"
+              class="form-control"
+              placeholder="Metros..."
+            />
+          </div>
+          <div class="form-group">
+            <label>Kilos</label>
+            <input
+              type="text"
+              formControlName="lastre_kilos"
+              class="form-control"
+              placeholder="Kilos..."
+            />
+          </div>
+        </div>
+
+        <!-- Extras -->
+        <div
+          class="filter-section"
+          *ngIf="filtersForm.get('tipo')?.value === 'Extras'"
+        >
+          <div class="form-group">
+            <label>Comentario</label>
+            <input
+              type="text"
+              formControlName="comentario"
+              class="form-control"
+              placeholder="Buscar en comentarios..."
+            />
+          </div>
+        </div>
+
+        <!-- Test -->
+        <div
+          class="filter-section"
+          *ngIf="filtersForm.get('tipo')?.value === 'Test'"
+        >
+          <div class="form-group">
+            <label>Comentario</label>
+            <input
+              type="text"
+              formControlName="comentario"
+              class="form-control"
+              placeholder="Buscar en comentarios..."
+            />
+          </div>
+        </div>
+
+        <!-- Competición -->
+        <div
+          class="filter-section"
+          *ngIf="filtersForm.get('tipo')?.value === 'Competición'"
+        >
+          <div class="form-group">
+            <label>Nombre</label>
+            <input
+              type="text"
+              formControlName="competicion_nombre"
+              class="form-control"
+              placeholder="Nombre de la competición..."
+            />
+          </div>
+          <div class="form-group">
+            <label>Lugar</label>
+            <input
+              type="text"
+              formControlName="competicion_lugar"
+              class="form-control"
+              placeholder="Lugar de la competición..."
+            />
+          </div>
+        </div>
+      </div>
+
+      <div class="form-actions">
+        <button type="button" (click)="applyFilters()" class="apply-button">
+          Aplicar Filtros
+        </button>
+        <button type="button" (click)="clearFilters()" class="clear-button">
+          Limpiar Filtros
+        </button>
+      </div>
+    </form>
+
+    <!-- Resultados del filtro -->
+    <div class="filter-results" *ngIf="filteredDays.length > 0">
+      <h4>Resultados de la búsqueda</h4>
+      <div class="results-container">
+        <div class="result-card" *ngFor="let day of filteredDays">
+          <div class="result-header">
+            <span class="day-name">{{ getDayName(day.date) }}</span>
+            <span class="day-date"
+              >{{ day.date.getDate() }}/{{ day.date.getMonth() + 1 }}/{{
+                day.date.getFullYear()
+              }}</span
+            >
+          </div>
+          <div class="result-content">
+            <div
+              class="training-item"
+              *ngFor="let entrenamiento of day.diaEntrenamiento?.entrenamientos"
+            >
+              <div class="training-type">{{ entrenamiento.tipo }}</div>
+              <div class="training-details">
+                <!-- Técnica -->
+                <div *ngIf="entrenamiento.tipo === 'Técnica'">
+                  <ul>
+                    <li *ngFor="let t of entrenamiento.tecnica">
+                      {{ t.tecnica }}
+                    </li>
+                  </ul>
+                </div>
+                <!-- Pesas -->
+                <div *ngIf="entrenamiento.tipo === 'Pesas'">
+                  <ul>
+                    <li *ngFor="let p of entrenamiento.pesas">
+                      {{ p.series }}x{{ p.repeticiones }} ({{ p.porcentaje }}%)
+                    </li>
+                  </ul>
+                </div>
+                <!-- Series -->
+                <div *ngIf="entrenamiento.tipo === 'Series'">
+                  <ul>
+                    <li *ngFor="let s of entrenamiento.serie">
+                      {{ s.numeroSeries }}x{{ s.metros }}m ({{
+                        s.recuperacion
+                      }})
+                    </li>
+                  </ul>
+                </div>
+                <!-- Velocidad -->
+                <div *ngIf="entrenamiento.tipo === 'Velocidad'">
+                  <ul>
+                    <li *ngFor="let v of entrenamiento.velocidad">
+                      {{ v.numeroSeries }}x{{ v.metros }}m ({{ v.porcentaje }}%)
+                    </li>
+                  </ul>
+                </div>
+                <!-- Vallas -->
+                <div *ngIf="entrenamiento.tipo === 'Vallas'">
+                  <ul>
+                    <li *ngFor="let v of entrenamiento.vallas">
+                      {{ v.numeroSeries }}x{{ v.numeroVallas }}v ({{
+                        v.recuperacion
+                      }})
+                    </li>
+                  </ul>
+                </div>
+                <!-- Multisaltos -->
+                <div *ngIf="entrenamiento.tipo === 'Multisaltos'">
+                  <ul>
+                    <li *ngFor="let m of entrenamiento.multisaltos">
+                      {{ m.numeroSaltos }} {{ m.tipo }}
+                    </li>
+                  </ul>
+                </div>
+                <!-- Multilanzamientos -->
+                <div *ngIf="entrenamiento.tipo === 'Multilanzamientos'">
+                  <ul>
+                    <li *ngFor="let m of entrenamiento.multilanzamientos">
+                      {{ m.numeroLanzamientos }} {{ m.tipo }}
+                    </li>
+                  </ul>
+                </div>
+                <!-- Rodaje -->
+                <div *ngIf="entrenamiento.tipo === 'Rodaje'">
+                  <p>Tiempo: {{ entrenamiento.rodaje?.tiempo }}</p>
+                </div>
+                <!-- Cuestas -->
+                <div *ngIf="entrenamiento.tipo === 'Cuestas'">
+                  <ul>
+                    <li *ngFor="let c of entrenamiento.cuestas">
+                      {{ c.numeroCuestas }}x{{ c.metros }}m ({{
+                        c.recuperacion
+                      }})
+                    </li>
+                  </ul>
+                </div>
+                <!-- Lastre -->
+                <div *ngIf="entrenamiento.tipo === 'Lastre'">
+                  <ul>
+                    <li *ngFor="let l of entrenamiento.lastre">
+                      {{ l.numeroSeries }}x{{ l.metros }}m ({{ l.kilos }}kg)
+                    </li>
+                  </ul>
+                </div>
+                <!-- Extras -->
+                <div *ngIf="entrenamiento.tipo === 'Extras'">
+                  <ul>
+                    <li *ngFor="let e of entrenamiento.extras">
+                      {{ e.comentario }}
+                    </li>
+                  </ul>
+                </div>
+                <!-- Test -->
+                <div *ngIf="entrenamiento.tipo === 'Test'">
+                  <p>{{ entrenamiento.test?.comentario }}</p>
+                </div>
+                <!-- Competición -->
+                <div *ngIf="entrenamiento.tipo === 'Competición'">
+                  <p>{{ entrenamiento.competicion?.nombre }}</p>
+                  <p>{{ entrenamiento.competicion?.lugar }}</p>
+                </div>
+
+                <!-- Resultado del atleta -->
+                <div *ngIf="getEntrenamientoResultado(entrenamiento._id)" class="resultado-content">
+                  <strong>Mi resultado:</strong>
+                  {{ getEntrenamientoResultado(entrenamiento._id) }}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Calendario existente -->
+  <div class="calendar-container">
     <div class="calendar-header">
-        <button (click)="previousMonth()">Anterior</button>
-        <h2>{{ getMonthName(currentMonth) }} {{ currentYear }}</h2>
-        <button (click)="nextMonth()">Siguiente</button>
+      <button (click)="previousMonth()">Anterior</button>
+      <h2>{{ getMonthName(currentMonth) }} {{ currentYear }}</h2>
+      <button (click)="nextMonth()">Siguiente</button>
     </div>
 
     <div class="calendar-grid">
-        <div class="day-header" *ngFor="let day of ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom']">
-            {{ day }}
-        </div>
+      <div
+        class="day-header"
+        *ngFor="let day of ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom']"
+      >
+        {{ day }}
+      </div>
 
-        <div class="day-cell" *ngFor="let day of daysInMonth" [class.empty-day]="!day">
-            <div class="calendar-day" *ngIf="day">
-                <div class="day-header-row">
-                    <span class="day-number">{{ day.date.getDate() }}</span>
-                    <button class="add-training" (click)="onClickAgregarOEditar(day.date)">
-                        <mat-icon>add</mat-icon>
-                    </button>
-                </div>
-                <div class="training-indicators">
-                    <div *ngFor="let entrenamiento of day.diaEntrenamiento?.entrenamientos" 
-                         class="training-indicator"
-                         [ngClass]="getTrainingClass(entrenamiento.tipo)"
-                         (click)="openTrainingDetails(entrenamiento)">
-                        <mat-icon>{{getTrainingIcon(entrenamiento.tipo)}}</mat-icon>
-                        <span>{{entrenamiento.tipo}}</span>
-                    </div>
-                </div>
+      <div
+        class="day-cell"
+        *ngFor="let day of daysInMonth"
+        [class.empty-day]="!day"
+      >
+        <div class="calendar-day" *ngIf="day">
+          <div class="day-header-row">
+            <span class="day-number">{{ day.date.getDate() }}</span>
+            <button
+              class="add-training"
+              (click)="onClickAgregarOEditar(day.date)"
+              *ngIf="canAddTraining()"
+            >
+              <mat-icon>add</mat-icon>
+            </button>
+          </div>
+          <div class="training-indicators">
+            <div
+              *ngFor="let entrenamiento of day.diaEntrenamiento?.entrenamientos"
+              class="training-indicator"
+              [ngClass]="getTrainingClass(entrenamiento.tipo)"
+              (click)="openTrainingDetails(entrenamiento)"
+            >
+              <mat-icon>{{ getTrainingIcon(entrenamiento.tipo) }}</mat-icon>
+              <span>{{ entrenamiento.tipo }}</span>
             </div>
+          </div>
         </div>
+      </div>
     </div>
+  </div>
 </div>
 
 <!-- Popup para otros entrenamientos -->
-<div class="trainings-popup" *ngIf="showPopup && selectedDay" [style.left.px]="popupPosition.x" [style.top.px]="popupPosition.y">
-    <div class="popup-header">
-        <h4>{{ getDayName(selectedDay.date) }} {{ selectedDay.date.getDate().toString().padStart(2, '0') }}/{{ (selectedDay.date.getMonth() + 1).toString().padStart(2, '0') }}/{{ selectedDay.date.getFullYear() }}</h4>
-        <button class="close-button" (click)="toggleTrainingsPopup(selectedDay)">
-            <mat-icon>close</mat-icon>
-        </button>
-    </div>
-    <div class="popup-content">
-        <div class="training-item" *ngFor="let entrenamiento of selectedDay.diaEntrenamiento?.entrenamientos">
-            <div *ngIf="entrenamiento.tipo !== 'Competición'">
-                <div class="training-type">{{ entrenamiento.tipo }}</div>
-                <div class="training-details">
-                    <div *ngIf="entrenamiento.tipo === 'Técnica'">
-                        <ul>
-                            <li *ngFor="let t of entrenamiento.tecnica">
-                                {{t.tecnica}}
-                            </li>
-                        </ul>
-                    </div>
-                    <div *ngIf="entrenamiento.tipo === 'Pesas'">
-                        <ul>
-                            <li *ngFor="let p of entrenamiento.pesas">
-                                {{p.series}}x{{p.repeticiones}} ({{p.porcentaje}}%)
-                            </li>
-                        </ul>
-                    </div>
-                    <div *ngIf="entrenamiento.tipo === 'Series'">
-                        <ul>
-                            <li *ngFor="let s of entrenamiento.serie">
-                                {{s.numeroSeries}}x{{s.metros}}m ({{s.recuperacion}})
-                            </li>
-                        </ul>
-                    </div>
-                    <div *ngIf="entrenamiento.tipo === 'Velocidad'">
-                        <ul>
-                            <li *ngFor="let v of entrenamiento.velocidad">
-                                {{v.numeroSeries}}x{{v.metros}}m ({{v.porcentaje}}%)
-                            </li>
-                        </ul>
-                    </div>
-                    <div *ngIf="entrenamiento.tipo === 'Vallas'">
-                        <ul>
-                            <li *ngFor="let v of entrenamiento.vallas">
-                                {{v.numeroSeries}}x{{v.numeroVallas}}v ({{v.recuperacion}})
-                            </li>
-                        </ul>
-                    </div>
-                    <div *ngIf="entrenamiento.tipo === 'Multisaltos'">
-                        <ul>
-                            <li *ngFor="let m of entrenamiento.multisaltos">
-                                {{m.numeroSaltos}} {{m.tipo}}
-                            </li>
-                        </ul>
-                    </div>
-                    <div *ngIf="entrenamiento.tipo === 'Multilanzamientos'">
-                        <ul>
-                            <li *ngFor="let m of entrenamiento.multilanzamientos">
-                                {{m.numeroLanzamientos}} {{m.tipo}}
-                            </li>
-                        </ul>
-                    </div>
-                    <div *ngIf="entrenamiento.tipo === 'Rodaje'">
-                        <p>Tiempo: {{entrenamiento.rodaje?.tiempo}}</p>
-                    </div>
-                    <div *ngIf="entrenamiento.tipo === 'Cuestas'">
-                        <ul>
-                            <li *ngFor="let c of entrenamiento.cuestas">
-                                {{c.numeroCuestas}}x{{c.metros}}m ({{c.recuperacion}})
-                            </li>
-                        </ul>
-                    </div>
-                    <div *ngIf="entrenamiento.tipo === 'Lastre'">
-                        <ul>
-                            <li *ngFor="let l of entrenamiento.lastre">
-                                {{l.numeroSeries}}x{{l.metros}}m ({{l.kilos}}kg)
-                            </li>
-                        </ul>
-                    </div>
-                    <div *ngIf="entrenamiento.tipo === 'Extras'">
-                        <ul>
-                            <li *ngFor="let e of entrenamiento.extras">
-                                {{e.comentario}}
-                            </li>
-                        </ul>
-                    </div>
-                </div>
-            </div>
+<div
+  class="trainings-popup"
+  *ngIf="showPopup && selectedDay"
+  [style.left.px]="popupPosition.x"
+  [style.top.px]="popupPosition.y"
+>
+  <div class="popup-header">
+    <h4>
+      {{ getDayName(selectedDay.date) }}
+      {{ selectedDay.date.getDate().toString().padStart(2, "0") }}/{{
+        (selectedDay.date.getMonth() + 1).toString().padStart(2, "0")
+      }}/{{ selectedDay.date.getFullYear() }}
+    </h4>
+    <button class="close-button" (click)="toggleTrainingsPopup(selectedDay)">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+  <div class="popup-content">
+    <div
+      class="training-item"
+      *ngFor="let entrenamiento of selectedDay.diaEntrenamiento?.entrenamientos"
+    >
+      <div *ngIf="entrenamiento.tipo !== 'Competición'">
+        <div class="training-type">{{ entrenamiento.tipo }}</div>
+        <div class="training-details">
+          <div *ngIf="entrenamiento.tipo === 'Técnica'">
+            <ul>
+              <li *ngFor="let t of entrenamiento.tecnica">
+                {{ t.tecnica }}
+              </li>
+            </ul>
+          </div>
+          <div *ngIf="entrenamiento.tipo === 'Pesas'">
+            <ul>
+              <li *ngFor="let p of entrenamiento.pesas">
+                {{ p.series }}x{{ p.repeticiones }} ({{ p.porcentaje }}%)
+              </li>
+            </ul>
+          </div>
+          <div *ngIf="entrenamiento.tipo === 'Series'">
+            <ul>
+              <li *ngFor="let s of entrenamiento.serie">
+                {{ s.numeroSeries }}x{{ s.metros }}m ({{ s.recuperacion }})
+              </li>
+            </ul>
+          </div>
+          <div *ngIf="entrenamiento.tipo === 'Velocidad'">
+            <ul>
+              <li *ngFor="let v of entrenamiento.velocidad">
+                {{ v.numeroSeries }}x{{ v.metros }}m ({{ v.porcentaje }}%)
+              </li>
+            </ul>
+          </div>
+          <div *ngIf="entrenamiento.tipo === 'Vallas'">
+            <ul>
+              <li *ngFor="let v of entrenamiento.vallas">
+                {{ v.numeroSeries }}x{{ v.numeroVallas }}v ({{
+                  v.recuperacion
+                }})
+              </li>
+            </ul>
+          </div>
+          <div *ngIf="entrenamiento.tipo === 'Multisaltos'">
+            <ul>
+              <li *ngFor="let m of entrenamiento.multisaltos">
+                {{ m.numeroSaltos }} {{ m.tipo }}
+              </li>
+            </ul>
+          </div>
+          <div *ngIf="entrenamiento.tipo === 'Multilanzamientos'">
+            <ul>
+              <li *ngFor="let m of entrenamiento.multilanzamientos">
+                {{ m.numeroLanzamientos }} {{ m.tipo }}
+              </li>
+            </ul>
+          </div>
+          <div *ngIf="entrenamiento.tipo === 'Rodaje'">
+            <p>Tiempo: {{ entrenamiento.rodaje?.tiempo }}</p>
+          </div>
+          <div *ngIf="entrenamiento.tipo === 'Cuestas'">
+            <ul>
+              <li *ngFor="let c of entrenamiento.cuestas">
+                {{ c.numeroCuestas }}x{{ c.metros }}m ({{ c.recuperacion }})
+              </li>
+            </ul>
+          </div>
+          <div *ngIf="entrenamiento.tipo === 'Lastre'">
+            <ul>
+              <li *ngFor="let l of entrenamiento.lastre">
+                {{ l.numeroSeries }}x{{ l.metros }}m ({{ l.kilos }}kg)
+              </li>
+            </ul>
+          </div>
+          <div *ngIf="entrenamiento.tipo === 'Extras'">
+            <ul>
+              <li *ngFor="let e of entrenamiento.extras">
+                {{ e.comentario }}
+              </li>
+            </ul>
+          </div>
         </div>
+      </div>
     </div>
+  </div>
 </div>
 
 <!-- Modal de detalles del entrenamiento -->
 <div class="training-modal" *ngIf="showTrainingModal" [@modalAnimation]>
-    <div class="modal-content">
-        <div class="modal-header">
-            <h3>{{currentTraining?.tipo}}</h3>
-            <button class="close-button" (click)="closeTrainingDetails()">
-                <mat-icon>close</mat-icon>
-            </button>
-        </div>
-        <div class="modal-body">
-            <div class="training-details" *ngIf="currentTraining">
-                <h3>{{currentTraining.tipo}}</h3>
-                
-                <!-- Técnica -->
-                <div *ngIf="currentTraining.tipo === 'Técnica' && currentTraining.tecnica">
-                    <div *ngFor="let t of currentTraining.tecnica">
-                        <p><strong>Técnica:</strong> {{t.tecnica}}</p>
-                    </div>
-                </div>
-
-                <!-- Pesas -->
-                <div *ngIf="currentTraining.tipo === 'Pesas' && currentTraining.pesas">
-                    <div *ngFor="let p of currentTraining.pesas">
-                        <p><strong>Series:</strong> {{p.series}}</p>
-                        <p><strong>Repeticiones:</strong> {{p.repeticiones}}</p>
-                        <p><strong>Porcentaje:</strong> {{p.porcentaje}}</p>
-                        <p><strong>Comentario:</strong> {{p.comentario}}</p>
-                    </div>
-                </div>
-
-                <!-- Series -->
-                <div *ngIf="currentTraining.tipo === 'Series' && currentTraining.serie">
-                    <div *ngFor="let s of currentTraining.serie">
-                        <p><strong>Número de Series:</strong> {{s.numeroSeries}}</p>
-                        <p><strong>Metros:</strong> {{s.metros}}</p>
-                        <p><strong>Recuperación:</strong> {{s.recuperacion}}</p>
-                        <p><strong>Tiempo Objetivo:</strong> {{s.tiempoObjetivo}}</p>
-                        <p><strong>Comentario:</strong> {{s.comentario}}</p>
-                    </div>
-                </div>
-
-                <!-- Velocidad -->
-                <div *ngIf="currentTraining.tipo === 'Velocidad' && currentTraining.velocidad">
-                    <div *ngFor="let v of currentTraining.velocidad">
-                        <p><strong>Número de Series:</strong> {{v.numeroSeries}}</p>
-                        <p><strong>Metros:</strong> {{v.metros}}</p>
-                        <p><strong>Recuperación:</strong> {{v.recuperacion}}</p>
-                        <p><strong>Porcentaje:</strong> {{v.porcentaje}}</p>
-                        <p><strong>Comentario:</strong> {{v.comentario}}</p>
-                    </div>
-                </div>
-
-                <!-- Vallas -->
-                <div *ngIf="currentTraining.tipo === 'Vallas' && currentTraining.vallas">
-                    <div *ngFor="let v of currentTraining.vallas">
-                        <p><strong>Número de Series:</strong> {{v.numeroSeries}}</p>
-                        <p><strong>Número de Vallas:</strong> {{v.numeroVallas}}</p>
-                        <p><strong>Recuperación:</strong> {{v.recuperacion}}</p>
-                        <p><strong>Comentario:</strong> {{v.comentario}}</p>
-                    </div>
-                </div>
-
-                <!-- Multisaltos -->
-                <div *ngIf="currentTraining.tipo === 'Multisaltos' && currentTraining.multisaltos">
-                    <div *ngFor="let m of currentTraining.multisaltos">
-                        <p><strong>Número de Saltos:</strong> {{m.numeroSaltos}}</p>
-                        <p><strong>Tipo:</strong> {{m.tipo}}</p>
-                        <p><strong>Comentario:</strong> {{m.comentario}}</p>
-                    </div>
-                </div>
-
-                <!-- Multilanzamientos -->
-                <div *ngIf="currentTraining.tipo === 'Multilanzamientos' && currentTraining.multilanzamientos">
-                    <div *ngFor="let m of currentTraining.multilanzamientos">
-                        <p><strong>Número de Lanzamientos:</strong> {{m.numeroLanzamientos}}</p>
-                        <p><strong>Tipo:</strong> {{m.tipo}}</p>
-                        <p><strong>Comentario:</strong> {{m.comentario}}</p>
-                    </div>
-                </div>
-
-                <!-- Rodaje -->
-                <div *ngIf="currentTraining.tipo === 'Rodaje' && currentTraining.rodaje">
-                    <p><strong>Tiempo:</strong> {{currentTraining.rodaje.tiempo}}</p>
-                    <p><strong>Comentario:</strong> {{currentTraining.rodaje.comentario}}</p>
-                </div>
-
-                <!-- Cuestas -->
-                <div *ngIf="currentTraining.tipo === 'Cuestas' && currentTraining.cuestas">
-                    <div *ngFor="let c of currentTraining.cuestas">
-                        <p><strong>Número de Cuestas:</strong> {{c.numeroCuestas}}</p>
-                        <p><strong>Metros:</strong> {{c.metros}}</p>
-                        <p><strong>Recuperación:</strong> {{c.recuperacion}}</p>
-                        <p><strong>Comentario:</strong> {{c.comentario}}</p>
-                    </div>
-                </div>
-
-                <!-- Lastre -->
-                <div *ngIf="currentTraining.tipo === 'Lastre' && currentTraining.lastre">
-                    <div *ngFor="let l of currentTraining.lastre">
-                        <p><strong>Número de Series:</strong> {{l.numeroSeries}}</p>
-                        <p><strong>Metros:</strong> {{l.metros}}</p>
-                        <p><strong>Kilos:</strong> {{l.kilos}}</p>
-                        <p><strong>Recuperación:</strong> {{l.recuperacion}}</p>
-                        <p><strong>Comentario:</strong> {{l.comentario}}</p>
-                    </div>
-                </div>
-
-                <!-- Extras -->
-                <div *ngIf="currentTraining.tipo === 'Extras' && currentTraining.extras">
-                    <div *ngFor="let e of currentTraining.extras">
-                        <p><strong>Comentario:</strong> {{e.comentario}}</p>
-                    </div>
-                </div>
-
-                <!-- Test -->
-                <div *ngIf="currentTraining.tipo === 'Test' && currentTraining.test">
-                    <p><strong>Comentario:</strong> {{currentTraining.test.comentario}}</p>
-                </div>
-
-                <!-- Competición -->
-                <div *ngIf="currentTraining.tipo === 'Competición' && currentTraining.competicion">
-                    <p><strong>Nombre:</strong> {{currentTraining.competicion.nombre}}</p>
-                    <p><strong>Fecha:</strong> {{currentTraining.competicion.fecha | date:'dd/MM/yyyy'}}</p>
-                    <p><strong>Lugar:</strong> {{currentTraining.competicion.lugar}}</p>
-                </div>
-            </div>
-        </div>
-        <div class="modal-footer">
-            <button class="edit-button" (click)="editTraining(currentTraining)" *ngIf="currentTraining?.tipo !== 'Competición'">
-                <mat-icon>edit</mat-icon>
-                Editar
-            </button>
-            <button class="delete-button" (click)="deleteTraining(currentTraining)">
-                <mat-icon>delete</mat-icon>
-                Eliminar
-            </button>
-        </div>
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3>{{ currentTraining?.tipo }}</h3>
+      <button class="close-button" (click)="closeTrainingDetails()">
+        <mat-icon>close</mat-icon>
+      </button>
     </div>
+    <div class="modal-body">
+      <div class="training-details" *ngIf="currentTraining">
+        <h3>{{ currentTraining.tipo }}</h3>
+
+        <!-- Técnica -->
+        <div
+          *ngIf="currentTraining.tipo === 'Técnica' && currentTraining.tecnica"
+        >
+          <div *ngFor="let t of currentTraining.tecnica">
+            <p><strong>Técnica:</strong> {{ t.tecnica }}</p>
+          </div>
+        </div>
+
+        <!-- Pesas -->
+        <div *ngIf="currentTraining.tipo === 'Pesas' && currentTraining.pesas">
+          <div *ngFor="let p of currentTraining.pesas">
+            <p><strong>Series:</strong> {{ p.series }}</p>
+            <p><strong>Repeticiones:</strong> {{ p.repeticiones }}</p>
+            <p><strong>Porcentaje:</strong> {{ p.porcentaje }}</p>
+            <p><strong>Comentario:</strong> {{ p.comentario }}</p>
+          </div>
+        </div>
+
+        <!-- Series -->
+        <div *ngIf="currentTraining.tipo === 'Series' && currentTraining.serie">
+          <div *ngFor="let s of currentTraining.serie">
+            <p><strong>Número de Series:</strong> {{ s.numeroSeries }}</p>
+            <p><strong>Metros:</strong> {{ s.metros }}</p>
+            <p><strong>Recuperación:</strong> {{ s.recuperacion }}</p>
+            <p><strong>Tiempo Objetivo:</strong> {{ s.tiempoObjetivo }}</p>
+            <p><strong>Comentario:</strong> {{ s.comentario }}</p>
+          </div>
+        </div>
+
+        <!-- Velocidad -->
+        <div
+          *ngIf="
+            currentTraining.tipo === 'Velocidad' && currentTraining.velocidad
+          "
+        >
+          <div *ngFor="let v of currentTraining.velocidad">
+            <p><strong>Número de Series:</strong> {{ v.numeroSeries }}</p>
+            <p><strong>Metros:</strong> {{ v.metros }}</p>
+            <p><strong>Recuperación:</strong> {{ v.recuperacion }}</p>
+            <p><strong>Porcentaje:</strong> {{ v.porcentaje }}</p>
+            <p><strong>Comentario:</strong> {{ v.comentario }}</p>
+          </div>
+        </div>
+
+        <!-- Vallas -->
+        <div
+          *ngIf="currentTraining.tipo === 'Vallas' && currentTraining.vallas"
+        >
+          <div *ngFor="let v of currentTraining.vallas">
+            <p><strong>Número de Series:</strong> {{ v.numeroSeries }}</p>
+            <p><strong>Número de Vallas:</strong> {{ v.numeroVallas }}</p>
+            <p><strong>Recuperación:</strong> {{ v.recuperacion }}</p>
+            <p><strong>Comentario:</strong> {{ v.comentario }}</p>
+          </div>
+        </div>
+
+        <!-- Multisaltos -->
+        <div
+          *ngIf="
+            currentTraining.tipo === 'Multisaltos' &&
+            currentTraining.multisaltos
+          "
+        >
+          <div *ngFor="let m of currentTraining.multisaltos">
+            <p><strong>Número de Saltos:</strong> {{ m.numeroSaltos }}</p>
+            <p><strong>Tipo:</strong> {{ m.tipo }}</p>
+            <p><strong>Comentario:</strong> {{ m.comentario }}</p>
+          </div>
+        </div>
+
+        <!-- Multilanzamientos -->
+        <div
+          *ngIf="
+            currentTraining.tipo === 'Multilanzamientos' &&
+            currentTraining.multilanzamientos
+          "
+        >
+          <div *ngFor="let m of currentTraining.multilanzamientos">
+            <p>
+              <strong>Número de Lanzamientos:</strong>
+              {{ m.numeroLanzamientos }}
+            </p>
+            <p><strong>Tipo:</strong> {{ m.tipo }}</p>
+            <p><strong>Comentario:</strong> {{ m.comentario }}</p>
+          </div>
+        </div>
+
+        <!-- Rodaje -->
+        <div
+          *ngIf="currentTraining.tipo === 'Rodaje' && currentTraining.rodaje"
+        >
+          <p><strong>Tiempo:</strong> {{ currentTraining.rodaje.tiempo }}</p>
+          <p>
+            <strong>Comentario:</strong> {{ currentTraining.rodaje.comentario }}
+          </p>
+        </div>
+
+        <!-- Cuestas -->
+        <div
+          *ngIf="currentTraining.tipo === 'Cuestas' && currentTraining.cuestas"
+        >
+          <div *ngFor="let c of currentTraining.cuestas">
+            <p><strong>Número de Cuestas:</strong> {{ c.numeroCuestas }}</p>
+            <p><strong>Metros:</strong> {{ c.metros }}</p>
+            <p><strong>Recuperación:</strong> {{ c.recuperacion }}</p>
+            <p><strong>Comentario:</strong> {{ c.comentario }}</p>
+          </div>
+        </div>
+
+        <!-- Lastre -->
+        <div
+          *ngIf="currentTraining.tipo === 'Lastre' && currentTraining.lastre"
+        >
+          <div *ngFor="let l of currentTraining.lastre">
+            <p><strong>Número de Series:</strong> {{ l.numeroSeries }}</p>
+            <p><strong>Metros:</strong> {{ l.metros }}</p>
+            <p><strong>Kilos:</strong> {{ l.kilos }}</p>
+            <p><strong>Recuperación:</strong> {{ l.recuperacion }}</p>
+            <p><strong>Comentario:</strong> {{ l.comentario }}</p>
+          </div>
+        </div>
+
+        <!-- Extras -->
+        <div
+          *ngIf="currentTraining.tipo === 'Extras' && currentTraining.extras"
+        >
+          <div *ngFor="let e of currentTraining.extras">
+            <p><strong>Comentario:</strong> {{ e.comentario }}</p>
+          </div>
+        </div>
+
+        <!-- Test -->
+        <div *ngIf="currentTraining.tipo === 'Test' && currentTraining.test">
+          <p>
+            <strong>Comentario:</strong> {{ currentTraining.test.comentario }}
+          </p>
+        </div>
+
+        <!-- Competición -->
+        <div
+          *ngIf="
+            currentTraining.tipo === 'Competición' &&
+            currentTraining.competicion
+          "
+        >
+          <p>
+            <strong>Nombre:</strong> {{ currentTraining.competicion.nombre }}
+          </p>
+          <p>
+            <strong>Fecha:</strong>
+            {{ currentTraining.competicion.fecha | date : "dd/MM/yyyy" }}
+          </p>
+          <p><strong>Lugar:</strong> {{ currentTraining.competicion.lugar }}</p>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button
+        class="edit-button"
+        (click)="editTraining(currentTraining)"
+        *ngIf="currentTraining?.tipo !== 'Competición' && canAddTraining()"
+      >
+        <mat-icon>edit</mat-icon>
+        Editar
+      </button>
+      <button
+        class="delete-button"
+        (click)="deleteTraining(currentTraining)"
+        *ngIf="canAddTraining()"
+      >
+        <mat-icon>delete</mat-icon>
+        Eliminar
+      </button>
+
+      <!-- Botón para añadir/editar resultado (visible para atletas) -->
+      <button
+        class="add-result-button"
+        (click)="toggleAddResultado()"
+        *ngIf="!canAddTraining()"
+      >
+        <mat-icon>{{ miResultado ? "edit" : "add" }}</mat-icon>
+        {{ miResultado ? "Editar Resultado" : "Añadir Resultado" }}
+      </button>
+
+      <!-- Botón para ver resultados (visible para entrenadores) -->
+      <button
+        class="view-results-button"
+        (click)="toggleResultadosModal()"
+        *ngIf="canAddTraining()"
+      >
+        <mat-icon>list</mat-icon>
+        Ver Resultados
+      </button>
+    </div>
+  </div>
 </div>
 
 <!-- Modal de Edición -->
 <div class="modal" *ngIf="showEditModal">
   <div class="modal-content">
     <div class="modal-header">
-      <h2>{{ isEditing ? 'Editar Entrenamiento' : 'Nuevo Entrenamiento' }}</h2>
+      <h2>{{ isEditing ? "Editar Entrenamiento" : "Nuevo Entrenamiento" }}</h2>
       <button class="close-button" (click)="closeEditModal()">×</button>
     </div>
-    
-    <form [formGroup]="trainingForm" (ngSubmit)="onSubmit()" class="training-form">
+
+    <form
+      [formGroup]="trainingForm"
+      (ngSubmit)="onSubmit()"
+      class="training-form"
+    >
       <div class="form-group">
         <label for="tipo">Tipo de Entrenamiento</label>
-        <select id="tipo" formControlName="tipo" class="form-control" (change)="onTrainingTypeChange($event)">
+        <select
+          id="tipo"
+          formControlName="tipo"
+          class="form-control"
+          (change)="onTrainingTypeChange($event)"
+        >
           <option value="">Selecciona un tipo</option>
           <option value="Técnica">Técnica</option>
           <option value="Pesas">Pesas</option>
@@ -296,325 +907,761 @@
       <!-- Campos específicos según el tipo de entrenamiento -->
       <div class="training-fields" *ngIf="trainingForm.get('tipo')?.value">
         <!-- Técnica -->
-        <div class="training-section" *ngIf="trainingForm.get('tipo')?.value === 'Técnica'">
+        <div
+          class="training-section"
+          *ngIf="trainingForm.get('tipo')?.value === 'Técnica'"
+        >
           <h3>Técnicas</h3>
           <div formArrayName="tecnica" class="array-container">
-            <div *ngFor="let tecnica of tecnicaArray.controls; let i = index" [formGroupName]="i" class="array-item">
+            <div
+              *ngFor="let tecnica of tecnicaArray.controls; let i = index"
+              [formGroupName]="i"
+              class="array-item"
+            >
               <div class="form-group">
                 <label>Técnica</label>
-                <input type="text" formControlName="tecnica" class="form-control">
-                <button type="button" (click)="removeTecnica(i)" class="remove-button">Eliminar</button>
+                <input
+                  type="text"
+                  formControlName="tecnica"
+                  class="form-control"
+                />
+                <button
+                  type="button"
+                  (click)="removeTecnica(i)"
+                  class="remove-button"
+                >
+                  Eliminar
+                </button>
               </div>
             </div>
-            <button type="button" (click)="addTecnica()" class="add-button">Añadir Técnica</button>
+            <button type="button" (click)="addTecnica()" class="add-button">
+              Añadir Técnica
+            </button>
           </div>
         </div>
 
         <!-- Pesas -->
-        <div class="training-section" *ngIf="trainingForm.get('tipo')?.value === 'Pesas'">
+        <div
+          class="training-section"
+          *ngIf="trainingForm.get('tipo')?.value === 'Pesas'"
+        >
           <h3>Ejercicios de Pesas</h3>
           <div formArrayName="pesas" class="array-container">
-            <div *ngFor="let pesa of pesasArray.controls; let i = index" [formGroupName]="i" class="array-item">
+            <div
+              *ngFor="let pesa of pesasArray.controls; let i = index"
+              [formGroupName]="i"
+              class="array-item"
+            >
               <div class="form-row">
                 <div class="form-group">
                   <label>Series</label>
-                  <input type="text" formControlName="series" class="form-control">
+                  <input
+                    type="text"
+                    formControlName="series"
+                    class="form-control"
+                  />
                 </div>
                 <div class="form-group">
                   <label>Repeticiones</label>
-                  <input type="text" formControlName="repeticiones" class="form-control">
+                  <input
+                    type="text"
+                    formControlName="repeticiones"
+                    class="form-control"
+                  />
                 </div>
                 <div class="form-group">
                   <label>Porcentaje</label>
-                  <input type="text" formControlName="porcentaje" class="form-control">
+                  <input
+                    type="text"
+                    formControlName="porcentaje"
+                    class="form-control"
+                  />
                 </div>
               </div>
               <div class="form-group">
                 <label>Comentario</label>
-                <input type="text" formControlName="comentario" class="form-control">
-                <button type="button" (click)="removePesas(i)" class="remove-button">Eliminar</button>
+                <input
+                  type="text"
+                  formControlName="comentario"
+                  class="form-control"
+                />
+                <button
+                  type="button"
+                  (click)="removePesas(i)"
+                  class="remove-button"
+                >
+                  Eliminar
+                </button>
               </div>
             </div>
-            <button type="button" (click)="addPesas()" class="add-button">Añadir Ejercicio</button>
+            <button type="button" (click)="addPesas()" class="add-button">
+              Añadir Ejercicio
+            </button>
           </div>
         </div>
 
         <!-- Series -->
-        <div class="training-section" *ngIf="trainingForm.get('tipo')?.value === 'Series'">
+        <div
+          class="training-section"
+          *ngIf="trainingForm.get('tipo')?.value === 'Series'"
+        >
           <h3>Series</h3>
           <div formArrayName="serie" class="array-container">
-            <div *ngFor="let serie of serieArray.controls; let i = index" [formGroupName]="i" class="array-item">
+            <div
+              *ngFor="let serie of serieArray.controls; let i = index"
+              [formGroupName]="i"
+              class="array-item"
+            >
               <div class="form-row">
                 <div class="form-group">
                   <label>Número de Series</label>
-                  <input type="text" formControlName="numeroSeries" class="form-control">
+                  <input
+                    type="text"
+                    formControlName="numeroSeries"
+                    class="form-control"
+                  />
                 </div>
                 <div class="form-group">
                   <label>Metros</label>
-                  <input type="text" formControlName="metros" class="form-control">
+                  <input
+                    type="text"
+                    formControlName="metros"
+                    class="form-control"
+                  />
                 </div>
                 <div class="form-group">
                   <label>Recuperación</label>
-                  <input type="text" formControlName="recuperacion" class="form-control">
+                  <input
+                    type="text"
+                    formControlName="recuperacion"
+                    class="form-control"
+                  />
                 </div>
               </div>
               <div class="form-group">
                 <label>Tiempo Objetivo</label>
-                <input type="text" formControlName="tiempoObjetivo" class="form-control">
+                <input
+                  type="text"
+                  formControlName="tiempoObjetivo"
+                  class="form-control"
+                />
               </div>
               <div class="form-group">
                 <label>Comentario</label>
-                <input type="text" formControlName="comentario" class="form-control">
-                <button type="button" (click)="removeSerie(i)" class="remove-button">Eliminar</button>
+                <input
+                  type="text"
+                  formControlName="comentario"
+                  class="form-control"
+                />
+                <button
+                  type="button"
+                  (click)="removeSerie(i)"
+                  class="remove-button"
+                >
+                  Eliminar
+                </button>
               </div>
             </div>
-            <button type="button" (click)="addSerie()" class="add-button">Añadir Serie</button>
+            <button type="button" (click)="addSerie()" class="add-button">
+              Añadir Serie
+            </button>
           </div>
         </div>
 
         <!-- Velocidad -->
-        <div class="training-section" *ngIf="trainingForm.get('tipo')?.value === 'Velocidad'">
+        <div
+          class="training-section"
+          *ngIf="trainingForm.get('tipo')?.value === 'Velocidad'"
+        >
           <h3>Ejercicios de Velocidad</h3>
           <div formArrayName="velocidad" class="array-container">
-            <div *ngFor="let velocidad of velocidadArray.controls; let i = index" [formGroupName]="i" class="array-item">
+            <div
+              *ngFor="let velocidad of velocidadArray.controls; let i = index"
+              [formGroupName]="i"
+              class="array-item"
+            >
               <div class="form-row">
                 <div class="form-group">
                   <label>Número de Series</label>
-                  <input type="text" formControlName="numeroSeries" class="form-control">
+                  <input
+                    type="text"
+                    formControlName="numeroSeries"
+                    class="form-control"
+                  />
                 </div>
                 <div class="form-group">
                   <label>Metros</label>
-                  <input type="text" formControlName="metros" class="form-control">
+                  <input
+                    type="text"
+                    formControlName="metros"
+                    class="form-control"
+                  />
                 </div>
                 <div class="form-group">
                   <label>Recuperación</label>
-                  <input type="text" formControlName="recuperacion" class="form-control">
+                  <input
+                    type="text"
+                    formControlName="recuperacion"
+                    class="form-control"
+                  />
                 </div>
                 <div class="form-group">
                   <label>Porcentaje</label>
-                  <input type="text" formControlName="porcentaje" class="form-control">
+                  <input
+                    type="text"
+                    formControlName="porcentaje"
+                    class="form-control"
+                  />
                 </div>
               </div>
               <div class="form-group">
                 <label>Comentario</label>
-                <input type="text" formControlName="comentario" class="form-control">
-                <button type="button" (click)="removeVelocidad(i)" class="remove-button">Eliminar</button>
+                <input
+                  type="text"
+                  formControlName="comentario"
+                  class="form-control"
+                />
+                <button
+                  type="button"
+                  (click)="removeVelocidad(i)"
+                  class="remove-button"
+                >
+                  Eliminar
+                </button>
               </div>
             </div>
-            <button type="button" (click)="addVelocidad()" class="add-button">Añadir Serie</button>
+            <button type="button" (click)="addVelocidad()" class="add-button">
+              Añadir Serie
+            </button>
           </div>
         </div>
 
         <!-- Vallas -->
-        <div class="training-section" *ngIf="trainingForm.get('tipo')?.value === 'Vallas'">
+        <div
+          class="training-section"
+          *ngIf="trainingForm.get('tipo')?.value === 'Vallas'"
+        >
           <h3>Ejercicios de Vallas</h3>
           <div formArrayName="vallas" class="array-container">
-            <div *ngFor="let valla of vallasArray.controls; let i = index" [formGroupName]="i" class="array-item">
+            <div
+              *ngFor="let valla of vallasArray.controls; let i = index"
+              [formGroupName]="i"
+              class="array-item"
+            >
               <div class="form-row">
                 <div class="form-group">
                   <label>Número de Series</label>
-                  <input type="text" formControlName="numeroSeries" class="form-control">
+                  <input
+                    type="text"
+                    formControlName="numeroSeries"
+                    class="form-control"
+                  />
                 </div>
                 <div class="form-group">
                   <label>Número de Vallas</label>
-                  <input type="text" formControlName="numeroVallas" class="form-control">
+                  <input
+                    type="text"
+                    formControlName="numeroVallas"
+                    class="form-control"
+                  />
                 </div>
                 <div class="form-group">
                   <label>Recuperación</label>
-                  <input type="text" formControlName="recuperacion" class="form-control">
+                  <input
+                    type="text"
+                    formControlName="recuperacion"
+                    class="form-control"
+                  />
                 </div>
               </div>
               <div class="form-group">
                 <label>Comentario</label>
-                <input type="text" formControlName="comentario" class="form-control">
-                <button type="button" (click)="removeVallas(i)" class="remove-button">Eliminar</button>
+                <input
+                  type="text"
+                  formControlName="comentario"
+                  class="form-control"
+                />
+                <button
+                  type="button"
+                  (click)="removeVallas(i)"
+                  class="remove-button"
+                >
+                  Eliminar
+                </button>
               </div>
             </div>
-            <button type="button" (click)="addVallas()" class="add-button">Añadir Serie</button>
+            <button type="button" (click)="addVallas()" class="add-button">
+              Añadir Serie
+            </button>
           </div>
         </div>
 
         <!-- Multisaltos -->
-        <div class="training-section" *ngIf="trainingForm.get('tipo')?.value === 'Multisaltos'">
+        <div
+          class="training-section"
+          *ngIf="trainingForm.get('tipo')?.value === 'Multisaltos'"
+        >
           <h3>Multisaltos</h3>
           <div formArrayName="multisaltos" class="array-container">
-            <div *ngFor="let multisalto of multisaltosArray.controls; let i = index" [formGroupName]="i" class="array-item">
+            <div
+              *ngFor="
+                let multisalto of multisaltosArray.controls;
+                let i = index
+              "
+              [formGroupName]="i"
+              class="array-item"
+            >
               <div class="form-row">
                 <div class="form-group">
                   <label>Número de Saltos</label>
-                  <input type="text" formControlName="numeroSaltos" class="form-control">
+                  <input
+                    type="text"
+                    formControlName="numeroSaltos"
+                    class="form-control"
+                  />
                 </div>
                 <div class="form-group">
                   <label>Tipo</label>
-                  <input type="text" formControlName="tipo" class="form-control">
+                  <input
+                    type="text"
+                    formControlName="tipo"
+                    class="form-control"
+                  />
                 </div>
               </div>
               <div class="form-group">
                 <label>Comentario</label>
-                <input type="text" formControlName="comentario" class="form-control">
-                <button type="button" (click)="removeMultisaltos(i)" class="remove-button">Eliminar</button>
+                <input
+                  type="text"
+                  formControlName="comentario"
+                  class="form-control"
+                />
+                <button
+                  type="button"
+                  (click)="removeMultisaltos(i)"
+                  class="remove-button"
+                >
+                  Eliminar
+                </button>
               </div>
             </div>
-            <button type="button" (click)="addMultisaltos()" class="add-button">Añadir Serie</button>
+            <button type="button" (click)="addMultisaltos()" class="add-button">
+              Añadir Serie
+            </button>
           </div>
         </div>
 
         <!-- Multilanzamientos -->
-        <div class="training-section" *ngIf="trainingForm.get('tipo')?.value === 'Multilanzamientos'">
+        <div
+          class="training-section"
+          *ngIf="trainingForm.get('tipo')?.value === 'Multilanzamientos'"
+        >
           <h3>Multilanzamientos</h3>
           <div formArrayName="multilanzamientos" class="array-container">
-            <div *ngFor="let multilanzamiento of multilanzamientosArray.controls; let i = index" [formGroupName]="i" class="array-item">
+            <div
+              *ngFor="
+                let multilanzamiento of multilanzamientosArray.controls;
+                let i = index
+              "
+              [formGroupName]="i"
+              class="array-item"
+            >
               <div class="form-row">
                 <div class="form-group">
                   <label>Número de Lanzamientos</label>
-                  <input type="text" formControlName="numeroLanzamientos" class="form-control">
+                  <input
+                    type="text"
+                    formControlName="numeroLanzamientos"
+                    class="form-control"
+                  />
                 </div>
                 <div class="form-group">
                   <label>Tipo</label>
-                  <input type="text" formControlName="tipo" class="form-control">
+                  <input
+                    type="text"
+                    formControlName="tipo"
+                    class="form-control"
+                  />
                 </div>
               </div>
               <div class="form-group">
                 <label>Comentario</label>
-                <input type="text" formControlName="comentario" class="form-control">
-                <button type="button" (click)="removeMultilanzamientos(i)" class="remove-button">Eliminar</button>
+                <input
+                  type="text"
+                  formControlName="comentario"
+                  class="form-control"
+                />
+                <button
+                  type="button"
+                  (click)="removeMultilanzamientos(i)"
+                  class="remove-button"
+                >
+                  Eliminar
+                </button>
               </div>
             </div>
-            <button type="button" (click)="addMultilanzamientos()" class="add-button">Añadir Serie</button>
+            <button
+              type="button"
+              (click)="addMultilanzamientos()"
+              class="add-button"
+            >
+              Añadir Serie
+            </button>
           </div>
         </div>
 
         <!-- Rodaje -->
-        <div class="training-section" *ngIf="trainingForm.get('tipo')?.value === 'Rodaje'">
+        <div
+          class="training-section"
+          *ngIf="trainingForm.get('tipo')?.value === 'Rodaje'"
+        >
           <h3>Rodaje</h3>
           <div formGroupName="rodaje" class="form-group">
             <div class="form-row">
               <div class="form-group">
                 <label>Tiempo</label>
-                <input type="text" formControlName="tiempo" class="form-control">
+                <input
+                  type="text"
+                  formControlName="tiempo"
+                  class="form-control"
+                />
               </div>
               <div class="form-group">
                 <label>Comentario</label>
-                <input type="text" formControlName="comentario" class="form-control">
+                <input
+                  type="text"
+                  formControlName="comentario"
+                  class="form-control"
+                />
               </div>
             </div>
           </div>
         </div>
 
         <!-- Cuestas -->
-        <div class="training-section" *ngIf="trainingForm.get('tipo')?.value === 'Cuestas'">
+        <div
+          class="training-section"
+          *ngIf="trainingForm.get('tipo')?.value === 'Cuestas'"
+        >
           <h3>Cuestas</h3>
           <div formArrayName="cuestas" class="array-container">
-            <div *ngFor="let cuesta of cuestasArray.controls; let i = index" [formGroupName]="i" class="array-item">
+            <div
+              *ngFor="let cuesta of cuestasArray.controls; let i = index"
+              [formGroupName]="i"
+              class="array-item"
+            >
               <div class="form-row">
                 <div class="form-group">
                   <label>Número de Cuestas</label>
-                  <input type="text" formControlName="numeroCuestas" class="form-control">
+                  <input
+                    type="text"
+                    formControlName="numeroCuestas"
+                    class="form-control"
+                  />
                 </div>
                 <div class="form-group">
                   <label>Metros</label>
-                  <input type="text" formControlName="metros" class="form-control">
+                  <input
+                    type="text"
+                    formControlName="metros"
+                    class="form-control"
+                  />
                 </div>
                 <div class="form-group">
                   <label>Recuperación</label>
-                  <input type="text" formControlName="recuperacion" class="form-control">
+                  <input
+                    type="text"
+                    formControlName="recuperacion"
+                    class="form-control"
+                  />
                 </div>
               </div>
               <div class="form-group">
                 <label>Comentario</label>
-                <input type="text" formControlName="comentario" class="form-control">
-                <button type="button" (click)="removeCuestas(i)" class="remove-button">Eliminar</button>
+                <input
+                  type="text"
+                  formControlName="comentario"
+                  class="form-control"
+                />
+                <button
+                  type="button"
+                  (click)="removeCuestas(i)"
+                  class="remove-button"
+                >
+                  Eliminar
+                </button>
               </div>
             </div>
-            <button type="button" (click)="addCuestas()" class="add-button">Añadir Serie</button>
+            <button type="button" (click)="addCuestas()" class="add-button">
+              Añadir Serie
+            </button>
           </div>
         </div>
 
         <!-- Lastre -->
-        <div class="training-section" *ngIf="trainingForm.get('tipo')?.value === 'Lastre'">
+        <div
+          class="training-section"
+          *ngIf="trainingForm.get('tipo')?.value === 'Lastre'"
+        >
           <h3>Lastre</h3>
           <div formArrayName="lastre" class="array-container">
-            <div *ngFor="let lastre of lastreArray.controls; let i = index" [formGroupName]="i" class="array-item">
+            <div
+              *ngFor="let lastre of lastreArray.controls; let i = index"
+              [formGroupName]="i"
+              class="array-item"
+            >
               <div class="form-row">
                 <div class="form-group">
                   <label>Número de Series</label>
-                  <input type="text" formControlName="numeroSeries" class="form-control">
+                  <input
+                    type="text"
+                    formControlName="numeroSeries"
+                    class="form-control"
+                  />
                 </div>
                 <div class="form-group">
                   <label>Metros</label>
-                  <input type="text" formControlName="metros" class="form-control">
+                  <input
+                    type="text"
+                    formControlName="metros"
+                    class="form-control"
+                  />
                 </div>
                 <div class="form-group">
                   <label>Kilos</label>
-                  <input type="text" formControlName="kilos" class="form-control">
+                  <input
+                    type="text"
+                    formControlName="kilos"
+                    class="form-control"
+                  />
                 </div>
                 <div class="form-group">
                   <label>Recuperación</label>
-                  <input type="text" formControlName="recuperacion" class="form-control">
+                  <input
+                    type="text"
+                    formControlName="recuperacion"
+                    class="form-control"
+                  />
                 </div>
               </div>
               <div class="form-group">
                 <label>Comentario</label>
-                <input type="text" formControlName="comentario" class="form-control">
-                <button type="button" (click)="removeLastre(i)" class="remove-button">Eliminar</button>
+                <input
+                  type="text"
+                  formControlName="comentario"
+                  class="form-control"
+                />
+                <button
+                  type="button"
+                  (click)="removeLastre(i)"
+                  class="remove-button"
+                >
+                  Eliminar
+                </button>
               </div>
             </div>
-            <button type="button" (click)="addLastre()" class="add-button">Añadir Serie</button>
+            <button type="button" (click)="addLastre()" class="add-button">
+              Añadir Serie
+            </button>
           </div>
         </div>
 
         <!-- Extras -->
-        <div class="training-section" *ngIf="trainingForm.get('tipo')?.value === 'Extras'">
+        <div
+          class="training-section"
+          *ngIf="trainingForm.get('tipo')?.value === 'Extras'"
+        >
           <h3>Extras</h3>
           <div formArrayName="extras" class="array-container">
-            <div *ngFor="let extra of extrasArray.controls; let i = index" [formGroupName]="i" class="array-item">
+            <div
+              *ngFor="let extra of extrasArray.controls; let i = index"
+              [formGroupName]="i"
+              class="array-item"
+            >
               <div class="form-group">
                 <label>Comentario</label>
-                <input type="text" formControlName="comentario" class="form-control">
-                <button type="button" (click)="removeExtras(i)" class="remove-button">Eliminar</button>
+                <input
+                  type="text"
+                  formControlName="comentario"
+                  class="form-control"
+                />
+                <button
+                  type="button"
+                  (click)="removeExtras(i)"
+                  class="remove-button"
+                >
+                  Eliminar
+                </button>
               </div>
             </div>
-            <button type="button" (click)="addExtras()" class="add-button">Añadir Comentario</button>
+            <button type="button" (click)="addExtras()" class="add-button">
+              Añadir Comentario
+            </button>
           </div>
         </div>
 
         <!-- Test -->
-        <div class="training-section" *ngIf="trainingForm.get('tipo')?.value === 'Test'">
+        <div
+          class="training-section"
+          *ngIf="trainingForm.get('tipo')?.value === 'Test'"
+        >
           <h3>Test</h3>
           <div formGroupName="test" class="form-group">
             <label>Comentario</label>
-            <input type="text" formControlName="comentario" class="form-control">
+            <input
+              type="text"
+              formControlName="comentario"
+              class="form-control"
+            />
           </div>
         </div>
 
         <!-- Competición -->
-        <div class="training-section" *ngIf="trainingForm.get('tipo')?.value === 'Competición'">
+        <div
+          class="training-section"
+          *ngIf="trainingForm.get('tipo')?.value === 'Competición'"
+        >
           <h3>Competición</h3>
-          <div formGroupName="competicion" class="form-group">
-            <div class="form-row">
-              <div class="form-group">
-                <label>Nombre</label>
-                <input type="text" formControlName="nombre" class="form-control">
+          <div class="competicion-search">
+            <div class="form-group">
+              <label>Buscar Competición</label>
+              <input
+                type="text"
+                [(ngModel)]="searchCompeticion"
+                (ngModelChange)="filterCompeticiones()"
+                class="form-control"
+                placeholder="Buscar por nombre o lugar..."
+              />
+            </div>
+
+            <div
+              class="competicion-list"
+              *ngIf="competicionesFiltradas.length > 0"
+            >
+              <div
+                class="competicion-item"
+                *ngFor="let competicion of competicionesFiltradas"
+                [class.selected]="selectedCompeticion?._id === competicion._id"
+                (click)="selectCompeticion(competicion)"
+              >
+                <div class="competicion-name">{{ competicion.nombre }}</div>
+                <div class="competicion-details">
+                  <span class="competicion-date">{{
+                    competicion.fecha | date : "dd/MM/yyyy"
+                  }}</span>
+                  <span class="competicion-place">{{ competicion.lugar }}</span>
+                </div>
               </div>
-              <div class="form-group">
-                <label>Fecha</label>
-                <input type="date" formControlName="fecha" class="form-control">
-              </div>
-              <div class="form-group">
-                <label>Lugar</label>
-                <input type="text" formControlName="lugar" class="form-control">
-              </div>
+            </div>
+
+            <div
+              class="no-results"
+              *ngIf="competicionesFiltradas.length === 0 && searchCompeticion"
+            >
+              No se encontraron competiciones
+            </div>
+          </div>
+
+          <div class="selected-competicion" *ngIf="selectedCompeticion">
+            <h4>Competición Seleccionada</h4>
+            <div class="competicion-info">
+              <p><strong>Nombre:</strong> {{ selectedCompeticion.nombre }}</p>
+              <p>
+                <strong>Fecha:</strong>
+                {{ selectedCompeticion.fecha | date : "dd/MM/yyyy" }}
+              </p>
+              <p><strong>Lugar:</strong> {{ selectedCompeticion.lugar }}</p>
             </div>
           </div>
         </div>
       </div>
 
       <div class="form-actions">
-        <button type="submit" class="submit-button" [disabled]="!trainingForm.valid">
-          {{ isEditing ? 'Guardar Cambios' : 'Crear Entrenamiento' }}
+        <button
+          type="submit"
+          class="submit-button"
+          [disabled]="!trainingForm.valid"
+        >
+          {{ isEditing ? "Guardar Cambios" : "Crear Entrenamiento" }}
         </button>
-        <button type="button" (click)="closeEditModal()" class="cancel-button">Cancelar</button>
+        <button type="button" (click)="closeEditModal()" class="cancel-button">
+          Cancelar
+        </button>
       </div>
     </form>
+  </div>
+</div>
+
+<!-- Modal para añadir resultado -->
+<div class="result-modal" *ngIf="showAddResultadoModal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3>Añadir Resultado</h3>
+      <button class="close-button" (click)="toggleAddResultado()">
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label>Resultado</label>
+        <textarea
+          [(ngModel)]="currentResultado"
+          class="form-control"
+          rows="4"
+          placeholder="Escribe tu resultado aquí..."
+        ></textarea>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button
+        type="button"
+        class="btn btn-secondary"
+        (click)="toggleAddResultado()"
+      >
+        Cancelar
+      </button>
+      <button type="button" class="btn btn-primary" (click)="addResultado()">
+        {{ miResultado ? "Actualizar Resultado" : "Guardar Resultado" }}
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal para ver resultados -->
+<div class="results-modal" *ngIf="showResultadosModal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3>Resultados del Entrenamiento</h3>
+      <button class="close-button" (click)="toggleResultadosModal()">
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div class="results-list" *ngIf="resultados && resultados.length > 0">
+        <div class="result-item" *ngFor="let resultado of resultados">
+          <div class="result-header">
+            <!-- Usando métodos del componente en lugar de typeof directamente -->
+            <span class="atleta-name">
+              <ng-container *ngIf="isAtletaObject(resultado)">
+                {{ resultado.atleta?.nombre || 'Atleta' }} 
+                {{ resultado.atleta?.apellidos || '' }}
+              </ng-container>
+              <ng-container *ngIf="!isAtletaObject(resultado)">
+                Atleta
+              </ng-container>
+            </span>
+            <span class="result-date">{{
+              resultado.fecha | date : "dd/MM/yyyy HH:mm"
+            }}</span>
+          </div>
+          <div class="result-content">
+            {{ resultado.resultado }}
+          </div>
+        </div>
+      </div>
+      <div class="no-results" *ngIf="!resultados || resultados.length === 0">
+        No hay resultados registrados para este entrenamiento.
+      </div>
+    </div>
   </div>
 </div>

@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { AuthService, Usuario } from '../../services/auth.service';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
@@ -10,7 +10,7 @@ import { Router, RouterLink } from '@angular/router';
   imports: [FormsModule, CommonModule, RouterLink],
   templateUrl: 'register.component.html',
 })
-export class RegisterComponent {
+export class RegisterComponent implements OnInit {
   // Ajustar el modelo para incluir el campo userTypes
   user: Usuario = {
     id: '',
@@ -24,6 +24,12 @@ export class RegisterComponent {
   userTypeOptions = ['Admin', 'Atleta', 'Entrenador', 'Editor', 'Viewer']; // Tipos de usuario disponibles
 
   constructor(private authService: AuthService, private router: Router) { }
+
+  ngOnInit() {
+    if (!this.authService.isLoggedIn() || !this.authService.isAdmin()) {
+      this.router.navigate(['/home']);
+    }
+  }
 
   onSubmit() {
     this.authService.register(this.user).subscribe(

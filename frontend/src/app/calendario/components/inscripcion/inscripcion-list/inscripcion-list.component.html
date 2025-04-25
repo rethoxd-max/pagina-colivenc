@@ -1,23 +1,30 @@
-<div *ngIf="inscripciones.length > 0; else noInscripciones">
-    <h3>Todas las Inscripciones</h3>
-    <ul>
-        <li *ngFor="let inscripcion of inscripciones">
-            {{ inscripcion.nombre_atleta }} -
-
-            <!-- Recorrer las pruebas seleccionadas y mostrar su nombre -->
-            <span *ngFor="let prueba of inscripcion.pruebasSeleccionadas">
-                {{ prueba.nombre_prueba }} {{ prueba.categoria_id.nombre_categoria }} <span
-                    *ngIf="!isLastElement(prueba, inscripcion.pruebasSeleccionadas)">,
+<div class="inscripciones-container" *ngIf="inscripciones.length > 0; else noInscripciones">
+    <h2 class="inscripciones-title">Todas las Inscripciones</h2>
+    <ul class="inscripciones-list">
+        <li class="inscripcion-item" *ngFor="let inscripcion of inscripciones">
+            <span class="atleta-nombre">{{ inscripcion.nombre_atleta }}</span>
+            
+            <div class="pruebas-container">
+                <span class="prueba-item" *ngFor="let prueba of inscripcion.pruebasSeleccionadas">
+                    {{ prueba.nombre_prueba }} - {{ prueba.categoria_id.nombre_categoria }}
                 </span>
-            </span>
+            </div>
 
-            <button (click)="editarInscripcion(inscripcion._id)">Editar</button>
-            <button (click)="borrarInscripcion(inscripcion._id)">Borrar</button>
+            <div class="acciones-container">
+                <button class="btn-accion btn-editar" (click)="editarInscripcion(inscripcion._id)">
+                    <i class="fas fa-edit"></i> Editar
+                </button>
+                <button class="btn-accion btn-borrar" (click)="borrarInscripcion(inscripcion._id)">
+                    <i class="fas fa-trash"></i> Borrar
+                </button>
+            </div>
         </li>
-
     </ul>
 </div>
 
 <ng-template #noInscripciones>
-    <p>No tienes inscripciones realizadas.</p>
+    <div class="no-inscripciones">
+        <i class="fas fa-info-circle"></i>
+        <p>No hay inscripciones realizadas.</p>
+    </div>
 </ng-template>
