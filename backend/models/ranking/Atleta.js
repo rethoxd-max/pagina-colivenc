@@ -13,6 +13,11 @@ const atletaSchema = new mongoose.Schema({
             message: 'La fecha de nacimiento debe ser una fecha válida y no puede ser en el futuro'
         }
     },
+    genero: {
+        type: String,
+        enum: ['Masculino', 'Femenino'],
+        required: true
+    },
     usuario: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User', // Referencia al modelo de usuario

@@ -14,13 +14,14 @@
             <input id="fecha" type="date" class="form-control" formControlName="fecha">
         </div>
 
-        <!-- Campo Lugar -->
+        <!-- Campo Lugar con Google Places Autocomplete -->
         <div class="mb-3">
             <label for="lugar" class="form-label">Lugar</label>
-            <input id="lugar" type="text" class="form-control" formControlName="lugar">
+            <input id="lugar" #lugarInput type="text" class="form-control" formControlName="lugar">
+            <small class="form-text text-muted">Escribe para buscar un lugar</small>
         </div>
 
-        <!-- Campo Lugar -->
+        <!-- Campo Tipo -->
         <div class="mb-3">
             <label for="tipo" class="form-label">Tipo</label>
             <input id="tipo" type="text" class="form-control" formControlName="tipo">
@@ -61,18 +62,34 @@
             </div>
         </div>
 
+        <!-- Campo Descripción -->
+        <div class="mb-3">
+            <label for="descripcion" class="form-label">Descripción</label>
+            <textarea id="descripcion" class="form-control" formControlName="descripcion" rows="3"></textarea>
+        </div>
 
         <!-- Campo Imagen -->
         <div class="mb-3">
             <label for="imagen" class="form-label">Imagen</label>
-            <input id="imagen" type="file" class="form-control" (change)="onFileSelected($event)">
+            <div class="input-group">
+                <input id="imagen" type="file" class="form-control" (change)="onFileSelected($event)">
+                <button type="button" class="btn btn-outline-secondary" *ngIf="selectedFile && isEditMode && existingImage" 
+                        (click)="clearFileSelection()">
+                    Cancelar selección
+                </button>
+            </div>
+            <small class="form-text text-muted" *ngIf="isEditMode && existingImage && !selectedFile">
+                Si no seleccionas una nueva imagen, se mantendrá la actual.
+            </small>
         </div>
 
         <!-- Mostrar la imagen seleccionada (opcional) -->
         <div *ngIf="imageUrl" class="mb-3">
-            <img [src]="imageUrl" alt="Imagen seleccionada" class="img-fluid" style="max-width: 200px;">
+            <label class="form-label">Vista previa</label>
+            <div class="image-preview-container">
+                <img [src]="imageUrl" alt="Imagen seleccionada" class="img-thumbnail" style="max-width: 300px;">
+            </div>
         </div>
-
 
         <!-- Botón de envío -->
         <button type="submit" class="btn btn-primary">{{ isEditMode ? 'Actualizar' : 'Crear' }}</button>

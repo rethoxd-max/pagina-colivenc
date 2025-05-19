@@ -118,22 +118,24 @@ router.get('/inscripcion/:id', auth, async (req, res) => {
 router.get('/entrenador/:entrenadorId/competicion/:competicionId', auth, async (req, res) => {
     try {
         const { entrenadorId, competicionId } = req.params;
+        const usuarioActual = req.user.id;
 
-        // Buscar inscripciones por entrenador y competición
-        const inscripciones = await Inscripcion.find({ competicion: competicionId })
+        // Buscar inscripciones por entrenador, competición y usuario actual
+        const inscripciones = await Inscripcion.find({ 
+            competicion: competicionId,
+            usuario: usuarioActual // Filtrar por el usuario actual
+        })
             .populate({
-                path: 'pruebasSeleccionadas', // Rellenar las pruebas seleccionadas
-                select: 'nombre_prueba categoria_id', // Incluir el nombre de la prueba y la categoría
+                path: 'pruebasSeleccionadas',
+                select: 'nombre_prueba categoria_id',
                 populate: {
-                    path: 'categoria_id', // Hacer populate del campo categoria_id
-                    select: 'nombre_categoria' // Incluir solo el nombre de la categoría
+                    path: 'categoria_id',
+                    select: 'nombre_categoria'
                 }
             });
-        if (!inscripciones || inscripciones.length === 0) {
-            return res.status(404).json({ message: 'No se encontraron inscripciones para este entrenador en la competición especificada.' });
-        }
 
-        res.status(200).json(inscripciones);
+        // Devolver un array vacío en lugar de 404 si no hay inscripciones
+        res.status(200).json(inscripciones || []);
     } catch (error) {
         console.error('Error al obtener inscripciones:', error);
         res.status(500).json({ message: 'Error al obtener inscripciones', error: error.message });

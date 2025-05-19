@@ -6,28 +6,42 @@ const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
 
+const BASE_URL = process.env.BASE_URL || 'https://api.cecolivenc.es';
+const UPLOAD_DIR = '/var/www/colivenc/backend/uploads/posts';
 
-// En tu archivo .env (en local)
-BASE_URL = 'http://localhost:5000'
-
-//BASE_URL=
+// Asegurarse de que el directorio existe
+if (!fs.existsSync(UPLOAD_DIR)) {
+    fs.mkdirSync(UPLOAD_DIR, { recursive: true });
+}
 
 // Configuración de multer para almacenar imágenes
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
-        cb(null, 'uploads/posts'); // Carpeta donde se almacenarán las imágenes
+        cb(null, UPLOAD_DIR);
     },
     filename: function (req, file, cb) {
-        cb(null, Date.now() + path.extname(file.originalname)); // Nombre único para el archivo
+        cb(null, Date.now() + path.extname(file.originalname));
     }
 });
 
-const upload = multer({ storage: storage });
+const upload = multer({ 
+    storage: storage,
+    limits: {
+        fileSize: 5 * 1024 * 1024 // límite de 5MB
+    }
+});
 
 // Obtener todos los posts
 router.get('/', async (req, res) => {
-    const posts = await Post.find().populate('author', ['name']);
-    res.json(posts);
+    try {
+        const posts = await Post.find()
+            .populate('author', 'username')
+            .sort({ date: -1 }); // Ordenar por fecha de más reciente a más antigua
+        res.json(posts);
+    } catch (error) {
+        console.error('Error al obtener posts:', error);
+        res.status(500).json({ message: 'Error al obtener los posts' });
+    }
 });
 
 // Obtener los últimos posts (ordenados por fecha descendente)
@@ -70,6 +84,14 @@ router.post('/', auth, upload.single('image'), async (req, res) => {
             return res.status(400).json({ msg: 'El título y el contenido son obligatorios.' });
         }
 
+        // Verificar si el archivo se subió correctamente
+        if (req.file) {
+            const filePath = path.join(UPLOAD_DIR, req.file.filename);
+            if (!fs.existsSync(filePath)) {
+                return res.status(500).json({ msg: 'Error al guardar la imagen' });
+            }
+        }
+
         const imageUrl = req.file ? `${BASE_URL}/uploads/posts/${req.file.filename}` : null;
 
         const post = new Post({
@@ -82,7 +104,15 @@ router.post('/', auth, upload.single('image'), async (req, res) => {
         await post.save();
         res.json(post);
     } catch (error) {
-        res.status(500).json({ msg: 'Error en el servidor', error });
+        console.error('Error al crear post:', error);
+        // Si hay un error y se subió un archivo, eliminarlo
+        if (req.file) {
+            const filePath = path.join(UPLOAD_DIR, req.file.filename);
+            if (fs.existsSync(filePath)) {
+                fs.unlinkSync(filePath);
+            }
+        }
+        res.status(500).json({ msg: 'Error en el servidor', error: error.message });
     }
 });
 
@@ -109,21 +139,35 @@ router.put('/:id', auth, upload.single('image'), async (req, res) => {
         if (req.file) {
             // Eliminar la imagen anterior si existe
             if (post.imageUrl) {
-                const oldImagePath = path.join(__dirname, '..', post.imageUrl);
+                const oldFilename = post.imageUrl.split('/').pop();
+                const oldImagePath = path.join(UPLOAD_DIR, oldFilename);
                 if (fs.existsSync(oldImagePath)) {
-                    fs.unlinkSync(oldImagePath); // Eliminar el archivo de la imagen anterior
+                    fs.unlinkSync(oldImagePath);
                 }
             }
 
+            // Verificar si la nueva imagen se subió correctamente
+            const newFilePath = path.join(UPLOAD_DIR, req.file.filename);
+            if (!fs.existsSync(newFilePath)) {
+                return res.status(500).json({ msg: 'Error al guardar la nueva imagen' });
+            }
+
             // Asignar la nueva imagen
-            post.imageUrl = req.file ? `${BASE_URL}/uploads/posts/${req.file.filename}` : null;
+            post.imageUrl = `${BASE_URL}/uploads/posts/${req.file.filename}`;
         }
 
         await post.save();
         res.json(post);
     } catch (error) {
-        console.error(error); // Añadir más detalles de error en el log
-        res.status(500).json({ msg: 'Error en el servidor', error });
+        console.error('Error al editar post:', error);
+        // Si hay un error y se subió un archivo, eliminarlo
+        if (req.file) {
+            const filePath = path.join(UPLOAD_DIR, req.file.filename);
+            if (fs.existsSync(filePath)) {
+                fs.unlinkSync(filePath);
+            }
+        }
+        res.status(500).json({ msg: 'Error en el servidor', error: error.message });
     }
 });
 

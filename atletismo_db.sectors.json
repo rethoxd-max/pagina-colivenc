@@ -1,0 +1,63 @@
+[{
+  "_id": {
+    "$oid": "67fe4648e4aaded6787b37fa"
+  },
+  "nombre_sector": "Velocidad",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "680767c873b262cd752a82e1"
+  },
+  "nombre_sector": "Combinadas",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "6811c367aefbc58d638eff5c"
+  },
+  "nombre_sector": "Lanzamientos",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "6811c36caefbc58d638eff5f"
+  },
+  "nombre_sector": "Marcha",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "6811c371aefbc58d638eff62"
+  },
+  "nombre_sector": "Medio Fondo",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "6811c374aefbc58d638eff65"
+  },
+  "nombre_sector": "Fondo",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "6811c37caefbc58d638eff68"
+  },
+  "nombre_sector": "Vallas",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "6811c380aefbc58d638eff6b"
+  },
+  "nombre_sector": "Saltos",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "6811cc97aefbc58d638f0049"
+  },
+  "nombre_sector": "Obstáculos",
+  "__v": 0
+}]

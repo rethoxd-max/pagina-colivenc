@@ -1,13 +1,16 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, NgZone, ElementRef, ViewChild } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { CompeticionService, PruebaCompeticion, SectorCompeticion, CategoriaCompeticion } from '../../services/competicion.service';
 import { NgFor, NgIf } from '@angular/common';
-import { environment } from '../../../../environments/environment.development';
+import { environment } from '../../../../environments/environment';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatSelectModule } from '@angular/material/select';
 import { MatSelectChange } from '@angular/material/select';
+/// <reference types="@types/googlemaps" />
+
+declare var google: any;
 
 @Component({
   selector: 'app-competicion-form',
@@ -17,11 +20,14 @@ import { MatSelectChange } from '@angular/material/select';
   styleUrls: ['./competicion-form.component.css'],
 })
 export class CompeticionFormComponent implements OnInit {
+  @ViewChild('lugarInput', { static: false }) lugarInputRef!: ElementRef;
+  
   competicionForm: FormGroup;
   competicionId: string | null = null;
   isEditMode = false;
   selectedFile: File | null = null;
   imageUrl: string | null = null;
+  existingImage: string | null = null; // Variable para guardar el nombre de la imagen existente
 
   // Variables para categorías, sectores y pruebas
   categoriasDisponibles: CategoriaCompeticion[] = [];
@@ -30,6 +36,8 @@ export class CompeticionFormComponent implements OnInit {
   pruebasSeleccionadas: PruebaCompeticion[] = [];
   categoriasSeleccionadas: string[] = [];
 
+  // Variable para Google Maps Places Autocomplete
+  autocomplete: any;
 
   baseUrl: string = environment.apiUrl;
 
@@ -37,7 +45,8 @@ export class CompeticionFormComponent implements OnInit {
     private competicionService: CompeticionService,
     private route: ActivatedRoute,
     private router: Router,
-    private fb: FormBuilder
+    private fb: FormBuilder,
+    private ngZone: NgZone
   ) {
     this.competicionForm = this.fb.group({
       nombre: ['', Validators.required],
@@ -81,15 +90,21 @@ export class CompeticionFormComponent implements OnInit {
             lugar: competicion.lugar,
             descripcion: competicion.descripcion,
             tipo: competicion.tipo,
-            imagen: competicion.imageUrl,
             categorias: competicion.categorias,
             pruebas: [],
             sector: ''
           });
-          // Establecer la URL de la imagen si existe
-          if (competicion.imagen) {
-            console.log(this.imageUrl);
-            this.imageUrl = `${this.baseUrl}/uploads/competiciones/${competicion.imagen}`; // Suponiendo que la imagen está en la carpeta 'uploads'
+          
+          // Guardar referencia a la imagen existente
+          if (competicion.imageUrl) {
+            // Extraer el nombre del archivo de la URL completa
+            const urlParts = competicion.imageUrl.split('/');
+            this.existingImage = urlParts[urlParts.length - 1]; // Obtener último segmento de la URL
+            
+            // Mostrar la imagen actual
+            this.imageUrl = competicion.imageUrl;
+            console.log('Imagen existente:', this.existingImage);
+            console.log('URL de imagen:', this.imageUrl);
           }
 
           this.categoriasSeleccionadas = competicion.categorias;
@@ -110,6 +125,130 @@ export class CompeticionFormComponent implements OnInit {
         }
       );
     }
+  }
+
+  ngAfterViewInit(): void {
+    // Esperar a que el ViewChild esté disponible antes de inicializar el autocomplete
+    setTimeout(() => {
+      this.inicializarAutocompletadoLugar();
+    }, 500);
+  }
+
+  inicializarAutocompletadoLugar(): void {
+    // Verificar que la API de Google Maps ha sido cargada
+    if (typeof google === 'undefined' || typeof google.maps === 'undefined' || !this.lugarInputRef) {
+      console.error('Google Maps API no está cargada o el elemento de referencia no está disponible');
+      return;
+    }
+
+    try {
+      // Crear objeto Autocomplete
+      this.autocomplete = new google.maps.places.Autocomplete(this.lugarInputRef.nativeElement, {
+        types: ['geocode'],
+        // Puedes limitar por país si lo deseas
+        // componentRestrictions: { country: 'es' }
+      });
+
+      // Añadir listener para cuando se selecciona un lugar
+      this.autocomplete.addListener('place_changed', () => {
+        this.ngZone.run(() => {
+          const place = this.autocomplete.getPlace();
+          
+          if (place && place.address_components) {
+            // Formatear la dirección sin código postal
+            let formattedAddress = this.formatearDireccionSinCodigoPostal(place);
+            
+            // Actualizar el valor en el formulario
+            this.competicionForm.patchValue({
+              lugar: formattedAddress
+            });
+          } else if (place && place.formatted_address) {
+            // Si no podemos procesar los componentes, usamos la dirección completa
+            this.competicionForm.patchValue({
+              lugar: place.formatted_address
+            });
+          }
+        });
+      });
+    } catch (error) {
+      console.error('Error al inicializar Google Places Autocomplete:', error);
+    }
+  }
+
+  // Método para formatear la dirección sin incluir el código postal
+  formatearDireccionSinCodigoPostal(place: any): string {
+    // Componentes que queremos incluir en la dirección final
+    let calle = '';
+    let numero = '';
+    let ciudad = '';
+    let provincia = '';
+    let pais = '';
+    let paisShortName = '';
+    
+    // Extraer componentes relevantes
+    for (const component of place.address_components) {
+      const componentType = component.types[0];
+      
+      switch (componentType) {
+        case 'street_number':
+          numero = component.long_name;
+          break;
+        case 'route':
+          calle = component.long_name;
+          break;
+        case 'locality':
+          ciudad = component.long_name;
+          break;
+        case 'administrative_area_level_1':
+          provincia = component.long_name;
+          break;
+        case 'country':
+          pais = component.long_name;
+          paisShortName = component.short_name;
+          break;
+      }
+    }
+    
+    // Construir la dirección formateada
+    let direccion = '';
+    
+    // Para lugares fuera de España, solo mostrar ciudad y país entre paréntesis
+    if (paisShortName && paisShortName !== 'ES') {
+      if (ciudad) {
+        direccion = ciudad;
+        direccion += ` (${pais})`;
+      } else if (provincia) {
+        // Si no hay ciudad pero sí provincia
+        direccion = provincia;
+        direccion += ` (${pais})`;
+      } else {
+        // Si solo tenemos el país
+        direccion = pais;
+      }
+    } else {
+      // Para lugares en España, mostrar calle, número, ciudad y provincia
+      // Calle y número
+      if (calle) {
+        direccion += calle;
+        if (numero) {
+          direccion += ', ' + numero;
+        }
+      }
+      
+      // Ciudad
+      if (ciudad) {
+        if (direccion) direccion += ', ';
+        direccion += ciudad;
+      }
+      
+      // Provincia
+      if (provincia) {
+        if (direccion) direccion += ', ';
+        direccion += provincia;
+      }
+    }
+    
+    return direccion;
   }
 
   formatDate(dateString: string): string {
@@ -141,8 +280,6 @@ export class CompeticionFormComponent implements OnInit {
       this.pruebasDisponibles = [];
     }
   }
-
-
 
   // Manejador de cambio de categorías
   onCategoriasChange(event: MatSelectChange): void {
@@ -187,6 +324,20 @@ export class CompeticionFormComponent implements OnInit {
     }
   }
 
+  // Método para limpiar la selección de archivo y volver a mostrar la imagen existente
+  clearFileSelection(): void {
+    this.selectedFile = null;
+    if (this.existingImage) {
+      this.imageUrl = `${this.baseUrl}/uploads/competiciones/${this.existingImage}`;
+    } else {
+      this.imageUrl = null;
+    }
+    // Resetear el input de archivo
+    const fileInput = document.getElementById('imagen') as HTMLInputElement;
+    if (fileInput) {
+      fileInput.value = '';
+    }
+  }
 
   seleccionarPrueba(prueba: PruebaCompeticion): void {
     this.pruebasSeleccionadas.push(prueba);
@@ -225,14 +376,15 @@ export class CompeticionFormComponent implements OnInit {
 
     if (this.selectedFile) {
       formData.append('image', this.selectedFile);
-    } else if (this.isEditMode && this.imageUrl) {
-      formData.append('imageUrl', this.imageUrl);  // Enviar la URL de la imagen existente si no se selecciona una nueva.
+    } else if (this.isEditMode && this.existingImage) {
+      // Si estamos en modo edición y hay una imagen existente pero no se ha seleccionado una nueva,
+      // enviar el nombre de la imagen existente para mantenerla
+      formData.append('existingImage', this.existingImage);
     }
 
     if (this.categoriasSeleccionadas!.length < 1) {
       this.categoriasSeleccionadas = [];
     }
-
 
     if (this.isEditMode) {
       this.competicionService.updateCompeticion(this.competicionId!, formData).subscribe(

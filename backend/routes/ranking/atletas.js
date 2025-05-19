@@ -13,6 +13,20 @@ router.get('/', async (req, res) => {
   }
 });
 
+// GET atletas por género
+router.get('/genero/:genero', async (req, res) => {
+  try {
+    const genero = req.params.genero;
+    if (genero !== 'Masculino' && genero !== 'Femenino') {
+      return res.status(400).json({ message: 'El género debe ser Masculino o Femenino' });
+    }
+    
+    const atletas = await Atleta.find({ genero }).populate('usuario').sort({ nombre: 1 });
+    res.json(atletas);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
 
 // GET atleta by ID
 router.get('/:id', async (req, res) => {
@@ -59,7 +73,11 @@ router.get('/usuario/:userId', async (req, res) => {
 // POST new atleta
 router.post('/', async (req, res) => {
   try {
-    const { nombre, fecha_nacimiento } = req.body;
+    const { nombre, fecha_nacimiento, genero } = req.body;
+
+    if (!genero || (genero !== 'Masculino' && genero !== 'Femenino')) {
+      return res.status(400).json({ message: 'El género debe ser Masculino o Femenino' });
+    }
 
     // Comprobar si ya existe un atleta con el mismo nombre y fecha de nacimiento
     const atletaExistente = await Atleta.findOne({ nombre, fecha_nacimiento });
@@ -74,6 +92,7 @@ router.post('/', async (req, res) => {
     const nuevoAtleta = new Atleta({
       nombre,
       fecha_nacimiento,
+      genero,
       usuario: usuario ? usuario._id : null // Si no existe usuario, será null
     });
 
@@ -88,7 +107,11 @@ router.post('/', async (req, res) => {
 // PUT update atleta by ID
 router.put('/:id', async (req, res) => {
   try {
-    const { nombre, fecha_nacimiento } = req.body;
+    const { nombre, fecha_nacimiento, genero } = req.body;
+
+    if (genero && genero !== 'Masculino' && genero !== 'Femenino') {
+      return res.status(400).json({ message: 'El género debe ser Masculino o Femenino' });
+    }
 
     // Buscamos un usuario con el nuevo nombre
     const usuario = await User.findOne({ name: nombre });
@@ -97,6 +120,7 @@ router.put('/:id', async (req, res) => {
     const atletaActualizado = await Atleta.findByIdAndUpdate(req.params.id, {
       nombre,
       fecha_nacimiento,
+      genero,
       usuario: usuario ? usuario._id : null
     }, { new: true }).populate('usuario');
 

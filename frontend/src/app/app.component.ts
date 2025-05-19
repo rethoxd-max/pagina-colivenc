@@ -68,9 +68,9 @@ export class AppComponent implements OnInit, OnDestroy {
             if (atleta && atleta._id) {
               this.atletaId = atleta._id;
               
-              // Si estamos en la ruta de perfil-atleta, actualizar la URL si es necesario
+              // Solo redirigir si estamos exactamente en la ruta '/perfil-atleta' sin ID
               const url = this.router.url;
-              if (url.includes('/perfil-atleta') && !url.includes(atleta._id)) {
+              if (url === '/perfil-atleta') {
                 this.router.navigate(['/perfil-atleta', atleta._id]);
               }
             } else {

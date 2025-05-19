@@ -4,7 +4,7 @@ import { CommonModule, NgIf } from '@angular/common';
 import { FormsModule, NgModel, NgModelGroup, ReactiveFormsModule } from '@angular/forms';
 import { RouterLink, ActivatedRoute } from '@angular/router'; // Añadido ActivatedRoute
 import { AuthService } from '../../../auth/services/auth.service';
-import { environment } from '../../../../environments/environment.development';
+import { environment } from '../../../../environments/environment';
 
 interface CompeticionAgrupada {
   year: number;
@@ -208,6 +208,7 @@ export class CompeticionListComponent implements OnInit {
     this.competicionService.deleteCompeticion(id).subscribe(
       () => {
         this.competiciones = this.competiciones.filter(comp => comp._id !== id);
+        this.loadCompeticiones();
       },
       (error) => {
         console.error('Error al eliminar la competición:', error);

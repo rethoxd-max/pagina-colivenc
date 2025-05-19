@@ -1326,13 +1326,14 @@ export class CalendarioEntrenamientoComponent implements OnInit, OnDestroy {
     if (user) {
       this.userId = user.id;
       this.isAdmin = this.authService.isAdmin();
+      this.isEntrenador = this.authService.isEntrenador();
       
       // Si hay un grupoId, verificar si el usuario es el entrenador
       if (this.grupoId) {
         this.entrenamientosService.getGrupoEntrenamiento(this.grupoId).subscribe({
           next: (grupo) => {
             // Verificar si el usuario es el entrenador del grupo
-            this.isEntrenador = grupo.entrenador?._id === this.userId;
+            this.isEntrenador = this.isEntrenador || grupo.entrenador?._id === this.userId;
             console.log('Permisos verificados:', {
               userId: this.userId,
               grupoEntrenadorId: grupo.entrenador?._id,

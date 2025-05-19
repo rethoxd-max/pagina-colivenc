@@ -7,20 +7,30 @@ const path = require('path');
 const fs = require('fs');
 const mongoose = require('mongoose');
 
+const BASE_URL = process.env.BASE_URL || 'https://api.cecolivenc.es';
+const UPLOAD_DIR = '/var/www/colivenc/backend/uploads/competiciones';
+
+// Asegurarse de que el directorio existe
+if (!fs.existsSync(UPLOAD_DIR)) {
+    fs.mkdirSync(UPLOAD_DIR, { recursive: true });
+}
+
 // Configuración de multer para almacenar imágenes
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
-        cb(null, 'uploads/competiciones'); // Carpeta donde se almacenarán las imágenes
+        cb(null, UPLOAD_DIR);
     },
     filename: function (req, file, cb) {
-        cb(null, Date.now() + path.extname(file.originalname)); // Nombre único para el archivo
+        cb(null, Date.now() + path.extname(file.originalname));
     }
 });
 
-const upload = multer({ storage: storage });
-
-// Base URL para las imágenes (reemplaza si estás en producción)
-const BASE_URL = 'http://localhost:5000';
+const upload = multer({ 
+    storage: storage,
+    limits: {
+        fileSize: 5 * 1024 * 1024 // límite de 5MB
+    }
+});
 
 // Obtener todas las competiciones
 router.get('/', async (req, res) => {
@@ -49,81 +59,130 @@ router.get('/:id', async (req, res) => {
 const ObjectId = require('mongoose').Types.ObjectId;
 
 router.post('/', auth, upload.single('image'), async (req, res) => {
-    const { nombre, fecha, lugar, descripcion, tipo, pruebas, categorias } = req.body;
-
-    // Convertir las pruebas a un array de ObjectId
-    let pruebaIds;
     try {
-        pruebaIds = pruebas.map(id => new ObjectId(id));
-    } catch (error) {
-        return res.status(400).json({ message: 'Invalid ObjectId format for pruebas' });
-    }
+        const { nombre, fecha, lugar, descripcion, tipo, pruebas, categorias } = req.body;
 
-    let categoriaIds;
-    try {
-        categoriaIds = categorias.map(id => new ObjectId(id));
-    } catch (error) {
-        return res.status(400).json({ message: 'Invalid ObjectId format for categoriase' });
-    }
+        // Convertir las pruebas a un array de ObjectId
+        let pruebaIds;
+        try {
+            pruebaIds = pruebas.map(id => new ObjectId(id));
+        } catch (error) {
+            return res.status(400).json({ message: 'Invalid ObjectId format for pruebas' });
+        }
 
-    // Imagen
-    const imageUrl = req.file ? `${BASE_URL}/uploads/competiciones/${req.file.filename}` : null;
+        let categoriaIds;
+        try {
+            categoriaIds = categorias.map(id => new ObjectId(id));
+        } catch (error) {
+            return res.status(400).json({ message: 'Invalid ObjectId format for categorias' });
+        }
 
-    const competicion = new Competicion({
-        nombre,
-        fecha,
-        lugar,
-        descripcion,
-        tipo,
-        imageUrl,
-        pruebas: pruebaIds,
-        categorias: categoriaIds,
-    });
+        // Verificar si el archivo se subió correctamente
+        if (req.file) {
+            const filePath = path.join(UPLOAD_DIR, req.file.filename);
+            if (!fs.existsSync(filePath)) {
+                return res.status(500).json({ msg: 'Error al guardar la imagen' });
+            }
+        }
 
-    try {
+        // Imagen
+        const imageUrl = req.file ? `${BASE_URL}/uploads/competiciones/${req.file.filename}` : null;
+
+        const competicion = new Competicion({
+            nombre,
+            fecha,
+            lugar,
+            descripcion,
+            tipo,
+            imageUrl,
+            pruebas: pruebaIds,
+            categorias: categoriaIds,
+        });
+
         const nuevaCompeticion = await competicion.save();
         res.status(201).json(nuevaCompeticion);
     } catch (err) {
+        console.error('Error al crear competición:', err);
+        // Si hay un error y se subió un archivo, eliminarlo
+        if (req.file) {
+            const filePath = path.join(UPLOAD_DIR, req.file.filename);
+            if (fs.existsSync(filePath)) {
+                fs.unlinkSync(filePath);
+            }
+        }
         res.status(400).json({ message: err.message });
     }
 });
 
-
 // Editar una competición (ruta protegida)
 router.put('/:id', auth, upload.single('image'), async (req, res) => {
-    const { nombre, fecha, lugar, descripcion, tipo, imageUrl, pruebas, categorias } = req.body;
-
     try {
         const competicion = await Competicion.findById(req.params.id);
         if (!competicion) {
             return res.status(404).json({ msg: 'Competición no encontrada' });
         }
 
-        // Actualizar los datos de la competición
-        competicion.nombre = nombre || competicion.nombre;
-        competicion.fecha = fecha || competicion.fecha;
-        competicion.lugar = lugar || competicion.lugar;
-        competicion.descripcion = descripcion || competicion.descripcion;
-        competicion.tipo = tipo || competicion.tipo;
-        competicion.pruebas = pruebas;
-        competicion.categorias = categorias;
-        competicion.imageUrl = imageUrl
+        // Actualizar los datos básicos de la competición
+        competicion.nombre = req.body.nombre || competicion.nombre;
+        competicion.fecha = req.body.fecha || competicion.fecha;
+        competicion.lugar = req.body.lugar || competicion.lugar;
+        competicion.descripcion = req.body.descripcion || competicion.descripcion;
+        competicion.tipo = req.body.tipo || competicion.tipo;
 
-        // Si hay una nueva imagen, eliminar la antigua (si existe) y actualizar
+        // Manejar las pruebas y categorías
+        if (req.body.pruebas) {
+            try {
+                if (Array.isArray(req.body.pruebas)) {
+                    competicion.pruebas = req.body.pruebas.map(id => new ObjectId(id));
+                }
+            } catch (error) {
+                console.error('Error al procesar pruebas:', error);
+            }
+        }
+
+        if (req.body.categorias) {
+            try {
+                if (Array.isArray(req.body.categorias)) {
+                    competicion.categorias = req.body.categorias.map(id => new ObjectId(id));
+                }
+            } catch (error) {
+                console.error('Error al procesar categorías:', error);
+            }
+        }
+
+        // Manejar la imagen
         if (req.file) {
+            // Eliminar la imagen anterior si existe
             if (competicion.imageUrl) {
-                const oldImagePath = path.join(__dirname, '..', competicion.imageUrl);
+                const oldFilename = competicion.imageUrl.split('/').pop();
+                const oldImagePath = path.join(UPLOAD_DIR, oldFilename);
                 if (fs.existsSync(oldImagePath)) {
-                    fs.unlinkSync(oldImagePath); // Eliminar el archivo de la imagen anterior
+                    fs.unlinkSync(oldImagePath);
                 }
             }
+
+            // Verificar si la nueva imagen se subió correctamente
+            const newFilePath = path.join(UPLOAD_DIR, req.file.filename);
+            if (!fs.existsSync(newFilePath)) {
+                return res.status(500).json({ msg: 'Error al guardar la nueva imagen' });
+            }
+
+            // Actualizar con la nueva imagen
             competicion.imageUrl = `${BASE_URL}/uploads/competiciones/${req.file.filename}`;
         }
 
         await competicion.save();
         res.json(competicion);
     } catch (error) {
-        res.status(500).json({ msg: 'Error en el servidor', error });
+        console.error('Error al actualizar competición:', error);
+        // Si hay un error y se subió un archivo, eliminarlo
+        if (req.file) {
+            const filePath = path.join(UPLOAD_DIR, req.file.filename);
+            if (fs.existsSync(filePath)) {
+                fs.unlinkSync(filePath);
+            }
+        }
+        res.status(500).json({ msg: 'Error en el servidor', error: error.message });
     }
 });
 
@@ -137,15 +196,17 @@ router.delete('/:id', auth, async (req, res) => {
 
         // Eliminar la imagen asociada si existe
         if (competicion.imageUrl) {
-            const imagePath = path.join(__dirname, '..', competicion.imageUrl);
+            const filename = competicion.imageUrl.split('/').pop();
+            const imagePath = path.join(UPLOAD_DIR, filename);
             if (fs.existsSync(imagePath)) {
-                fs.unlinkSync(imagePath); // Eliminar la imagen del servidor
+                fs.unlinkSync(imagePath);
             }
         }
 
         await competicion.deleteOne();
         res.status(200).json({ msg: 'Competición eliminada' });
     } catch (err) {
+        console.error('Error al eliminar competición:', err);
         res.status(500).json({ msg: 'Error en el servidor', error: err.message });
     }
 });

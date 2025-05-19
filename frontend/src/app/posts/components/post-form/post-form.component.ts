@@ -1,9 +1,14 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { PostService } from '../../services/posts.service';
-import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import {
+  FormBuilder,
+  FormGroup,
+  ReactiveFormsModule,
+  Validators,
+} from '@angular/forms';
 import { NgClass, NgIf } from '@angular/common';
-import { environment } from '../../../../environments/environment.development';
+import { environment } from '../../../../environments/environment';
 @Component({
   selector: 'app-post-form',
   standalone: true,
@@ -37,17 +42,17 @@ export class PostFormComponent implements OnInit {
     this.postId = this.route.snapshot.paramMap.get('id');
     if (this.postId) {
       this.isEditMode = true;
-      this.postService.getPosts().subscribe(
-        (posts) => {
-          const post = posts.find((p: { _id: string | null }) => p._id === this.postId);
-          if (post) {
-            this.postForm.patchValue({
-              title: post.title,
-              content: post.content,
-            });
-          }
+      this.postService.getPosts().subscribe((posts) => {
+        const post = posts.find(
+          (p: { _id: string | null }) => p._id === this.postId
+        );
+        if (post) {
+          this.postForm.patchValue({
+            title: post.title,
+            content: post.content,
+          });
         }
-      );
+      });
     }
   }
 
@@ -77,8 +82,9 @@ export class PostFormComponent implements OnInit {
     }
 
     this.postService.createPost(formData).subscribe(
-      () => {
-        this.router.navigate(['/posts']);
+      (response) => {
+        console.log('Respuesta del servidor:', response);
+        this.router.navigate(['/noticias']);
       },
       (error) => {
         console.error('Error al crear el post:', error);

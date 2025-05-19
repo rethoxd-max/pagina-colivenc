@@ -12,7 +12,34 @@ router.get('/', async (req, res) => {
     }
 });
 
+// GET todas las marcas de un atleta en una prueba específica
+router.get('/atleta/:atletaId/prueba/:pruebaId', async (req, res) => {
+    try {
+        const { atletaId, pruebaId } = req.params;
+        const marcas = await Marca.find({
+            nombre_atleta: atletaId,
+            nombre_prueba: pruebaId
+        }).populate('nombre_atleta nombre_prueba categoria PcAL');
+        
+        res.json(marcas);
+    } catch (err) {
+        res.status(500).json({ message: err.message });
+    }
+});
 
+// GET todas las marcas para una prueba
+router.get('/prueba/:pruebaId', async (req, res) => {
+    try {
+        const { pruebaId } = req.params;
+        const marcas = await Marca.find({
+            nombre_prueba: pruebaId
+        }).populate('nombre_atleta nombre_prueba categoria PcAL');
+        
+        res.json(marcas);
+    } catch (err) {
+        res.status(500).json({ message: err.message });
+    }
+});
 
 // GET marca by ID
 router.get('/:id', async (req, res) => {

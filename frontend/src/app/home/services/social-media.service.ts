@@ -1,6 +1,8 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Observable, throwError } from 'rxjs';
+import { catchError, map } from 'rxjs/operators';
+import { environment } from '../../../environments/environment';
 
 export interface InstagramPost {
   id: string;
@@ -28,27 +30,25 @@ export interface FacebookPost {
   providedIn: 'root'
 })
 export class SocialMediaService {
-  private readonly FACEBOOK_PAGE_ID = 'TU_PAGE_ID'; // Reemplazar con el ID de la página de Facebook
-  private readonly INSTAGRAM_BUSINESS_ID = 'TU_BUSINESS_ID'; // Reemplazar con el ID de Instagram Business
-  private readonly ACCESS_TOKEN = 'TU_ACCESS_TOKEN'; // Reemplazar con el token de acceso
+  private readonly apiUrl = environment.apiUrl;
 
   constructor(private http: HttpClient) { }
 
   getInstagramPosts(): Observable<{ data: InstagramPost[] }> {
-    const url = `https://graph.facebook.com/v18.0/${this.INSTAGRAM_BUSINESS_ID}/media`;
-    const params = {
-      access_token: this.ACCESS_TOKEN,
-      fields: 'id,media_url,caption,timestamp,permalink,media_type'
-    };
-    return this.http.get<{ data: InstagramPost[] }>(url, { params });
+    return this.http.get<{ data: InstagramPost[] }>(`${this.apiUrl}/api/instagram/posts`).pipe(
+      catchError(error => {
+        console.error('Error al obtener posts de Instagram:', error);
+        return throwError(() => new Error('No se pudieron cargar los posts de Instagram'));
+      })
+    );
   }
 
   getFacebookPosts(): Observable<{ data: FacebookPost[] }> {
-    const url = `https://graph.facebook.com/v18.0/${this.FACEBOOK_PAGE_ID}/posts`;
-    const params = {
-      access_token: this.ACCESS_TOKEN,
-      fields: 'id,message,created_time,full_picture,permalink_url,likes.summary(true)'
-    };
-    return this.http.get<{ data: FacebookPost[] }>(url, { params });
+    return this.http.get<{ data: FacebookPost[] }>(`${this.apiUrl}/api/facebook/posts`).pipe(
+      catchError(error => {
+        console.error('Error al obtener posts de Facebook:', error);
+        return throwError(() => new Error('No se pudieron cargar los posts de Facebook'));
+      })
+    );
   }
 } 

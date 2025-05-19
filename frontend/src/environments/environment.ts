@@ -1,4 +1,4 @@
 export const environment = {
     production: true,
-    apiUrl: 'https://tu-dominio.com'
+    apiUrl: 'https://api.cecolivenc.es'
 };

@@ -1,13 +1,14 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { environment } from '../../../environments/environment.development';
+import { environment } from '../../../environments/environment';
 
 // Interfaces según la nueva estructura de la base de datos
 export interface Atleta {
   _id: string;
   nombre: string;
   fecha_nacimiento: Date;
+  genero: 'Masculino' | 'Femenino';
   usuario?: {
     _id: string;
     name: string;

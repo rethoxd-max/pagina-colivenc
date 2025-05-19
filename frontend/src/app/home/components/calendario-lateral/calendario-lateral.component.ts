@@ -91,13 +91,23 @@ export class CalendarioLateralComponent implements OnInit {
     const month = this.currentDate.getMonth();
     
     // Obtener el primer día del mes
-    this.firstDayOfMonth = new Date(year, month, 1).getDay();
+    const firstDay = new Date(year, month, 1);
+    const firstDayOfWeek = firstDay.getDay(); // 0 = Domingo, 1 = Lunes, ..., 6 = Sábado
+    
+    // Ajustar para que el lunes sea el primer día (1) en lugar del domingo (0)
+    const adjustedFirstDayOfWeek = firstDayOfWeek === 0 ? 6 : firstDayOfWeek - 1;
+    
+    // Crear array de días vacíos para el inicio del mes
+    const emptyDays = Array(adjustedFirstDayOfWeek).fill(0);
     
     // Obtener el número de días en el mes
-    this.daysInMonth = Array.from(
+    const daysInMonth = Array.from(
       { length: new Date(year, month + 1, 0).getDate() },
       (_, i) => i + 1
     );
+    
+    // Combinar días vacíos con días del mes
+    this.daysInMonth = [...emptyDays, ...daysInMonth];
   }
 
   prevMonth(): void {

@@ -1,0 +1,76 @@
+<div class="tienda-container">
+  <h1>Tienda del Club</h1>
+  
+  <div *ngIf="loading" class="loading">
+    Cargando productos...
+  </div>
+
+  <div *ngIf="error" class="error-message">
+    {{ error }}
+  </div>
+
+  <div class="productos-grid">
+    <div *ngFor="let producto of productos" class="producto-card">
+      <div class="producto-imagen-container" (click)="seleccionarProducto(producto)">
+        <img [src]="producto.imagen" [alt]="producto.nombre" class="producto-imagen">
+      </div>
+      <div class="producto-info">
+        <h2>{{ producto.nombre }}</h2>
+        <p>{{ producto.descripcion }}</p>
+        <p class="precio">{{ producto.precio | currency:'EUR' }}</p>
+        
+        <div class="tallas-container" (click)="$event.stopPropagation()">
+          <select 
+            [ngModel]="getTallaSeleccionada(producto._id)"
+            (ngModelChange)="seleccionarTalla(producto._id, $event)"
+            class="talla-select">
+            <option value="">Selecciona talla</option>
+            <option *ngFor="let talla of producto.tallas" [value]="talla">
+              {{ talla }}
+            </option>
+          </select>
+        </div>
+
+        <button 
+          class="btn-comprar" 
+          (click)="iniciarCompra(producto); $event.stopPropagation()" 
+          [disabled]="!getTallaSeleccionada(producto._id)">
+          Comprar
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div *ngIf="productoSeleccionado" class="modal">
+    <div class="modal-content">
+      <h2>{{ productoSeleccionado.nombre }}</h2>
+      <img [src]="productoSeleccionado.imagen" [alt]="productoSeleccionado.nombre" class="producto-imagen-detalle">
+      <p>{{ productoSeleccionado.descripcion }}</p>
+      <p class="precio">{{ productoSeleccionado.precio | currency:'EUR' }}</p>
+      
+      <div class="tallas-container">
+        <h3>Selecciona tu talla:</h3>
+        <div class="tallas-grid">
+          <button 
+            *ngFor="let talla of productoSeleccionado.tallas" 
+            [class.selected]="talla === getTallaSeleccionada(productoSeleccionado._id)"
+            (click)="seleccionarTalla(productoSeleccionado._id, talla)">
+            {{ talla }}
+          </button>
+        </div>
+      </div>
+
+      <div class="acciones">
+        <button 
+          class="btn-comprar" 
+          (click)="iniciarCompra(productoSeleccionado)" 
+          [disabled]="!getTallaSeleccionada(productoSeleccionado._id)">
+          Comprar ahora
+        </button>
+        <button class="btn-cerrar" (click)="productoSeleccionado = null">
+          Cerrar
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

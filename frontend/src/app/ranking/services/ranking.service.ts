@@ -1,13 +1,14 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { environment } from '../../../environments/environment.development';
+import { environment } from '../../../environments/environment';
 
 // Interfaces según la nueva estructura de la base de datos
 export interface Atleta {
   _id: string;
   nombre: string;
   fecha_nacimiento: Date;
+  genero: 'Masculino' | 'Femenino';
   usuario?: {
     _id: string;
     name: string;
@@ -96,20 +97,55 @@ export class RankingService {
     return this.http.get<Atleta[]>(`${this.apiUrl}/atletas`);
   }
 
+  // Obtener atletas por género
+  getAtletasPorGenero(genero: string): Observable<Atleta[]> {
+    return this.http.get<Atleta[]>(`${this.apiUrl}/atletas/genero/${genero}`);
+  }
+
   getAtletaById(atletaId: string): Observable<Atleta> {
     return this.http.get<Atleta>(`${this.apiUrl}/atletas/${atletaId}`);
   }
 
+  // Obtener todas las marcas de un atleta en una prueba específica
+  getTodasMarcasAtletaEnPrueba(atletaId: string, pruebaId: string): Observable<Marca[]> {
+    return this.http.get<Marca[]>(`${this.apiUrl}/marcas/atleta/${atletaId}/prueba/${pruebaId}`);
+  }
+
+  // Obtener todas las marcas para una prueba
+  getTodasMarcasPorPrueba(pruebaId: string): Observable<Marca[]> {
+    return this.http.get<Marca[]>(`${this.apiUrl}/marcas/prueba/${pruebaId}`);
+  }
+
+  // Obtener mejores marcas por prueba
   getMejoresMarcas(pruebaId: string): Observable<Marca[]> {
     return this.http.get<Marca[]>(`${this.apiUrl}/ranking/mejores-marcas/${pruebaId}`);
   }
 
-  getMejoresMarcasPorCategoria(pruebaId: string, categoriaId: string): Observable<Marca[]> {
-    return this.http.get<Marca[]>(`${this.apiUrl}/ranking/mejores-marcas/${pruebaId}/${categoriaId}`);
+  // Obtener mejores marcas por prueba y género
+  getMejoresMarcasPorGenero(pruebaId: string, genero: string): Observable<Marca[]> {
+    return this.http.get<Marca[]>(`${this.apiUrl}/ranking/mejores-marcas/${pruebaId}/genero/${genero}`);
   }
 
-  getMejoresMarcasPorCategoriaYPcAL(pruebaId: string, categoriaId: string, PcALId: string): Observable<Marca[]> {
-    return this.http.get<Marca[]>(`${this.apiUrl}/ranking/mejores-marcas/${pruebaId}/${categoriaId}/${PcALId}`);
+  getMejoresMarcasPorCategoria(pruebaId: string, categoriaId: string, mostrarSoloMejorMarca: boolean = true): Observable<Marca[]> {
+    const params = new HttpParams().set('todasMarcas', (!mostrarSoloMejorMarca).toString());
+    return this.http.get<Marca[]>(`${this.apiUrl}/ranking/mejores-marcas/${pruebaId}/${categoriaId}`, { params });
+  }
+
+  // Obtener mejores marcas por prueba, categoría y género
+  getMejoresMarcasPorCategoriaYGenero(pruebaId: string, categoriaId: string, genero: string, mostrarSoloMejorMarca: boolean = true): Observable<Marca[]> {
+    const params = new HttpParams().set('todasMarcas', (!mostrarSoloMejorMarca).toString());
+    return this.http.get<Marca[]>(`${this.apiUrl}/ranking/mejores-marcas/${pruebaId}/${categoriaId}/genero/${genero}`, { params });
+  }
+
+  getMejoresMarcasPorCategoriaYPcAL(pruebaId: string, categoriaId: string, PcALId: string, mostrarSoloMejorMarca: boolean = true): Observable<Marca[]> {
+    const params = new HttpParams().set('todasMarcas', (!mostrarSoloMejorMarca).toString());
+    return this.http.get<Marca[]>(`${this.apiUrl}/ranking/mejores-marcas/${pruebaId}/${categoriaId}/${PcALId}`, { params });
+  }
+
+  // Obtener mejores marcas por prueba, categoría, PcAL y género
+  getMejoresMarcasPorCategoriaYPcALYGenero(pruebaId: string, categoriaId: string, PcALId: string, genero: string, mostrarSoloMejorMarca: boolean = true): Observable<Marca[]> {
+    const params = new HttpParams().set('todasMarcas', (!mostrarSoloMejorMarca).toString());
+    return this.http.get<Marca[]>(`${this.apiUrl}/ranking/mejores-marcas/${pruebaId}/${categoriaId}/${PcALId}/genero/${genero}`, { params });
   }
 
   getCategorias(): Observable<Categoria[]> {

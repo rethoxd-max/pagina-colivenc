@@ -4,7 +4,7 @@ import { CommonModule, NgIf } from '@angular/common'; // Importar CommonModule p
 import { ReactiveFormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../../auth/services/auth.service';
-import { environment } from '../../../../environments/environment.development';
+import { environment } from '../../../../environments/environment';
 
 @Component({
   selector: 'app-post-list',
@@ -29,11 +29,11 @@ export class PostListComponent implements OnInit {
     this.loadPosts();
   }
 
-  loadPosts() {
+  loadPosts(): void {
     this.postService.getPosts().subscribe(
       (data) => {
-        this.posts = data; // Asumiendo que el API devuelve un array de posts
-
+        // Ordenar por fecha de más reciente a más antigua
+        this.posts = data.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
       },
       (error) => {
         console.error('Error al cargar los posts:', error);

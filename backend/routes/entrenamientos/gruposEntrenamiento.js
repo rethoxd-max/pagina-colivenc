@@ -30,10 +30,7 @@ router.get('/atleta/:atletaId', async (req, res) => {
         const grupos = await GrupoEntrenamiento.find({ atletas: atletaId })
             .populate('entrenador atletas');
 
-        if (grupos.length === 0) {
-            return res.status(404).json({ message: 'No se encontraron grupos para este atleta' });
-        }
-
+        // Devolver un array vacío en lugar de un 404
         res.json(grupos);
     } catch (err) {
         res.status(500).json({ message: err.message });

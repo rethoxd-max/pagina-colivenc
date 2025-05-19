@@ -35,6 +35,7 @@ export class PerfilAtletaComponent implements OnInit, OnDestroy {
   
   private routeSubscription!: Subscription;
   private authSubscription!: Subscription;
+  private isLoggedIn: boolean = false;
 
   constructor(
     private rankingService: RankingService,
@@ -45,22 +46,27 @@ export class PerfilAtletaComponent implements OnInit, OnDestroy {
   ) { }
 
   ngOnInit() {
+    // Primero verificamos si el usuario está logueado
+    this.authSubscription = this.authService.getIsLoggedIn().subscribe(isLoggedIn => {
+      this.isLoggedIn = isLoggedIn;
+      
+      if (!isLoggedIn) {
+        // Si el usuario se desloguea, limpiar los datos
+        this.clearAtletaData();
+      }
+    });
+
     // Suscribirse a los cambios de parámetros de la ruta
     this.routeSubscription = this.route.paramMap.subscribe(params => {
       const atletaId = params.get('atletaId');
-      this.loadAtletaData(atletaId);
-    });
-
-    // Suscribirse a los cambios en el estado de autenticación
-    this.authSubscription = this.authService.getIsLoggedIn().subscribe(isLoggedIn => {
-      if (isLoggedIn) {
-        // Si no hay atletaId en la ruta y el usuario está logueado, cargar su perfil
-        if (!this.route.snapshot.paramMap.get('atletaId')) {
+      if (atletaId) {
+        // Si hay un atletaId en la ruta, cargar ese perfil específico
+        this.loadAtletaData(atletaId);
+      } else {
+        // Si no hay atletaId y el usuario está logueado, cargar su perfil
+        if (this.isLoggedIn) {
           this.loadCurrentUserAtleta();
         }
-      } else {
-        // Si el usuario se desloguea, limpiar los datos
-        this.clearAtletaData();
       }
     });
   }

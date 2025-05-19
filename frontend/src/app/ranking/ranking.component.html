@@ -1,47 +1,84 @@
 <div class="container" [class.with-results]="marcas.length > 0">
     <!-- Filtros en modo inicial -->
     <div class="filters-container">
-        <h2>Ranking de Marcas</h2>
-        <h3 class="text-center mb-4">Selecciona los filtros</h3>
-        <!-- Selección de sector -->
-        <div class="form-group">
-            <label for="sectores">Sector:</label>
-            <select id="sectores" class="form-control" [(ngModel)]="sectorSeleccionado"
-                (ngModelChange)="onSectorSelected()">
-                <option *ngFor="let sector of sectores" [ngValue]="sector">{{ sector.nombre_sector }}</option>
-            </select>
-        </div>
+        <h2 class="text-center">Ranking de Marcas</h2>
+        <h4 class="text-center mb-4">Selecciona los filtros</h4>
+        
+        <div class="row">
+            <!-- Columna 1: Filtros principales -->
+            <div class="col-md-4">
+                <!-- Selección de sector -->
+                <div class="form-group">
+                    <label for="sectores">Sector:</label>
+                    <select id="sectores" class="form-control" [(ngModel)]="sectorSeleccionado"
+                        (ngModelChange)="onSectorSelected()">
+                        <option *ngFor="let sector of sectores" [ngValue]="sector">{{ sector.nombre_sector }}</option>
+                    </select>
+                </div>
 
-        <!-- Selección de prueba -->
-        <div *ngIf="sectorSeleccionado" class="form-group">
-            <label for="pruebas">Prueba:</label>
-            <select id="pruebas" class="form-control" [(ngModel)]="pruebaSeleccionada" (ngModelChange)="onPruebaSelected()">
-                <option *ngFor="let prueba of pruebas" [ngValue]="prueba">{{ prueba.nombre_prueba }}</option>
-            </select>
-        </div>
+                <!-- Selección de prueba -->
+                <div *ngIf="sectorSeleccionado" class="form-group">
+                    <label for="pruebas">Prueba:</label>
+                    <select id="pruebas" class="form-control" [(ngModel)]="pruebaSeleccionada" (ngModelChange)="onPruebaSelected()">
+                        <option *ngFor="let prueba of pruebas" [ngValue]="prueba">{{ prueba.nombre_prueba }}</option>
+                    </select>
+                </div>
+            </div>
 
-        <!-- Selección de categoría -->
-        <div *ngIf="pruebaSeleccionada" class="form-group">
-            <label for="categorias">Categoría:</label>
-            <select id="categorias" class="form-control" [(ngModel)]="categoriaSeleccionada"
-                (ngModelChange)="onCategoriaSelected()">
-                <option *ngFor="let categoria of categorias" [ngValue]="categoria">{{ categoria.nombre_categoria }}</option>
-            </select>
-        </div>
+            <!-- Columna 2: Filtros de visualización y viento -->
+            <div class="col-md-4">
+                <!-- Selección de mostrar marcas -->
+                <div *ngIf="pruebaSeleccionada" class="form-group">
+                    <label for="mostrar-marcas">Mostrar:</label>
+                    <select id="mostrar-marcas" class="form-control" [(ngModel)]="mostrarSoloMejorMarca" (ngModelChange)="onMostrarMarcasSelected()">
+                        <option *ngFor="let opcion of opcionesMostrarMarcas" [ngValue]="opcion.valor">{{ opcion.texto }}</option>
+                    </select>
+                </div>
 
-        <!-- Selección de Temporada -->
-        <div *ngIf="categoriaSeleccionada" class="form-group">
-            <label for="PcAL">Temporada:</label>
-            <select id="PcAL" class="form-control" [(ngModel)]="PcALSeleccionado" (ngModelChange)="onPcALSelected()">
-                <option [ngValue]="ambas">{{ambas.PcAL}}</option>
-                <option *ngFor="let pcal of PcAL" [ngValue]="pcal">{{ pcal.PcAL }}</option>
-            </select>
+                <!-- Selección de viento válido (solo si la prueba requiere viento) -->
+                <div *ngIf="pruebaSeleccionada && requiereMedicionViento" class="form-group">
+                    <label for="viento">Viento:</label>
+                    <select id="viento" class="form-control" [(ngModel)]="vientoValido" (ngModelChange)="onVientoSelected()">
+                        <option *ngFor="let opcion of opcionesViento" [ngValue]="opcion.valor">{{ opcion.texto }}</option>
+                    </select>
+                </div>
+
+                <!-- Selección de género -->
+                <div *ngIf="pruebaSeleccionada" class="form-group">
+                    <label for="genero">Género:</label>
+                    <select id="genero" class="form-control" [(ngModel)]="generoSeleccionado" (ngModelChange)="onGeneroSelected()">
+                        <option *ngFor="let opcion of opcionesGenero" [ngValue]="opcion.valor">{{ opcion.texto }}</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Columna 3: Filtros de categoría y temporada -->
+            <div class="col-md-4">
+                <!-- Selección de categoría -->
+                <div *ngIf="pruebaSeleccionada" class="form-group">
+                    <label for="categorias">Categoría:</label>
+                    <select id="categorias" class="form-control" [(ngModel)]="categoriaSeleccionada"
+                        (ngModelChange)="onCategoriaSelected()">
+                        <option *ngFor="let categoria of categorias" [ngValue]="categoria">{{ categoria.nombre_categoria }}</option>
+                    </select>
+                </div>
+
+                <!-- Selección de Temporada -->
+                <div *ngIf="categoriaSeleccionada" class="form-group">
+                    <label for="PcAL">Temporada:</label>
+                    <select id="PcAL" class="form-control" [(ngModel)]="PcALSeleccionado" (ngModelChange)="onPcALSelected()">
+                        <option [ngValue]="ambas">{{ambas.PcAL}}</option>
+                        <option *ngFor="let pcal of PcAL" [ngValue]="pcal">{{ pcal.PcAL }}</option>
+                    </select>
+                </div>
+            </div>
         </div>
     </div>
 
     <!-- Sidebar con filtros (visible solo con resultados) -->
     <div class="sidebar">
-        <h3 class="mb-4">Filtros</h3>
+        <h3 class="text-center mb-3">Filtros</h3>
+        
         <!-- Selección de sector -->
         <div class="form-group">
             <label for="sectores-sidebar">Sector:</label>
@@ -59,13 +96,47 @@
             </select>
         </div>
 
-        <!-- Selección de categoría -->
-        <div *ngIf="pruebaSeleccionada" class="form-group">
-            <label for="categorias-sidebar">Categoría:</label>
-            <select id="categorias-sidebar" class="form-control" [(ngModel)]="categoriaSeleccionada"
-                (ngModelChange)="onCategoriaSelected()">
-                <option *ngFor="let categoria of categorias" [ngValue]="categoria">{{ categoria.nombre_categoria }}</option>
-            </select>
+        <div class="row">
+            <div class="col-6">
+                <!-- Selección de mostrar marcas -->
+                <div *ngIf="pruebaSeleccionada" class="form-group">
+                    <label for="mostrar-marcas-sidebar">Mostrar:</label>
+                    <select id="mostrar-marcas-sidebar" class="form-control" [(ngModel)]="mostrarSoloMejorMarca" (ngModelChange)="onMostrarMarcasSelected()">
+                        <option *ngFor="let opcion of opcionesMostrarMarcas" [ngValue]="opcion.valor">{{ opcion.texto }}</option>
+                    </select>
+                </div>
+            </div>
+            <div class="col-6">
+                <!-- Selección de viento válido (solo si la prueba requiere viento) -->
+                <div *ngIf="pruebaSeleccionada && requiereMedicionViento" class="form-group">
+                    <label for="viento-sidebar">Viento:</label>
+                    <select id="viento-sidebar" class="form-control" [(ngModel)]="vientoValido" (ngModelChange)="onVientoSelected()">
+                        <option *ngFor="let opcion of opcionesViento" [ngValue]="opcion.valor">{{ opcion.texto }}</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-6">
+                <!-- Selección de género -->
+                <div *ngIf="pruebaSeleccionada" class="form-group">
+                    <label for="genero-sidebar">Género:</label>
+                    <select id="genero-sidebar" class="form-control" [(ngModel)]="generoSeleccionado" (ngModelChange)="onGeneroSelected()">
+                        <option *ngFor="let opcion of opcionesGenero" [ngValue]="opcion.valor">{{ opcion.texto }}</option>
+                    </select>
+                </div>
+            </div>
+            <div class="col-6">
+                <!-- Selección de categoría -->
+                <div *ngIf="pruebaSeleccionada" class="form-group">
+                    <label for="categorias-sidebar">Categoría:</label>
+                    <select id="categorias-sidebar" class="form-control" [(ngModel)]="categoriaSeleccionada"
+                        (ngModelChange)="onCategoriaSelected()">
+                        <option *ngFor="let categoria of categorias" [ngValue]="categoria">{{ categoria.nombre_categoria }}</option>
+                    </select>
+                </div>
+            </div>
         </div>
 
         <!-- Selección de Temporada -->
@@ -79,46 +150,54 @@
     </div>
 
     <div class="main-content">
-        <h2 *ngIf="marcas.length > 0">Ranking de Marcas</h2>
+        <h2 *ngIf="marcas.length > 0" class="text-center mb-3">Ranking de Marcas</h2>
 
         <!-- Tabla de marcas -->
         <div *ngIf="pruebaSeleccionada && categoriaSeleccionada && PcALSeleccionado && marcas.length > 0; else noMarcas"
             class="table-responsive">
-            <h3 class="text-center mb-4">Marcas para {{ pruebaSeleccionada.nombre_prueba }}</h3>
-            <table class="table table-bordered table-striped">
+            <h4 class="text-center mb-3">Marcas para {{ pruebaSeleccionada.nombre_prueba }}</h4>
+            <table class="table table-bordered table-striped table-hover">
                 <thead class="thead-dark">
                     <tr>
+                        <th style="width: 5%" class="text-center">#</th>
                         <th *ngIf="mostrarAtleta">Atleta</th>
-                        <th *ngIf="mostrarTiempo">Tiempo</th>
-                        <th *ngIf="mostrarMetros">Metros</th>
-                        <th *ngIf="mostrarPuntos">Puntos</th>
+                        <th *ngIf="categoriaSeleccionada?._id === 'todas'" class="text-center">Categoría</th>
+                        <th *ngIf="mostrarTiempo" class="text-center">Tiempo</th>
+                        <th *ngIf="mostrarMetros" class="text-center">Metros</th>
+                        <th *ngIf="mostrarPuntos" class="text-center">Puntos</th>
+                        <th *ngIf="mostrarViento" class="text-center">Viento</th>
                         <th *ngIf="mostrarLugar">Lugar</th>
-                        <th *ngIf="mostrarViento">Viento</th>
                         <th *ngIf="mostrarComentario">Comentario</th>
-                        <th *ngIf="mostrarFecha">Fecha</th>
-                        <th *ngIf="isAdmin()">Acciones</th>
+                        <th *ngIf="mostrarFecha" class="text-center">Fecha</th>
+                        <th *ngIf="isAdmin()" class="text-center">Acciones</th>
                     </tr>
                 </thead>
                 <tbody>
-                    <tr *ngFor="let marca of marcas">
+                    <tr *ngFor="let marca of marcas; let i = index">
+                        <td class="text-center">{{ i + 1 }}</td>
                         <td *ngIf="mostrarAtleta">
                             <a [routerLink]="['/atletas', marca.nombre_atleta._id, 'perfil']">
                                 {{ marca.nombre_atleta.nombre }}
                             </a>
                         </td>
-                        <td *ngIf="mostrarTiempo">{{ formatearTiempo(marca.horas, marca.minutos, marca.segundos) }}</td>
-                        <td *ngIf="mostrarMetros">{{ marca.metros }}</td>
-                        <td *ngIf="mostrarPuntos">{{ marca.puntos }}</td>
+                        <td *ngIf="categoriaSeleccionada?._id === 'todas'" class="text-center">{{ marca.categoria.nombre_categoria }}</td>
+                        <td *ngIf="mostrarTiempo" class="text-center">{{ formatearTiempo(marca.horas, marca.minutos, marca.segundos) }}</td>
+                        <td *ngIf="mostrarMetros" class="text-center">{{ marca.metros }}</td>
+                        <td *ngIf="mostrarPuntos" class="text-center">{{ marca.puntos }}</td>
+                        <td *ngIf="mostrarViento" class="text-center" [ngClass]="{'text-danger': marca.viento > 2.0}">
+                            {{ marca.viento != null ? (marca.viento | number:'1.1-1') + ' m/s' : '' }}
+                        </td>
                         <td *ngIf="mostrarLugar">{{ marca.lugar }}</td>
-                        <td *ngIf="mostrarViento">{{ marca.viento }}</td>
                         <td *ngIf="mostrarComentario">
                             <a href="#" (click)="openDecathlonModal(marca.comentario); $event.preventDefault();">
                                 Ver marcas combinadas
                             </a>
                         </td>
-                        <td *ngIf="mostrarFecha">{{ marca.fecha_realizacion }}</td>
-                        <td *ngIf="isAdmin()">
-                            <button (click)="deleteMarca(marca._id)" class="btn btn-danger">Borrar</button>
+                        <td *ngIf="mostrarFecha" class="text-center">{{ marca.fecha_realizacion }}</td>
+                        <td *ngIf="isAdmin()" class="text-center">
+                            <button (click)="deleteMarca(marca._id)" class="btn btn-sm btn-danger">
+                                <i class="fas fa-trash"></i> Borrar
+                            </button>
                         </td>
                     </tr>
                 </tbody>
@@ -127,8 +206,8 @@
 
         <ng-template #noMarcas>
             <div *ngIf="pruebaSeleccionada && categoriaSeleccionada && PcALSeleccionado"
-                class="alert alert-info text-center">
-                No hay marcas disponibles para tu búsqueda
+                class="alert alert-info text-center mt-4">
+                <i class="fas fa-info-circle mr-2"></i> No hay marcas disponibles para tu búsqueda
             </div>
         </ng-template>
     </div>

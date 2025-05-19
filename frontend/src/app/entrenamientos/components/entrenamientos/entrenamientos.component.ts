@@ -48,41 +48,55 @@ export class EntrenamientosComponent implements OnInit {
       return;
     }
 
+    // Array para almacenar todos los grupos
+    let gruposCombinados: any[] = [];
+
+    // Si es entrenador, cargar grupos donde es entrenador
     if (this.isEntrenador) {
       console.log('Cargando grupos como entrenador con ID:', this.userId);
       this.entrenamientosService.getGruposEntrenamientoByEntrenador(this.userId).subscribe({
-        next: (grupos) => {
-          console.log('Grupos obtenidos como entrenador:', grupos);
-          this.gruposEntrenamiento = grupos;
+        next: (gruposEntrenador) => {
+          console.log('Grupos obtenidos como entrenador:', gruposEntrenador);
+          gruposCombinados = [...gruposEntrenador];
+          this.gruposEntrenamiento = gruposCombinados;
         },
         error: (error) => {
           console.error('Error al obtener los grupos como entrenador:', error);
-          this.gruposEntrenamiento = [];
-        }
-      });
-    } else {
-      console.log('Cargando grupos como atleta');
-      this.perfilAtletaService.getAtletaByUserId(this.userId).subscribe({
-        next: (atleta) => {
-          this.atletaId = atleta._id;
-          console.log('Cargando grupos para atleta con ID:', this.atletaId);
-          this.entrenamientosService.getGruposEntrenamiento(this.atletaId).subscribe({
-            next: (grupos) => {
-              console.log('Grupos obtenidos como atleta:', grupos);
-              this.gruposEntrenamiento = grupos;
-            },
-            error: (error) => {
-              console.error('Error al obtener los grupos como atleta:', error);
-              this.gruposEntrenamiento = [];
-            }
-          });
-        },
-        error: (error) => {
-          console.error('Error al obtener el atleta:', error);
-          this.gruposEntrenamiento = [];
         }
       });
     }
+
+    // Cargar grupos donde es atleta
+    console.log('Cargando grupos como atleta');
+    this.perfilAtletaService.getAtletaByUserId(this.userId).subscribe({
+      next: (atleta) => {
+        if (!atleta || !atleta._id) {
+          console.error('No se encontró el atleta o no tiene ID válido');
+          return;
+        }
+        this.atletaId = atleta._id;
+        console.log('Cargando grupos para atleta con ID:', this.atletaId);
+        this.entrenamientosService.getGruposEntrenamiento(this.atletaId).subscribe({
+          next: (gruposAtleta) => {
+            console.log('Grupos obtenidos como atleta:', gruposAtleta);
+            // Combinar los grupos de atleta con los existentes
+            const gruposUnicos = [...this.gruposEntrenamiento];
+            gruposAtleta.forEach(grupoAtleta => {
+              if (!gruposUnicos.some(g => g._id === grupoAtleta._id)) {
+                gruposUnicos.push(grupoAtleta);
+              }
+            });
+            this.gruposEntrenamiento = gruposUnicos;
+          },
+          error: (error) => {
+            console.error('Error al obtener los grupos como atleta:', error);
+          }
+        });
+      },
+      error: (error) => {
+        console.error('Error al obtener el atleta:', error);
+      }
+    });
   }
 
   puedeEditarGrupo(grupo: any): boolean {

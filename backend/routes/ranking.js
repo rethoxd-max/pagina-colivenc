@@ -45,16 +45,28 @@ router.get('/mejores-marcas/prueba/:pruebaId/atleta/:atletaId', async (req, res)
     }
 });
 
-
-
+// GET mejores marcas por prueba
 router.get('/mejores-marcas/:pruebaId', async (req, res) => {
     try {
         const pruebaId = req.params.pruebaId;
+        const todasMarcas = req.query.todasMarcas === 'true';
+
+        // Validar que el ID sea válido
+        if (!mongoose.Types.ObjectId.isValid(pruebaId)) {
+            return res.status(400).json({ message: 'ID de prueba no válido.' });
+        }
 
         // Obtener todas las marcas de la prueba seleccionada
-        const marcas = await Marca.find({ nombre_prueba: pruebaId })
-            .populate('nombre_atleta nombre_prueba')
-            .lean(); // Usamos lean() para mejorar el rendimiento
+        const marcas = await Marca.find({
+            nombre_prueba: pruebaId
+        })
+            .populate('nombre_atleta nombre_prueba categoria')
+            .lean();
+
+        if (todasMarcas) {
+            // Si se solicitan todas las marcas, devolver todas las marcas ordenadas
+            return res.json(marcas.sort(ordenarMarcas));
+        }
 
         // Agrupar las marcas por atleta
         const marcasPorAtleta = marcas.reduce((acc, marca) => {
@@ -77,10 +89,163 @@ router.get('/mejores-marcas/:pruebaId', async (req, res) => {
     }
 });
 
+// GET mejores marcas por prueba y género
+router.get('/mejores-marcas/:pruebaId/genero/:genero', async (req, res) => {
+    try {
+        const { pruebaId, genero } = req.params;
+        const todasMarcas = req.query.todasMarcas === 'true';
+
+        // Validar que los IDs sean válidos
+        if (!mongoose.Types.ObjectId.isValid(pruebaId)) {
+            return res.status(400).json({ message: 'ID de prueba no válido.' });
+        }
+
+        if (genero !== 'Masculino' && genero !== 'Femenino') {
+            return res.status(400).json({ message: 'El género debe ser Masculino o Femenino' });
+        }
+
+        // Obtener todas las marcas de la prueba seleccionada
+        const marcas = await Marca.find({
+            nombre_prueba: pruebaId
+        })
+            .populate({
+                path: 'nombre_atleta',
+                match: { genero }
+            })
+            .populate('nombre_prueba categoria')
+            .lean();
+
+        // Filtrar marcas donde nombre_atleta existe (solo atletas del género seleccionado)
+        const marcasFiltradas = marcas.filter(marca => marca.nombre_atleta !== null);
+
+        if (todasMarcas) {
+            // Si se solicitan todas las marcas, devolver todas las marcas ordenadas
+            return res.json(marcasFiltradas.sort(ordenarMarcas));
+        }
+
+        // Agrupar las marcas por atleta
+        const marcasPorAtleta = marcasFiltradas.reduce((acc, marca) => {
+            const atletaId = marca.nombre_atleta._id.toString();
+            if (!acc[atletaId]) acc[atletaId] = [];
+            acc[atletaId].push(marca);
+            return acc;
+        }, {});
+
+        // Filtrar la mejor marca para cada atleta según las reglas
+        const mejoresMarcas = Object.values(marcasPorAtleta).map(marcasAtleta => obtenerMejorMarca(marcasAtleta));
+
+        // Ordenar las mejores marcas para el ranking
+        const rankingOrdenado = mejoresMarcas.sort(ordenarMarcas);
+
+        // Enviar las mejores marcas ordenadas
+        res.json(rankingOrdenado);
+    } catch (err) {
+        res.status(500).json({ message: err.message });
+    }
+});
+
+router.get('/mejores-marcas/:pruebaId', async (req, res) => {
+    try {
+        const pruebaId = req.params.pruebaId;
+        const todasMarcas = req.query.todasMarcas === 'true';
+
+        // Obtener todas las marcas de la prueba seleccionada
+        const marcas = await Marca.find({ nombre_prueba: pruebaId })
+            .populate('nombre_atleta nombre_prueba')
+            .lean(); // Usamos lean() para mejorar el rendimiento
+
+        if (todasMarcas) {
+            // Si se solicitan todas las marcas, devolver todas las marcas ordenadas
+            return res.json(marcas.sort(ordenarMarcas));
+        }
+
+        // Agrupar las marcas por atleta
+        const marcasPorAtleta = marcas.reduce((acc, marca) => {
+            const atletaId = marca.nombre_atleta._id.toString();
+            if (!acc[atletaId]) acc[atletaId] = [];
+            acc[atletaId].push(marca);
+            return acc;
+        }, {});
+
+        // Filtrar la mejor marca para cada atleta según las reglas
+        const mejoresMarcas = Object.values(marcasPorAtleta).map(marcasAtleta => obtenerMejorMarca(marcasAtleta));
+
+        // Ordenar las mejores marcas para el ranking
+        const rankingOrdenado = mejoresMarcas.sort(ordenarMarcas);
+
+        // Enviar las mejores marcas ordenadas
+        res.json(rankingOrdenado);
+    } catch (err) {
+        res.status(500).json({ message: err.message });
+    }
+});
+
+// GET mejores marcas por prueba, categoría y género
+router.get('/mejores-marcas/:pruebaId/:categoriaId/genero/:genero', async (req, res) => {
+    try {
+        const { pruebaId, categoriaId, genero } = req.params;
+        const todasMarcas = req.query.todasMarcas === 'true';
+
+        // Validar que los IDs sean válidos
+        if (!mongoose.Types.ObjectId.isValid(pruebaId) || !mongoose.Types.ObjectId.isValid(categoriaId)) {
+            return res.status(400).json({ message: 'ID de prueba o categoría no válido.' });
+        }
+        
+        if (genero !== 'Masculino' && genero !== 'Femenino') {
+            return res.status(400).json({ message: 'El género debe ser Masculino o Femenino' });
+        }
+
+        // Obtener todas las marcas de la prueba y categoría seleccionadas
+        const marcas = await Marca.find({
+            nombre_prueba: pruebaId,
+            categoria: categoriaId
+        })
+            .populate({
+                path: 'nombre_atleta',
+                match: { genero }
+            })
+            .populate('nombre_prueba categoria')
+            .lean();
+
+        // Filtrar marcas donde nombre_atleta existe (solo atletas del género seleccionado)
+        const marcasFiltradas = marcas.filter(marca => marca.nombre_atleta !== null);
+
+        if (marcasFiltradas.length === 0) {
+            return res.status(404).json({ message: 'No se encontraron marcas válidas para esta prueba, categoría y género.' });
+        }
+
+        if (todasMarcas) {
+            // Si se solicitan todas las marcas, devolver todas las marcas ordenadas
+            return res.json(marcasFiltradas.sort(ordenarMarcas));
+        }
+
+        // Agrupar las marcas por atleta
+        const marcasPorAtleta = marcasFiltradas.reduce((acc, marca) => {
+            const atletaId = marca.nombre_atleta._id.toString();
+            if (!acc[atletaId]) acc[atletaId] = [];
+            acc[atletaId].push(marca);
+            return acc;
+        }, {});
+
+        // Filtrar la mejor marca para cada atleta según las reglas
+        const mejoresMarcas = Object.values(marcasPorAtleta).map(marcasAtleta => obtenerMejorMarca(marcasAtleta));
+
+        // Ordenar las mejores marcas para el ranking
+        const rankingOrdenado = mejoresMarcas.sort(ordenarMarcas);
+
+        // Enviar las mejores marcas ordenadas
+        res.json(rankingOrdenado);
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ message: err.message });
+    }
+});
+
 router.get('/mejores-marcas/:pruebaId/:categoriaId', async (req, res) => {
     try {
         const pruebaId = req.params.pruebaId;
         const categoriaId = req.params.categoriaId;
+        const todasMarcas = req.query.todasMarcas === 'true';
 
         // Validar que los IDs sean válidos
         if (!mongoose.Types.ObjectId.isValid(pruebaId) || !mongoose.Types.ObjectId.isValid(categoriaId)) {
@@ -106,8 +271,66 @@ router.get('/mejores-marcas/:pruebaId/:categoriaId', async (req, res) => {
             return res.status(404).json({ message: 'No se encontraron marcas válidas para esta prueba y categoría.' });
         }
 
+        if (todasMarcas) {
+            // Si se solicitan todas las marcas, devolver todas las marcas ordenadas
+            return res.json(marcasValidas.sort(ordenarMarcas));
+        }
+
         // Agrupar las marcas por atleta
         const marcasPorAtleta = marcasValidas.reduce((acc, marca) => {
+            const atletaId = marca.nombre_atleta._id.toString();
+            if (!acc[atletaId]) acc[atletaId] = [];
+            acc[atletaId].push(marca);
+            return acc;
+        }, {});
+
+        // Filtrar la mejor marca para cada atleta según las reglas
+        const mejoresMarcas = Object.values(marcasPorAtleta).map(marcasAtleta => obtenerMejorMarca(marcasAtleta));
+
+        // Ordenar las mejores marcas para el ranking
+        const rankingOrdenado = mejoresMarcas.sort(ordenarMarcas);
+
+        // Enviar las mejores marcas ordenadas
+        res.json(rankingOrdenado);
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ message: err.message });
+    }
+});
+
+// GET mejores marcas por prueba, categoría, PcAL y género
+router.get('/mejores-marcas/:pruebaId/:categoriaId/:PcALId/genero/:genero', async (req, res) => {
+    try {
+        const { pruebaId, categoriaId, PcALId, genero } = req.params;
+        const todasMarcas = req.query.todasMarcas === 'true';
+        
+        if (genero !== 'Masculino' && genero !== 'Femenino') {
+            return res.status(400).json({ message: 'El género debe ser Masculino o Femenino' });
+        }
+
+        // Obtener todas las marcas de la prueba, categoría y PcAL seleccionados
+        const marcas = await Marca.find({
+            nombre_prueba: pruebaId,
+            categoria: categoriaId,
+            PcAL: PcALId
+        })
+            .populate({
+                path: 'nombre_atleta',
+                match: { genero }
+            })
+            .populate('nombre_prueba categoria PcAL')
+            .lean();
+
+        // Filtrar marcas donde nombre_atleta existe (solo atletas del género seleccionado)
+        const marcasFiltradas = marcas.filter(marca => marca.nombre_atleta !== null);
+
+        if (todasMarcas) {
+            // Si se solicitan todas las marcas, devolver todas las marcas ordenadas
+            return res.json(marcasFiltradas.sort(ordenarMarcas));
+        }
+
+        // Agrupar las marcas por atleta
+        const marcasPorAtleta = marcasFiltradas.reduce((acc, marca) => {
             const atletaId = marca.nombre_atleta._id.toString();
             if (!acc[atletaId]) acc[atletaId] = [];
             acc[atletaId].push(marca);
@@ -132,7 +355,8 @@ router.get('/mejores-marcas/:pruebaId/:categoriaId/:PcALId', async (req, res) =>
     try {
         const pruebaId = req.params.pruebaId;
         const categoriaId = req.params.categoriaId;
-        const PcALId = req.params.PcALId
+        const PcALId = req.params.PcALId;
+        const todasMarcas = req.query.todasMarcas === 'true';
 
         // Obtener todas las marcas de la prueba seleccionada y la categoría
         const marcas = await Marca.find({
@@ -142,6 +366,11 @@ router.get('/mejores-marcas/:pruebaId/:categoriaId/:PcALId', async (req, res) =>
         })
             .populate('nombre_atleta nombre_prueba categoria PcAL')
             .lean(); // Usamos lean() para mejorar el rendimiento
+
+        if (todasMarcas) {
+            // Si se solicitan todas las marcas, devolver todas las marcas ordenadas
+            return res.json(marcas.sort(ordenarMarcas));
+        }
 
         // Agrupar las marcas por atleta
         const marcasPorAtleta = marcas.reduce((acc, marca) => {
@@ -164,8 +393,6 @@ router.get('/mejores-marcas/:pruebaId/:categoriaId/:PcALId', async (req, res) =>
     }
 });
 
-
-
 // Función para ordenar las marcas en el ranking
 function ordenarMarcas(a, b) {
     if (a.metros && b.metros) {
@@ -178,8 +405,6 @@ function ordenarMarcas(a, b) {
         return totalSegundosA - totalSegundosB;
     }
 }
-
-
 
 // GET marca by ID
 router.get('/:id', async (req, res) => {

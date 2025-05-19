@@ -27,6 +27,8 @@ import { HomeComponent } from './home/home.component';
 import { CreateDatosCompeticionesComponent } from './calendario/components/create-datos-competiciones/create-datos-competiciones.component';
 import { BuscadorAtletasComponent } from './buscador-atletas/buscador-atletas.component';
 import { PostDetailComponent } from './posts/components/post-detail/post-detail.component';
+import { ProcesarResultadosComponent } from './competiciones/procesar-resultados/procesar-resultados.component';
+import { TiendaComponent } from './tienda/tienda.component';
 
 export const routes: Routes = [
     { path: 'home', component: HomeComponent },
@@ -44,6 +46,7 @@ export const routes: Routes = [
     { path: 'create-competicion', component: CompeticionFormComponent, canActivate: [AuthGuard, adminGuard] },
     { path: 'edit-competicion/:id', component: CompeticionFormComponent, canActivate: [AuthGuard, adminGuard] },
     { path: 'datos-competiciones', component: CreateDatosCompeticionesComponent, canActivate: [AuthGuard, adminGuard] },
+    { path: 'procesar-resultados', component: ProcesarResultadosComponent, canActivate: [AuthGuard, adminGuard] },
     
     // Rutas de ranking
     { path: 'ranking', component: RankingComponent },
@@ -67,6 +70,25 @@ export const routes: Routes = [
     { path: 'crear-grupo', component: CrearGrupoEntrenamientoComponent, canActivate: [AuthGuard, entrenadorGuard] },
     { path: 'editar-grupo/:id', component: EditarGrupoComponent, canActivate: [AuthGuard, entrenadorGuard] },
     { path: 'crear-entrenamiento/:diaEntrenamientoId', component: CrearEntrenamientoComponent, canActivate: [AuthGuard, entrenadorGuard] },
+    
+    // Ruta de la tienda
+    {
+        path: 'tienda',
+        children: [
+            {
+                path: '',
+                loadComponent: () => import('./tienda/tienda.component').then(m => m.TiendaComponent)
+            },
+            {
+                path: 'success',
+                loadComponent: () => import('./tienda/success/success.component').then(m => m.SuccessComponent)
+            },
+            {
+                path: 'cancel',
+                loadComponent: () => import('./tienda/cancel/cancel.component').then(m => m.CancelComponent)
+            }
+        ]
+    },
     
     // Ruta por defecto
     { path: '', redirectTo: '/home', pathMatch: 'full' }

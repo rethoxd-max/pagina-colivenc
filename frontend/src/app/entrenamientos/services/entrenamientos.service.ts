@@ -1,7 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, BehaviorSubject, catchError, map, of, tap } from 'rxjs';
-import { environment } from '../../../environments/environment.development';
+import { environment } from '../../../environments/environment';
 import { CalendarioEntrenamientoComponent } from '../components/calendario-entrenamiento/calendario-entrenamiento.component';
 import { AuthService } from '../../auth/services/auth.service';
 

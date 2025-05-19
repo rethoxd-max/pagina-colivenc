@@ -16,20 +16,26 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
     }
 
     const authToken = authService.getToken();
+    console.log('Interceptor - Token presente:', !!authToken);
 
     let authReq = req;
     if (authToken) {
         authReq = req.clone({
             setHeaders: {
-                Authorization: `Bearer ${authToken}`
+                'x-auth-token': authToken
             }
         });
     }
 
     return next(authReq).pipe(
         catchError(err => {
-            // Ya no deslogueamos automáticamente al usuario
-            return throwError(err);
+            console.log('Interceptor - Error:', err.status);
+            if (err.status === 401) {
+                console.log('Interceptor - Redirigiendo a login');
+                const currentUrl = router.url;
+                router.navigate(['/login'], { queryParams: { returnUrl: currentUrl } });
+            }
+            return throwError(() => err);
         })
     );
 };

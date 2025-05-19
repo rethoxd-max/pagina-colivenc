@@ -36,7 +36,7 @@ export class EditarGrupoComponent implements OnInit {
     this.entrenamientosService.getGrupoEntrenamiento(this.grupoId).subscribe({
       next: (grupo: GrupoEntrenamiento) => {
         this.nombreGrupo = grupo.nombre_grupo;
-        this.atletas = grupo.atletas;
+        this.atletas = grupo.atletas as Atleta[];
         this.cargarAtletasDisponibles();
       },
       error: (error: any) => console.error('Error al cargar el grupo:', error)
@@ -77,7 +77,10 @@ export class EditarGrupoComponent implements OnInit {
 
     this.entrenamientosService.agregarAtletaAlGrupo(this.grupoId, atleta._id).subscribe({
       next: (grupoActualizado: GrupoEntrenamiento) => {
-        this.atletas = grupoActualizado.atletas;
+        this.atletas = grupoActualizado.atletas.map(a => ({
+          ...a,
+          genero: 'Masculino'
+        })) as Atleta[];
         this.atletasDisponibles = this.atletasDisponibles.filter(a => a._id !== atleta._id);
       },
       error: (error: any) => console.error('Error al agregar atleta:', error)
@@ -87,7 +90,10 @@ export class EditarGrupoComponent implements OnInit {
   eliminarAtleta(atletaId: string) {
     this.entrenamientosService.eliminarAtletaDelGrupo(this.grupoId, atletaId).subscribe({
       next: (grupoActualizado: GrupoEntrenamiento) => {
-        this.atletas = grupoActualizado.atletas;
+        this.atletas = grupoActualizado.atletas.map(a => ({
+          ...a,
+          genero: 'Masculino'
+        })) as Atleta[];
         this.cargarAtletasDisponibles();
       },
       error: (error: any) => console.error('Error al eliminar atleta:', error)
