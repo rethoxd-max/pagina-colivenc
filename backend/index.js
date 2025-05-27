@@ -1,5 +1,6 @@
 // Cargar variables de entorno primero
 const path = require('path');
+const fs = require('fs');
 require('dotenv').config({ path: path.resolve(__dirname, '.env') });
 
 // Verificar variables críticas
@@ -10,6 +11,18 @@ if (missingEnvVars.length > 0) {
     console.error('Error: Faltan las siguientes variables de entorno:', missingEnvVars.join(', '));
     process.exit(1);
 }
+
+// Crear directorios de uploads si no existen
+const uploadsDir = path.join(__dirname, 'uploads');
+const postsDir = path.join(__dirname, 'uploads', 'posts');
+const competicionesDir = path.join(__dirname, 'uploads', 'competiciones');
+
+[uploadsDir, postsDir, competicionesDir].forEach(dir => {
+    if (!fs.existsSync(dir)) {
+        fs.mkdirSync(dir, { recursive: true });
+        console.log(`Directorio creado: ${dir}`);
+    }
+});
 
 const express = require("express");
 const mongoose = require("mongoose");
@@ -27,7 +40,7 @@ const app = express();
 
 // Configuración de CORS
 const corsOptions = {
-  origin: ['https://cecolivenc.es', 'https://api.cecolivenc.es', 'http://localhost:4200'],
+  origin: ['https://cecolivenc.es', 'https://www.cecolivenc.es'],
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'x-auth-token', 'Authorization'],
   exposedHeaders: ['Content-Type', 'x-auth-token'],
@@ -46,21 +59,54 @@ app.options('*', cors(corsOptions));
 app.use(bodyParser.json({ limit: "50mb" }));
 app.use(bodyParser.urlencoded({ limit: "50mb", extended: true }));
 
-// Ruta para servir las imágenes
-app.use("/uploads", express.static(path.join("/var/www/colivenc/backend/uploads")));
-
-// Otras configuraciones
-app.use(express.json({ limit: "50mb" }));
-app.use(express.urlencoded({ limit: "50mb", extended: true }));
-
 // Middleware para logging de requests
 app.use((req, res, next) => {
-  console.log('=== Request Recibida ===');
-  console.log('Método:', req.method);
-  console.log('URL:', req.url);
-  console.log('Headers:', req.headers);
-  console.log('Body:', req.body);
-  next();
+    console.log(`${new Date().toISOString()} - ${req.method} ${req.url}`);
+    next();
+});
+
+// Configuración de archivos estáticos
+const staticOptions = {
+    setHeaders: (res, path) => {
+        res.set('Access-Control-Allow-Origin', '*');
+        res.set('Access-Control-Allow-Methods', 'GET, OPTIONS');
+        res.set('Access-Control-Allow-Headers', 'Content-Type');
+        res.set('Cross-Origin-Resource-Policy', 'cross-origin');
+        res.set('Cache-Control', 'public, max-age=31536000');
+        console.log(`Sirviendo archivo estático: ${path}`);
+    }
+};
+
+// Middleware para logging de archivos estáticos
+app.use((req, res, next) => {
+    if (req.path.startsWith('/uploads/')) {
+        const filePath = path.join(__dirname, req.path);
+        console.log('=== ACCESO A ARCHIVO ESTÁTICO ===');
+        console.log('Ruta solicitada:', req.path);
+        console.log('Ruta completa:', filePath);
+        console.log('¿Existe el archivo?:', fs.existsSync(filePath));
+        if (fs.existsSync(filePath)) {
+            const stats = fs.statSync(filePath);
+            console.log('Tamaño del archivo:', stats.size);
+            console.log('Permisos del archivo:', stats.mode);
+        }
+    }
+    next();
+});
+
+// Ruta única para archivos estáticos
+app.use('/uploads', express.static(path.join(__dirname, 'uploads'), staticOptions));
+
+// Middleware para manejar errores 404 en archivos estáticos
+app.use('/uploads', (req, res, next) => {
+    if (req.path.startsWith('/uploads/')) {
+        const filePath = path.join(__dirname, req.path);
+        if (!fs.existsSync(filePath)) {
+            console.log('Archivo no encontrado:', filePath);
+            return res.status(404).json({ error: 'Archivo no encontrado' });
+        }
+    }
+    next();
 });
 
 // Rutas
@@ -124,7 +170,7 @@ mongoose
   .catch((err) => console.log("Error al conectar a MongoDB:", err));
 
 // Iniciar el servidor
-const PORT = process.env["PORT"] || 5000;
+const PORT = process.env["PORT"] || 3000;
 app.listen(PORT, () => {
   console.log(`Servidor corriendo en el puerto ${PORT}`);
 });

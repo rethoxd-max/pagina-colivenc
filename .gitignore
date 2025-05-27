@@ -1,5 +1,7 @@
 # Dependencies
 node_modules/
+backend/node_modules/
+frontend/node_modules/
 /.pnp
 .pnp.js
 
@@ -35,4 +37,7 @@ yarn-error.log*
 *.env
 
 # Directorios de versiones antiguas
-/VERSIONES/ 
+/VERSIONES/
+
+# Directorios locales
+/pagina-colivenc-local/ 

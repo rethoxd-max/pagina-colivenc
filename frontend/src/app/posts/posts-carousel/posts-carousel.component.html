@@ -1,6 +1,6 @@
 <div class="carousel-container" *ngIf="posts.length > 0">
     <div class="carousel-slide">
-        <img [src]="posts[currentIndex].imageUrl" alt="Imagen del post" class="carousel-image"
+        <img [src]="getImageUrl(posts[currentIndex].imageUrl)" alt="Imagen del post" class="carousel-image"
             *ngIf="posts[currentIndex].imageUrl">
         <div class="carousel-text">
             <h2>{{ posts[currentIndex].title }}</h2>

@@ -1,0 +1,73 @@
+<div class="crear-producto-container">
+  <h2>{{ esEdicion ? 'Editar Producto' : 'Crear Nuevo Producto' }}</h2>
+  
+  <form [formGroup]="productoForm" (ngSubmit)="onSubmit()" class="producto-form">
+    <div class="form-group">
+      <label for="nombre">Nombre del Producto</label>
+      <input type="text" id="nombre" formControlName="nombre" class="form-control">
+      <div *ngIf="productoForm.get('nombre')?.errors?.['required'] && productoForm.get('nombre')?.touched" class="error-message">
+        El nombre es requerido
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label for="descripcion">Descripción</label>
+      <textarea id="descripcion" formControlName="descripcion" class="form-control"></textarea>
+      <div *ngIf="productoForm.get('descripcion')?.errors?.['required'] && productoForm.get('descripcion')?.touched" class="error-message">
+        La descripción es requerida
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label for="precio">Precio (€)</label>
+      <input type="number" id="precio" formControlName="precio" class="form-control" step="0.01">
+      <div *ngIf="productoForm.get('precio')?.errors?.['required'] && productoForm.get('precio')?.touched" class="error-message">
+        El precio es requerido
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label for="categoria">Categoría</label>
+      <input type="text" id="categoria" formControlName="categoria" class="form-control">
+      <div *ngIf="productoForm.get('categoria')?.errors?.['required'] && productoForm.get('categoria')?.touched" class="error-message">
+        La categoría es requerida
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label for="stock">Stock</label>
+      <input type="number" id="stock" formControlName="stock" class="form-control" min="0">
+      <div *ngIf="productoForm.get('stock')?.errors?.['required'] && productoForm.get('stock')?.touched" class="error-message">
+        El stock es requerido
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label for="tallas">Tallas (separadas por comas)</label>
+      <input type="text" id="tallas" formControlName="tallas" class="form-control" placeholder="Ej: S, M, L, XL">
+      <div *ngIf="productoForm.get('tallas')?.errors?.['required'] && productoForm.get('tallas')?.touched" class="error-message">
+        Las tallas son requeridas
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label for="imagen">Imagen del Producto</label>
+      <input type="file" id="imagen" (change)="onFileSelected($event)" class="form-control" accept="image/*">
+      <div *ngIf="imagenActual" class="imagen-actual">
+        <p>Imagen actual:</p>
+        <img [src]="getImagenUrl(imagenActual)" alt="Imagen actual" class="preview-imagen">
+      </div>
+      <div *ngIf="imagenSeleccionada" class="imagen-preview">
+        <p>Nueva imagen seleccionada:</p>
+        <img [src]="imagenPreview" alt="Vista previa" class="preview-imagen">
+      </div>
+    </div>
+
+    <div class="form-actions">
+      <button type="submit" [disabled]="productoForm.invalid || loading" class="btn-submit">
+        {{ esEdicion ? 'Actualizar Producto' : 'Crear Producto' }}
+      </button>
+      <button type="button" (click)="volver()" class="btn-cancel">Cancelar</button>
+    </div>
+  </form>
+</div> 

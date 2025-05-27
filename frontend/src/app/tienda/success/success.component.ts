@@ -1,6 +1,5 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
-import { TiendaService } from '../../services/tienda.service';
 import { CommonModule } from '@angular/common';
 
 @Component({
@@ -46,7 +45,6 @@ export class SuccessComponent implements OnInit {
   constructor(
     private route: ActivatedRoute,
     private router: Router,
-    private tiendaService: TiendaService
   ) {}
 
   ngOnInit() {

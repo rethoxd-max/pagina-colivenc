@@ -7,13 +7,17 @@
     
 
     <div class="d-flex align-items-center gap-2">
-      <button *ngIf="isLoggedIn && atletaId" class="btn btn-nav" [routerLink]="['/entrenamientos']">
+      <button *ngIf="isLoggedIn && (atletaId || isAdmin())" class="btn btn-nav" [routerLink]="['/entrenamientos']">
         <i class="fas fa-running"></i>
         <span class="d-none d-md-inline ms-1">Entrenamientos</span>
       </button>
       <button *ngIf="isLoggedIn && atletaId" class="btn btn-nav" [routerLink]="['/perfil-atleta', atletaId]">
         <i class="fas fa-user"></i>
         <span class="d-none d-md-inline ms-1">Perfil</span>
+      </button>
+      <button *ngIf="isLoggedIn" class="btn btn-nav" [routerLink]="['/cambiar-password']">
+        <i class="fas fa-key"></i>
+        <span class="d-none d-md-inline ms-1">Cambiar Contraseña</span>
       </button>
       <button *ngIf="!isLoggedIn" class="btn btn-nav" routerLink="/login">
         <i class="fas fa-sign-in-alt"></i>

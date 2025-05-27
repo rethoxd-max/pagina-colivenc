@@ -5,6 +5,7 @@ import { CommonModule, NgIf } from '@angular/common';
 import { ReactiveFormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { PostService } from '../services/posts.service';
+import { environment } from '../../../environments/environment';
 
 interface Post {
   _id: string;
@@ -25,6 +26,7 @@ export class PostsCarouselComponent implements OnInit, OnDestroy {
   posts: Post[] = [];
   currentIndex: number = 0;
   autoSlideSub?: Subscription;
+  baseURL: string = environment.apiUrl;
 
   constructor(private postService: PostService) { }
 
@@ -42,7 +44,6 @@ export class PostsCarouselComponent implements OnInit, OnDestroy {
     });
   }
 
-
   startAutoSlide() {
     this.autoSlideSub = interval(5000).subscribe(() => this.nextSlide());
   }
@@ -57,6 +58,14 @@ export class PostsCarouselComponent implements OnInit, OnDestroy {
 
   prevSlide() {
     this.currentIndex = (this.currentIndex - 1 + this.posts.length) % this.posts.length;
+  }
+
+  getImageUrl(imageUrl: string | undefined) {
+    if (!imageUrl) return '';
+    if (imageUrl.startsWith('http')) {
+      return imageUrl;
+    }
+    return `${this.baseURL}${imageUrl}`;
   }
 
   ngOnDestroy() {

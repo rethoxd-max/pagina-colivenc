@@ -80,13 +80,13 @@ export class PostListComponent implements OnInit {
     return this.authService.isAuthenticated() && user && user.userTypes.includes('Editor');
   }
 
-
   getImageUrl(imageUrl: string) {
-    // Verificar si la URL ya tiene el dominio para evitar duplicarlo
+    if (!imageUrl) return '';
+    // Si la URL ya es absoluta, la devolvemos tal cual
     if (imageUrl.startsWith('http')) {
-      return imageUrl; // Si la URL ya es completa, la devolvemos tal cual
+      return imageUrl;
     }
-    return `${this.baseURL}${imageUrl}`; // Si es relativa, la completamos con baseUrl
+    // Si es relativa, la completamos con la URL base
+    return `${this.baseURL}${imageUrl}`;
   }
-
 }

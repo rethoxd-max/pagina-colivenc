@@ -29,6 +29,8 @@ import { BuscadorAtletasComponent } from './buscador-atletas/buscador-atletas.co
 import { PostDetailComponent } from './posts/components/post-detail/post-detail.component';
 import { ProcesarResultadosComponent } from './competiciones/procesar-resultados/procesar-resultados.component';
 import { TiendaComponent } from './tienda/tienda.component';
+import { CrearProductoComponent } from './tienda/components/crear-producto/crear-producto.component';
+
 
 export const routes: Routes = [
     { path: 'home', component: HomeComponent },
@@ -77,7 +79,15 @@ export const routes: Routes = [
         children: [
             {
                 path: '',
-                loadComponent: () => import('./tienda/tienda.component').then(m => m.TiendaComponent)
+                component: TiendaComponent
+            },
+            {
+                path: 'crear-producto',
+                component: CrearProductoComponent
+            },
+            {
+                path: 'editar-producto/:id',
+                component: CrearProductoComponent
             },
             {
                 path: 'success',
@@ -88,6 +98,13 @@ export const routes: Routes = [
                 loadComponent: () => import('./tienda/cancel/cancel.component').then(m => m.CancelComponent)
             }
         ]
+    },
+    
+    // Ruta para cambiar la contraseña
+    {
+        path: 'cambiar-password',
+        loadComponent: () => import('./auth/components/cambiar-password/cambiar-password.component').then(m => m.CambiarPasswordComponent),
+        canActivate: [AuthGuard]
     },
     
     // Ruta por defecto

@@ -4,6 +4,7 @@ const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 const { check, validationResult } = require('express-validator'); // Importar express-validator
 const router = express.Router();
+const auth = require('../middleware/auth');
 
 // Registro de usuario
 router.post(
@@ -103,6 +104,34 @@ router.get('/users/:id?', async (req, res) => {
     } catch (error) {
         console.error(error.message);
         res.status(500).send('Error en el servidor');
+    }
+});
+
+// Cambiar contraseña
+router.post('/change-password', auth, async (req, res) => {
+    try {
+        const { currentPassword, newPassword } = req.body;
+        const user = await User.findById(req.user.id);
+
+        if (!user) {
+            return res.status(404).json({ message: 'Usuario no encontrado' });
+        }
+
+        // Verificar la contraseña actual
+        const isMatch = await bcrypt.compare(currentPassword, user.password);
+        if (!isMatch) {
+            return res.status(400).json({ message: 'La contraseña actual es incorrecta' });
+        }
+
+        // Encriptar la nueva contraseña
+        const salt = await bcrypt.genSalt(10);
+        user.password = await bcrypt.hash(newPassword, salt);
+
+        await user.save();
+        res.json({ message: 'Contraseña actualizada exitosamente' });
+    } catch (error) {
+        console.error('Error al cambiar la contraseña:', error);
+        res.status(500).json({ message: 'Error en el servidor' });
     }
 });
 

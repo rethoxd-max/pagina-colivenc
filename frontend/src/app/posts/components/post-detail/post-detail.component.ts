@@ -36,7 +36,7 @@ interface Post {
               </div>
 
               <div class="post-content">
-                <p class="lead">{{ post?.content }}</p>
+                <p class="lead" [innerHTML]="post?.content"></p>
               </div>
 
               <div class="d-flex justify-content-between align-items-center mt-4">
@@ -62,6 +62,10 @@ interface Post {
     .post-content {
       line-height: 1.8;
       font-size: 1.1rem;
+    }
+    
+    .post-content p {
+      white-space: pre-wrap;
     }
     
     .card {
