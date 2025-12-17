@@ -26,9 +26,7 @@ export class RegisterComponent implements OnInit {
   constructor(private authService: AuthService, private router: Router) { }
 
   ngOnInit() {
-    if (!this.authService.isLoggedIn() || !this.authService.isAdmin()) {
-      this.router.navigate(['/home']);
-    }
+    // Registro abierto a cualquier persona
   }
 
   onSubmit() {

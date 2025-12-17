@@ -35,7 +35,7 @@ import { CrearProductoComponent } from './tienda/components/crear-producto/crear
 export const routes: Routes = [
     { path: 'home', component: HomeComponent },
     { path: 'login', component: LoginComponent },
-    { path: 'register', component: RegisterComponent, canActivate: [AuthGuard, adminGuard] },
+    { path: 'register', component: RegisterComponent },
     
     // Rutas de posts/noticias
     { path: 'noticias', component: PostListComponent },

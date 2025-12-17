@@ -3,13 +3,21 @@ const path = require('path');
 const fs = require('fs');
 require('dotenv').config({ path: path.resolve(__dirname, '.env') });
 
-// Verificar variables críticas
-const requiredEnvVars = ['STRIPE_SECRET_KEY', 'STRIPE_WEBHOOK_SECRET', 'FRONTEND_URL'];
+// Verificar variables críticas (en desarrollo Stripe es opcional)
+const isProduction = process.env.NODE_ENV === 'production';
+const requiredEnvVars = isProduction 
+    ? ['STRIPE_SECRET_KEY', 'STRIPE_WEBHOOK_SECRET', 'FRONTEND_URL']
+    : ['FRONTEND_URL'];
 const missingEnvVars = requiredEnvVars.filter(envVar => !process.env[envVar]);
 
 if (missingEnvVars.length > 0) {
     console.error('Error: Faltan las siguientes variables de entorno:', missingEnvVars.join(', '));
     process.exit(1);
+}
+
+// Advertencia si faltan variables de Stripe en desarrollo
+if (!isProduction && (!process.env.STRIPE_SECRET_KEY || !process.env.STRIPE_WEBHOOK_SECRET)) {
+    console.warn('⚠️  Advertencia: Las funciones de Stripe no estarán disponibles sin configurar STRIPE_SECRET_KEY y STRIPE_WEBHOOK_SECRET');
 }
 
 // Crear directorios de uploads si no existen
@@ -39,8 +47,12 @@ console.log('PORT:', process.env.PORT);
 const app = express();
 
 // Configuración de CORS
+const allowedOrigins = process.env.NODE_ENV === 'production'
+  ? ['https://cecolivenc.es', 'https://www.cecolivenc.es']
+  : ['http://localhost:4200', 'http://127.0.0.1:4200', process.env.FRONTEND_URL];
+
 const corsOptions = {
-  origin: ['https://cecolivenc.es', 'https://www.cecolivenc.es'],
+  origin: allowedOrigins.filter(Boolean),
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'x-auth-token', 'Authorization'],
   exposedHeaders: ['Content-Type', 'x-auth-token'],
@@ -164,9 +176,10 @@ app.use("/entrenamientos", entrenamientosRoutes);
 app.use("/grupos-entrenamiento", gruposEntrenamientoRoutes);
 
 // Conectar a MongoDB
+const mongoUri = process.env.MONGODB_URI || "mongodb://127.0.0.1:27017/colivenc";
 mongoose
-  .connect("mongodb://127.0.0.1:27017/colivenc")
-  .then(() => console.log("Conectado a MongoDB"))
+  .connect(mongoUri)
+  .then(() => console.log("Conectado a MongoDB Atlas"))
   .catch((err) => console.log("Error al conectar a MongoDB:", err));
 
 // Iniciar el servidor

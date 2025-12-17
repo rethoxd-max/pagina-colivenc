@@ -3,12 +3,14 @@ const mongoose = require('mongoose');
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 const Producto = require('../models/Producto');
 
+const BASE_URL = process.env.BASE_URL || 'http://localhost:3000';
+
 const productosEjemplo = [
     {
         nombre: "Camiseta Club Colivenc",
         descripcion: "Camiseta oficial del Club Colivenc con el logo del club en el pecho. Material transpirable y cómodo para entrenamientos.",
         precio: 25.00,
-        imagen: "https://api.cecolivenc.es/uploads/camiseta-colivenc.jpg",
+        imagen: `${BASE_URL}/uploads/camiseta-colivenc.jpg`,
         tallas: ["S", "M", "L", "XL"],
         stock: 50,
         categoria: "Ropa"
@@ -17,7 +19,7 @@ const productosEjemplo = [
         nombre: "Pantalón Corto Running",
         descripcion: "Pantalón corto técnico para running con bolsillos laterales. Ideal para entrenamientos y competiciones.",
         precio: 30.00,
-        imagen: "https://api.cecolivenc.es/uploads/pantalon-running.jpg",
+        imagen: `${BASE_URL}/uploads/pantalon-running.jpg`,
         tallas: ["S", "M", "L"],
         stock: 30,
         categoria: "Ropa"
@@ -26,7 +28,7 @@ const productosEjemplo = [
         nombre: "Gorra Club Colivenc",
         descripcion: "Gorra con el logo del club bordado. Protección UV y ajuste regulable.",
         precio: 15.00,
-        imagen: "https://api.cecolivenc.es/uploads/gorra-colivenc.jpg",
+        imagen: `${BASE_URL}/uploads/gorra-colivenc.jpg`,
         tallas: ["Única"],
         stock: 40,
         categoria: "Accesorios"
@@ -35,8 +37,8 @@ const productosEjemplo = [
 
 async function crearProductos() {
     try {
-        // Conectar a MongoDB
-        await mongoose.connect('mongodb://127.0.0.1:27017/colivenc');
+        // Conectar a MongoDB usando variable de entorno
+        await mongoose.connect(process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/colivenc');
         console.log('Conectado a MongoDB');
 
         // Crear productos en Stripe y guardarlos en la base de datos

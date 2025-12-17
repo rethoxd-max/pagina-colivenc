@@ -6,8 +6,8 @@ const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
 
-const BASE_URL = process.env.BASE_URL || 'https://api.cecolivenc.es';
-const UPLOAD_DIR = '/var/www/colivenc/backend/uploads/posts';
+const BASE_URL = process.env.BASE_URL || 'http://localhost:3000';
+const UPLOAD_DIR = path.join(__dirname, '..', 'uploads', 'posts');
 
 // Asegurarse de que el directorio existe
 if (!fs.existsSync(UPLOAD_DIR)) {

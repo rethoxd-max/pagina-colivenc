@@ -7,8 +7,8 @@ const path = require('path');
 const fs = require('fs');
 const mongoose = require('mongoose');
 
-const BASE_URL = process.env.BASE_URL || 'https://api.cecolivenc.es';
-const UPLOAD_DIR = '/var/www/colivenc/backend/uploads/competiciones';
+const BASE_URL = process.env.BASE_URL || 'http://localhost:3000';
+const UPLOAD_DIR = path.join(__dirname, '..', '..', 'uploads', 'competiciones');
 
 // Asegurarse de que el directorio existe
 if (!fs.existsSync(UPLOAD_DIR)) {
