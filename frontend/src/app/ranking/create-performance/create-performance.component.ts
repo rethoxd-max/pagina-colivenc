@@ -9,6 +9,7 @@ import { MatCardModule } from '@angular/material/card';
 import { Observable } from 'rxjs';
 import { Atleta, Categoria, PcAL, Prueba, RankingService, Sector, Marca } from '../services/ranking.service'; // Marca importada
 import { SearchAtletaComponent } from "./components/search-atleta/search-atleta.component";
+import { ImportarCsvComponent } from "./components/importar-csv/importar-csv.component";
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../environments/environment';
 import { MatSnackBar } from '@angular/material/snack-bar';
@@ -29,7 +30,8 @@ declare var google: any;
     MatInputModule,
     MatTabsModule,
     MatCardModule,
-    SearchAtletaComponent
+    SearchAtletaComponent,
+    ImportarCsvComponent
   ],
   templateUrl: './create-performance.component.html',
   styleUrls: ['./create-performance.component.css']

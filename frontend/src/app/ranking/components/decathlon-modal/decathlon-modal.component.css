@@ -1,18 +1,154 @@
-.column-container {
+/* Sobreescribir estilos del dialog de Material */
+:host ::ng-deep .mat-mdc-dialog-container .mdc-dialog__surface {
+    max-height: 90vh !important;
+    overflow: visible !important;
+}
+
+:host ::ng-deep .mat-mdc-dialog-content {
+    max-height: none !important;
+    overflow: visible !important;
+}
+
+.modal-container {
+    width: 800px;
+    max-width: 95vw;
+}
+
+.modal-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem 1.5rem;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    margin: -24px -24px 0 -24px;
+    border-radius: 4px 4px 0 0;
+    color: white;
+}
+
+.header-icon {
+    width: 40px;
+    height: 40px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.header-icon i {
+    font-size: 1.25rem;
+    color: #ffd700;
+}
+
+.modal-header h2 {
+    margin: 0;
+    font-size: 1.25rem;
+    font-weight: 600;
+}
+
+mat-dialog-content {
+    padding: 1.25rem 1rem !important;
+    overflow: visible !important;
+    max-height: none !important;
+}
+
+.pruebas-grid {
+    display: flex;
+    gap: 3rem;
+}
+
+.pruebas-columna {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.prueba-item {
     display: flex;
     justify-content: space-between;
+    align-items: center;
+    padding: 0.6rem 0.75rem;
+    border-bottom: 1px solid #f0f0f0;
+    transition: background-color 0.2s ease;
+    border-radius: 4px;
 }
 
-.column {
-    flex: 1;
-    padding: 0 10px;
-    /* Espacio entre columnas */
+.prueba-item:last-child {
+    border-bottom: none;
 }
 
-.column label {
-    font-weight: bold;
+.prueba-item:hover {
+    background-color: #f8f9ff;
 }
 
-.column div {
-    margin-bottom: 10px;
+.prueba-item.highlight {
+    background-color: #fafafa;
+}
+
+.prueba-item.highlight:hover {
+    background-color: #f0f4ff;
+}
+
+.prueba-info {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.prueba-numero {
+    width: 24px;
+    height: 24px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.75rem;
+    font-weight: 600;
+    flex-shrink: 0;
+}
+
+.prueba-nombre {
+    font-weight: 500;
+    color: #333;
+    font-size: 0.95rem;
+}
+
+.prueba-marca {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+}
+
+.marca-valor {
+    font-weight: 600;
+    color: #1a1a2e;
+    font-size: 1rem;
+    font-family: 'Roboto Mono', monospace;
+}
+
+.marca-viento {
+    font-size: 0.8rem;
+    color: #666;
+    font-family: 'Roboto Mono', monospace;
+}
+
+mat-dialog-actions {
+    padding: 0.75rem 1rem 1rem !important;
+    border-top: 1px solid #eee;
+}
+
+mat-dialog-actions button {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1.25rem;
+    border-radius: 6px;
+    font-weight: 500;
+}
+
+mat-dialog-actions button i {
+    font-size: 0.9rem;
 }

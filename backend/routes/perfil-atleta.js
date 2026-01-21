@@ -27,8 +27,11 @@ router.get('/pruebas/atleta/:atletaId', async (req, res) => {
             return res.status(404).json({ message: 'No se encontraron marcas para este atleta.' });
         }
 
+        // Filtrar marcas con pruebas válidas (pueden ser null si la prueba fue eliminada)
+        const marcasValidas = marcas.filter(m => m.nombre_prueba && m.nombre_prueba.sector_id);
+
         // Obtener una lista única de pruebas
-        const pruebas = [...new Set(marcas.map(marca => marca.nombre_prueba))];
+        const pruebas = [...new Set(marcasValidas.map(marca => marca.nombre_prueba))];
 
         if (pruebas.length === 0) {
             return res.status(404).json({ message: 'No se encontraron pruebas para este atleta.' });
@@ -83,8 +86,11 @@ router.get('/pruebas/atleta/:atletaId/anyo/:anyo', async (req, res) => {
             return res.status(404).json({ message: 'No se encontraron marcas para este atleta en el año especificado.' });
         }
 
+        // Filtrar marcas con pruebas válidas (pueden ser null si la prueba fue eliminada)
+        const marcasValidas = marcas.filter(m => m.nombre_prueba && m.nombre_prueba.sector_id);
+
         // Obtener una lista única de pruebas
-        const pruebas = [...new Set(marcas.map(marca => marca.nombre_prueba))];
+        const pruebas = [...new Set(marcasValidas.map(marca => marca.nombre_prueba))];
 
         if (pruebas.length === 0) {
             return res.status(404).json({ message: 'No se encontraron pruebas para este atleta en el año especificado.' });
@@ -108,7 +114,272 @@ router.get('/pruebas/atleta/:atletaId/anyo/:anyo', async (req, res) => {
     }
 });
 
+// ==================== ENDPOINTS OPTIMIZADOS ====================
 
+// Lista de pruebas que requieren medición de viento
+const pruebasConViento = [
+    '60ml', '100ml', '100m', '200m',
+    '60mv', '110mv',
+    'Longitud', 'Salto de Longitud',
+    'Triple', 'Triple Salto'
+];
+
+// Función auxiliar para verificar si una prueba requiere viento
+function requiereViento(nombrePrueba) {
+    return pruebasConViento.some(p => nombrePrueba.includes(p));
+}
+
+// Función auxiliar para verificar si una marca tiene viento ilegal
+function tieneVientoIlegal(marca) {
+    if (!marca.PcAL || marca.PcAL.PcAL !== 'AL') return false;
+    if (marca.viento === undefined || marca.viento === null) return false;
+    const nombrePrueba = marca.nombre_prueba?.nombre_prueba || '';
+    if (!requiereViento(nombrePrueba)) return false;
+    return marca.viento > 2.0;
+}
+
+// Obtener TODAS las mejores marcas de un atleta (una por prueba) - OPTIMIZADO
+router.get('/mejores-marcas/atleta/:atletaId', async (req, res) => {
+    try {
+        const { atletaId } = req.params;
+
+        if (!mongoose.Types.ObjectId.isValid(atletaId)) {
+            return res.status(400).json({ message: 'ID de atleta no válido.' });
+        }
+
+        // Obtener todas las marcas del atleta en una sola consulta
+        const todasLasMarcas = await Marca.find({
+            nombre_atleta: new mongoose.Types.ObjectId(atletaId)
+        }).populate('nombre_atleta nombre_prueba PcAL categoria').lean();
+
+        if (!todasLasMarcas || todasLasMarcas.length === 0) {
+            return res.status(404).json({ message: 'No se encontraron marcas para este atleta.' });
+        }
+
+        // Agrupar marcas por prueba
+        const marcasPorPrueba = {};
+        todasLasMarcas.forEach(marca => {
+            const pruebaId = marca.nombre_prueba._id.toString();
+            if (!marcasPorPrueba[pruebaId]) {
+                marcasPorPrueba[pruebaId] = [];
+            }
+            marcasPorPrueba[pruebaId].push(marca);
+        });
+
+        // Calcular las marcas para cada prueba
+        // La marca principal será la LEGAL, y si hay una ILEGAL mejor, se muestra como secundaria
+        const mejoresMarcas = [];
+        const mejoresMarcasIlegales = {};
+
+        for (const pruebaId in marcasPorPrueba) {
+            const marcas = marcasPorPrueba[pruebaId];
+            const mejorMarcaGeneral = obtenerMejorMarca(marcas);
+            
+            // Filtrar marcas legales (sin viento o viento <= 2.0)
+            const marcasLegales = marcas.filter(m => 
+                m.viento === undefined || m.viento === null || m.viento <= 2.0
+            );
+            
+            if (marcasLegales.length > 0) {
+                const mejorMarcaLegal = obtenerMejorMarca(marcasLegales);
+                mejoresMarcas.push(mejorMarcaLegal);
+                
+                // Si la mejor marca general es ilegal y es mejor que la legal, guardarla
+                if (tieneVientoIlegal(mejorMarcaGeneral)) {
+                    mejoresMarcasIlegales[pruebaId] = mejorMarcaGeneral;
+                }
+            } else {
+                // Si no hay marcas legales, usar la general (será ilegal)
+                mejoresMarcas.push(mejorMarcaGeneral);
+            }
+        }
+
+        res.json({ mejoresMarcas, mejoresMarcasIlegales });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ message: err.message });
+    }
+});
+
+// Obtener TODAS las mejores marcas de un atleta filtradas por año - OPTIMIZADO
+router.get('/mejores-marcas/atleta/:atletaId/anyo/:anyo', async (req, res) => {
+    try {
+        const { atletaId, anyo } = req.params;
+
+        if (!mongoose.Types.ObjectId.isValid(atletaId)) {
+            return res.status(400).json({ message: 'ID de atleta no válido.' });
+        }
+
+        // Obtener todas las marcas del atleta para el año específico
+        const todasLasMarcas = await Marca.find({
+            nombre_atleta: new mongoose.Types.ObjectId(atletaId),
+            anyo: parseInt(anyo)
+        }).populate('nombre_atleta nombre_prueba PcAL categoria').lean();
+
+        if (!todasLasMarcas || todasLasMarcas.length === 0) {
+            return res.status(404).json({ message: 'No se encontraron marcas para este atleta en este año.' });
+        }
+
+        // Agrupar marcas por prueba
+        const marcasPorPrueba = {};
+        todasLasMarcas.forEach(marca => {
+            const pruebaId = marca.nombre_prueba._id.toString();
+            if (!marcasPorPrueba[pruebaId]) {
+                marcasPorPrueba[pruebaId] = [];
+            }
+            marcasPorPrueba[pruebaId].push(marca);
+        });
+
+        // Calcular las marcas para cada prueba
+        // La marca principal será la LEGAL, y si hay una ILEGAL mejor, se muestra como secundaria
+        const mejoresMarcas = [];
+        const mejoresMarcasIlegales = {};
+
+        for (const pruebaId in marcasPorPrueba) {
+            const marcas = marcasPorPrueba[pruebaId];
+            const mejorMarcaGeneral = obtenerMejorMarca(marcas);
+            
+            // Filtrar marcas legales (sin viento o viento <= 2.0)
+            const marcasLegales = marcas.filter(m => 
+                m.viento === undefined || m.viento === null || m.viento <= 2.0
+            );
+            
+            if (marcasLegales.length > 0) {
+                const mejorMarcaLegal = obtenerMejorMarca(marcasLegales);
+                mejoresMarcas.push(mejorMarcaLegal);
+                
+                // Si la mejor marca general es ilegal y es mejor que la legal, guardarla
+                if (tieneVientoIlegal(mejorMarcaGeneral)) {
+                    mejoresMarcasIlegales[pruebaId] = mejorMarcaGeneral;
+                }
+            } else {
+                // Si no hay marcas legales, usar la general (será ilegal)
+                mejoresMarcas.push(mejorMarcaGeneral);
+            }
+        }
+
+        res.json({ mejoresMarcas, mejoresMarcasIlegales });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ message: err.message });
+    }
+});
+
+// Obtener TODAS las marcas de un atleta para un año (para la pestaña resultados) - OPTIMIZADO
+router.get('/todas-marcas/atleta/:atletaId/anyo/:anyo', async (req, res) => {
+    try {
+        const { atletaId, anyo } = req.params;
+
+        if (!mongoose.Types.ObjectId.isValid(atletaId)) {
+            return res.status(400).json({ message: 'ID de atleta no válido.' });
+        }
+
+        // Obtener todas las marcas del atleta para el año específico
+        const todasLasMarcas = await Marca.find({
+            nombre_atleta: new mongoose.Types.ObjectId(atletaId),
+            anyo: parseInt(anyo)
+        }).populate('nombre_atleta nombre_prueba PcAL categoria').lean();
+
+        if (!todasLasMarcas || todasLasMarcas.length === 0) {
+            return res.status(404).json({ message: 'No se encontraron marcas para este atleta en este año.' });
+        }
+
+        // Agrupar marcas por prueba
+        const marcasPorPrueba = {};
+        todasLasMarcas.forEach(marca => {
+            const pruebaId = marca.nombre_prueba._id.toString();
+            if (!marcasPorPrueba[pruebaId]) {
+                marcasPorPrueba[pruebaId] = [];
+            }
+            marcasPorPrueba[pruebaId].push(marca);
+        });
+
+        // Ordenar cada grupo de marcas por fecha (más reciente primero)
+        for (const pruebaId in marcasPorPrueba) {
+            marcasPorPrueba[pruebaId].sort((a, b) => {
+                const fechaA = convertirFecha(a.fecha_realizacion);
+                const fechaB = convertirFecha(b.fecha_realizacion);
+                return fechaB - fechaA;
+            });
+        }
+
+        res.json({ marcasPorPrueba });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ message: err.message });
+    }
+});
+
+// Obtener datos de PROGRESIÓN: mejores marcas por prueba y año - OPTIMIZADO
+router.get('/progresion/atleta/:atletaId', async (req, res) => {
+    try {
+        const { atletaId } = req.params;
+
+        if (!mongoose.Types.ObjectId.isValid(atletaId)) {
+            return res.status(400).json({ message: 'ID de atleta no válido.' });
+        }
+
+        // Obtener TODAS las marcas del atleta
+        const todasLasMarcas = await Marca.find({
+            nombre_atleta: new mongoose.Types.ObjectId(atletaId)
+        }).populate('nombre_atleta nombre_prueba PcAL categoria').lean();
+
+        if (!todasLasMarcas || todasLasMarcas.length === 0) {
+            return res.status(404).json({ message: 'No se encontraron marcas para este atleta.' });
+        }
+
+        // Agrupar marcas por prueba y año
+        const marcasPorPruebaYAnyo = {};
+        todasLasMarcas.forEach(marca => {
+            const pruebaId = marca.nombre_prueba._id.toString();
+            const anyo = marca.anyo;
+            const key = `${pruebaId}-${anyo}`;
+            
+            if (!marcasPorPruebaYAnyo[key]) {
+                marcasPorPruebaYAnyo[key] = [];
+            }
+            marcasPorPruebaYAnyo[key].push(marca);
+        });
+
+        // Calcular la mejor marca LEGAL para cada combinación prueba-año
+        // La marca principal será la LEGAL, la ilegal se muestra como secundaria
+        const mejoresMarcasPorPruebaAnyo = {};
+        const mejoresMarcasIlegalesPorPruebaAnyo = {};
+
+        for (const key in marcasPorPruebaYAnyo) {
+            const marcas = marcasPorPruebaYAnyo[key];
+            const mejorMarcaGeneral = obtenerMejorMarca(marcas);
+            
+            // Filtrar marcas legales
+            const marcasLegales = marcas.filter(m => 
+                m.viento === undefined || m.viento === null || m.viento <= 2.0
+            );
+            
+            if (marcasLegales.length > 0) {
+                const mejorMarcaLegal = obtenerMejorMarca(marcasLegales);
+                mejoresMarcasPorPruebaAnyo[key] = mejorMarcaLegal;
+                
+                // Si la mejor marca general es ilegal, guardarla como secundaria
+                if (tieneVientoIlegal(mejorMarcaGeneral)) {
+                    mejoresMarcasIlegalesPorPruebaAnyo[key + '-ilegal'] = mejorMarcaGeneral;
+                }
+            } else {
+                // Si no hay marcas legales, usar la general
+                mejoresMarcasPorPruebaAnyo[key] = mejorMarcaGeneral;
+            }
+        }
+
+        res.json({ 
+            marcasPorPruebaAnyo: mejoresMarcasPorPruebaAnyo,
+            marcasIlegalesPorPruebaAnyo: mejoresMarcasIlegalesPorPruebaAnyo
+        });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ message: err.message });
+    }
+});
+
+// ==================== FIN ENDPOINTS OPTIMIZADOS ====================
 
 
 // Obtener todas las marcas de un atleta por su ID
@@ -158,7 +429,7 @@ router.get('/mejor-marca/prueba/:pruebaId/atleta/:atletaId', async (req, res) =>
         const marcas = await Marca.find({
             nombre_prueba: pruebaId,
             nombre_atleta: atletaId
-        }).populate('nombre_atleta nombre_prueba').lean();
+        }).populate('nombre_atleta nombre_prueba PcAL').lean();
 
         if (!marcas || marcas.length === 0) {
             return res.status(404).json({ message: 'No se encontraron marcas para el atleta en esta prueba.' });
@@ -272,7 +543,7 @@ router.get('/mejor-marca/prueba/:pruebaId/anyo/:anyo/atleta/:atletaId', async (r
             nombre_prueba: pruebaId,
             anyo: anyo,
             nombre_atleta: atletaId
-        }).populate('nombre_atleta nombre_prueba').lean();
+        }).populate('nombre_atleta nombre_prueba PcAL').lean();
 
         if (!marcas || marcas.length === 0) {
             return res.status(404).json({ message: 'No se encontraron marcas para el atleta en esta prueba y año.' });
@@ -401,7 +672,7 @@ router.get('/marcas/prueba/:pruebaId/anyo/:anyo/atleta/:atletaId', async (req, r
             nombre_prueba: pruebaId,
             anyo: anyo,
             nombre_atleta: atletaId
-        }).populate('nombre_atleta nombre_prueba').lean();
+        }).populate('nombre_atleta nombre_prueba PcAL').lean();
 
         // Si no se encuentran marcas, devolver un mensaje de error
         if (!marcas || marcas.length === 0) {
@@ -467,8 +738,8 @@ router.get('/mejor-marca-legal/prueba/:pruebaId/atleta/:atletaId', async (req, r
         const marcas = await Marca.find({
             nombre_prueba: pruebaId,
             nombre_atleta: atletaId,
-            viento: { $exists: true, $lte: 2.0, $gte: -2.0 } // Viento legal: entre -2.0 y 2.0 m/s
-        }).populate('nombre_atleta nombre_prueba').lean();
+            viento: { $exists: true, $lte: 2.0 } // Viento legal: <= 2.0 m/s (negativo sin límite)
+        }).populate('nombre_atleta nombre_prueba PcAL').lean();
 
         if (!marcas || marcas.length === 0) {
             return res.status(404).json({ message: 'No se encontraron marcas con viento legal para el atleta en esta prueba.' });
@@ -496,7 +767,7 @@ router.get('/mejor-marca-legal/prueba/:pruebaId/categoria/:categoriaId/atleta/:a
             nombre_prueba: pruebaId,
             categoria: categoriaId,
             nombre_atleta: atletaId,
-            viento: { $exists: true, $lte: 2.0, $gte: -2.0 }
+            viento: { $exists: true, $lte: 2.0 }
         }).populate('nombre_atleta nombre_prueba categoria').lean();
 
         if (!marcas || marcas.length === 0) {
@@ -525,7 +796,7 @@ router.get('/mejor-marca-legal/prueba/:pruebaId/PcAL/:PcALId/atleta/:atletaId', 
             nombre_prueba: pruebaId,
             PcAL: PcALId,
             nombre_atleta: atletaId,
-            viento: { $exists: true, $lte: 2.0, $gte: -2.0 }
+            viento: { $exists: true, $lte: 2.0 }
         }).populate('nombre_atleta nombre_prueba PcAL').lean();
 
         if (!marcas || marcas.length === 0) {
@@ -555,7 +826,7 @@ router.get('/mejor-marca-legal/prueba/:pruebaId/categoria/:categoriaId/PcAL/:PcA
             categoria: categoriaId,
             PcAL: PcALId,
             nombre_atleta: atletaId,
-            viento: { $exists: true, $lte: 2.0, $gte: -2.0 }
+            viento: { $exists: true, $lte: 2.0 }
         }).populate('nombre_atleta nombre_prueba categoria PcAL').lean();
 
         if (!marcas || marcas.length === 0) {
@@ -584,8 +855,8 @@ router.get('/mejor-marca-legal/prueba/:pruebaId/anyo/:anyo/atleta/:atletaId', as
             nombre_prueba: pruebaId,
             anyo: anyo,
             nombre_atleta: atletaId,
-            viento: { $exists: true, $lte: 2.0, $gte: -2.0 }
-        }).populate('nombre_atleta nombre_prueba').lean();
+            viento: { $exists: true, $lte: 2.0 }
+        }).populate('nombre_atleta nombre_prueba PcAL').lean();
 
         if (!marcas || marcas.length === 0) {
             return res.status(404).json({ message: 'No se encontraron marcas con viento legal para el atleta en esta prueba y año.' });
@@ -614,7 +885,7 @@ router.get('/mejor-marca-legal/prueba/:pruebaId/PcAL/:PcALId/anyo/:anyo/atleta/:
             PcAL: PcALId,
             anyo: anyo,
             nombre_atleta: atletaId,
-            viento: { $exists: true, $lte: 2.0, $gte: -2.0 }
+            viento: { $exists: true, $lte: 2.0 }
         }).populate('nombre_atleta nombre_prueba PcAL').lean();
 
         if (!marcas || marcas.length === 0) {

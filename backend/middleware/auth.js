@@ -38,7 +38,24 @@ const auth = async (req, res, next) => {
         next();
     } catch (error) {
         console.error('Error en middleware de autenticación:', error);
-        res.status(401).json({ mensaje: 'Token no válido' });
+        
+        // Diferenciar entre token expirado y token inválido
+        if (error.name === 'TokenExpiredError') {
+            return res.status(401).json({ 
+                mensaje: 'Token expirado', 
+                code: 'TOKEN_EXPIRED',
+                expiredAt: error.expiredAt 
+            });
+        }
+        
+        if (error.name === 'JsonWebTokenError') {
+            return res.status(401).json({ 
+                mensaje: 'Token inválido', 
+                code: 'TOKEN_INVALID' 
+            });
+        }
+        
+        res.status(401).json({ mensaje: 'Error de autenticación', code: 'AUTH_ERROR' });
     }
 };
 

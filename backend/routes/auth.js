@@ -71,7 +71,7 @@ router.post(
 
         // Crear token JWT
         const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
-            expiresIn: 3600 // Expira en 1 hora
+            expiresIn: '7d' // Expira en 7 días
         });
 
         // Incluir los tipos de usuario en la respuesta

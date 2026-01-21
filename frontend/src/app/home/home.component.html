@@ -1,14 +1,78 @@
 <div class="home-container">
-  <div class="layout-container">
-    <div class="left-sidebar">
-      <app-social-sidebar></app-social-sidebar>
+  <!-- Layout de 3 columnas: Redes Sociales | Noticias | Calendario -->
+  <section class="three-column-section">
+    <div class="section-grid">
+      <!-- Columna Izquierda: Redes Sociales -->
+      <div class="sidebar-column left-column">
+        <div class="sidebar-card">
+          <div class="sidebar-header">
+            <span class="sidebar-icon">📱</span>
+            <h3>Síguenos</h3>
+          </div>
+          <div class="sidebar-content">
+            <app-social-sidebar></app-social-sidebar>
+          </div>
+        </div>
+      </div>
+
+      <!-- Columna Central: Noticias -->
+      <div class="main-column">
+        <div class="content-card">
+          <div class="card-header">
+            <div class="header-title">
+              <span class="header-icon">📰</span>
+              <h2>Últimas Noticias</h2>
+            </div>
+            <div class="header-line"></div>
+          </div>
+          <div class="card-content">
+            <app-posts-carousel></app-posts-carousel>
+          </div>
+        </div>
+      </div>
+
+      <!-- Columna Derecha: Calendario -->
+      <div class="sidebar-column right-column">
+        <div class="sidebar-card">
+          <div class="sidebar-header">
+            <span class="sidebar-icon">📅</span>
+            <h3>Calendario</h3>
+          </div>
+          <div class="sidebar-content">
+            <app-calendario-lateral></app-calendario-lateral>
+          </div>
+        </div>
+      </div>
     </div>
-    <div class="main-content">
-      <app-posts-carousel></app-posts-carousel>
+  </section>
+
+  <!-- Sección de Horarios -->
+  <section class="schedule-section">
+    <div class="section-container">
+      <div class="section-header">
+        <div class="section-title-wrapper">
+          <span class="section-icon">⏰</span>
+          <h2 class="section-title">Horarios de Entrenamiento</h2>
+        </div>
+        <div class="section-line"></div>
+      </div>
       <app-horarios-escuela></app-horarios-escuela>
     </div>
-    <div class="right-sidebar">
-      <app-calendario-lateral></app-calendario-lateral>
+  </section>
+
+  <!-- CTA Section -->
+  <section class="cta-section">
+    <div class="section-container">
+      <div class="cta-card">
+        <div class="cta-content">
+          <h3>¿Listo para empezar?</h3>
+          <p>Únete a nuestra familia de atletas y alcanza tu máximo potencial</p>
+        </div>
+        <a routerLink="/inscripciones" class="cta-button">
+          <span>Inscríbete ahora</span>
+          <i class="fas fa-arrow-right"></i>
+        </a>
+      </div>
     </div>
-  </div>
+  </section>
 </div>

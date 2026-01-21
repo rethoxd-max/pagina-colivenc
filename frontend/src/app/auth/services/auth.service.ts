@@ -139,6 +139,65 @@ export class AuthService {
     }
   }
 
+  /**
+   * Decodifica el token JWT sin verificar la firma
+   */
+  private decodeToken(token: string): any {
+    try {
+      const base64Url = token.split('.')[1];
+      const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+      const jsonPayload = decodeURIComponent(
+        atob(base64)
+          .split('')
+          .map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
+          .join('')
+      );
+      return JSON.parse(jsonPayload);
+    } catch {
+      return null;
+    }
+  }
+
+  /**
+   * Verifica si el token ha expirado
+   */
+  isTokenExpired(): boolean {
+    const token = this.getToken();
+    if (!token) return true;
+
+    const decoded = this.decodeToken(token);
+    if (!decoded || !decoded.exp) return true;
+
+    // exp está en segundos, Date.now() en milisegundos
+    const expirationDate = decoded.exp * 1000;
+    const now = Date.now();
+    
+    // Considerar expirado si quedan menos de 60 segundos
+    return now >= (expirationDate - 60000);
+  }
+
+  /**
+   * Obtiene el tiempo restante del token en milisegundos
+   */
+  getTokenTimeRemaining(): number {
+    const token = this.getToken();
+    if (!token) return 0;
+
+    const decoded = this.decodeToken(token);
+    if (!decoded || !decoded.exp) return 0;
+
+    const expirationDate = decoded.exp * 1000;
+    return Math.max(0, expirationDate - Date.now());
+  }
+
+  /**
+   * Maneja el token expirado - limpia datos y notifica
+   */
+  handleExpiredToken(): void {
+    console.log('AuthService - Manejando token expirado');
+    this.clearUserData();
+  }
+
   changePassword(currentPassword: string, newPassword: string): Observable<any> {
     return this.http.post(`${this.apiUrl}/change-password`, {
       currentPassword,

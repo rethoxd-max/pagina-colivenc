@@ -1,98 +1,163 @@
-<div class="tienda-container">
-  <div class="tienda-header">
-    <h1>Tienda del Club</h1>
-    <div class="tienda-actions">
-      <button class="btn-carrito-toggle" (click)="toggleCarrito()">
-        <i class="fas fa-shopping-cart"></i>
-        <span class="carrito-badge" *ngIf="cantidadItems > 0">{{ cantidadItems }}</span>
-      </button>
-      <button class="btn-crear-producto" routerLink="/tienda/crear-producto">
-        Añadir Nuevo Producto
-      </button>
+<div class="tienda-page">
+  <!-- Header de la tienda -->
+  <div class="page-header">
+    <div class="header-content">
+      <span class="header-badge">
+        <i class="fas fa-store"></i>
+        Tienda Oficial
+      </span>
+      <h1 class="page-title">Tienda del Club</h1>
+      <p class="page-subtitle">Equipación y merchandising oficial de COLIVENC</p>
     </div>
   </div>
 
-  <div *ngIf="loading" class="loading">
-    Cargando productos...
-  </div>
-
-  <div *ngIf="error" class="error-message">
-    {{ error }}
-  </div>
-
-  <div class="productos-grid">
-    <div *ngFor="let producto of productos" class="producto-card">
-      <div class="producto-imagen-container" (click)="seleccionarProducto(producto)">
-        <img [src]="getImagenUrl(producto.imagen)" [alt]="producto.nombre" class="producto-imagen">
+  <!-- Barra de acciones -->
+  <div class="tienda-container">
+    <div class="actions-bar">
+      <div class="results-info">
+        <i class="fas fa-tshirt"></i>
+        <span>{{ productos.length }} productos disponibles</span>
       </div>
-      <div class="producto-info">
-        <h2>{{ producto.nombre }}</h2>
-        <p>{{ producto.descripcion }}</p>
-        <p class="precio">{{ producto.precio | currency:'EUR' }}</p>
-        
-        <div class="tallas-container" (click)="$event.stopPropagation()">
-          <select 
-            [ngModel]="getTallaSeleccionada(producto._id)"
-            (ngModelChange)="seleccionarTalla(producto._id, $event)"
-            class="talla-select">
-            <option value="">Selecciona talla</option>
-            <option *ngFor="let talla of producto.tallas" [value]="talla">
-              {{ formatearTalla(talla) }}
-            </option>
-          </select>
-        </div>
+      <div class="actions-buttons">
+        <button class="btn-carrito-toggle" (click)="toggleCarrito()">
+          <i class="fas fa-shopping-cart"></i>
+          <span>Carrito</span>
+          <span class="carrito-badge" *ngIf="cantidadItems > 0">{{ cantidadItems }}</span>
+        </button>
+        <button class="btn-crear-producto" routerLink="/tienda/crear-producto">
+          <i class="fas fa-plus"></i>
+          Añadir Producto
+        </button>
+      </div>
+    </div>
 
-        <div class="acciones-producto">
-          <button 
-            class="btn-carrito" 
-            (click)="agregarAlCarrito(producto); $event.stopPropagation()" 
-            [disabled]="!getTallaSeleccionada(producto._id)">
-            Añadir al carrito
-          </button>
-          <button 
-            class="btn-editar" 
-            (click)="editarProducto(producto); $event.stopPropagation()">
-            Editar
-          </button>
-          <button 
-            class="btn-eliminar" 
-            (click)="eliminarProducto(producto); $event.stopPropagation()">
-            Eliminar
-          </button>
+    <!-- Loading -->
+    <div *ngIf="loading" class="loading-state">
+      <div class="loading-icon">
+        <i class="fas fa-spinner fa-spin"></i>
+      </div>
+      <p>Cargando productos...</p>
+    </div>
+
+    <!-- Error -->
+    <div *ngIf="error" class="error-state">
+      <div class="error-icon">
+        <i class="fas fa-exclamation-circle"></i>
+      </div>
+      <p>{{ error }}</p>
+    </div>
+
+    <!-- Grid de productos -->
+    <div class="productos-grid">
+      <div *ngFor="let producto of productos" class="producto-card">
+        <div class="producto-imagen-container" (click)="seleccionarProducto(producto)">
+          <img [src]="getImagenUrl(producto.imagen)" [alt]="producto.nombre" class="producto-imagen">
+          <div class="producto-overlay">
+            <span class="ver-detalle">
+              <i class="fas fa-eye"></i>
+              Ver detalle
+            </span>
+          </div>
+        </div>
+        <div class="producto-info">
+          <div class="producto-header">
+            <h2>{{ producto.nombre }}</h2>
+            <span class="precio">{{ producto.precio | currency:'EUR' }}</span>
+          </div>
+          <p class="producto-descripcion">{{ producto.descripcion }}</p>
+          
+          <div class="tallas-container" (click)="$event.stopPropagation()">
+            <label>
+              <i class="fas fa-ruler"></i>
+              Talla
+            </label>
+            <select 
+              [ngModel]="getTallaSeleccionada(producto._id)"
+              (ngModelChange)="seleccionarTalla(producto._id, $event)"
+              class="talla-select">
+              <option value="">Selecciona talla</option>
+              <option *ngFor="let talla of producto.tallas" [value]="talla">
+                {{ formatearTalla(talla) }}
+              </option>
+            </select>
+          </div>
+
+          <div class="acciones-producto">
+            <button 
+              class="btn-carrito" 
+              (click)="agregarAlCarrito(producto); $event.stopPropagation()" 
+              [disabled]="!getTallaSeleccionada(producto._id)">
+              <i class="fas fa-cart-plus"></i>
+              Añadir
+            </button>
+            <button 
+              class="btn-editar" 
+              (click)="editarProducto(producto); $event.stopPropagation()">
+              <i class="fas fa-edit"></i>
+            </button>
+            <button 
+              class="btn-eliminar" 
+              (click)="eliminarProducto(producto); $event.stopPropagation()">
+              <i class="fas fa-trash"></i>
+            </button>
+          </div>
         </div>
       </div>
     </div>
+
+    <!-- Estado vacío -->
+    <div *ngIf="!loading && !error && productos.length === 0" class="empty-state">
+      <div class="empty-icon">
+        <i class="fas fa-box-open"></i>
+      </div>
+      <h3>No hay productos disponibles</h3>
+      <p>Vuelve pronto para ver nuestra nueva equipación</p>
+    </div>
   </div>
 
-  <div *ngIf="productoSeleccionado" class="modal">
-    <div class="modal-content">
-      <h2>{{ productoSeleccionado.nombre }}</h2>
-      <img [src]="getImagenUrl(productoSeleccionado.imagen)" [alt]="productoSeleccionado.nombre" class="producto-imagen-detalle">
-      <p>{{ productoSeleccionado.descripcion }}</p>
-      <p class="precio">{{ productoSeleccionado.precio | currency:'EUR' }}</p>
+  <!-- Modal de detalle de producto -->
+  <div *ngIf="productoSeleccionado" class="modal-overlay" (click)="productoSeleccionado = null">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <button class="modal-close" (click)="productoSeleccionado = null">
+        <i class="fas fa-times"></i>
+      </button>
       
-      <div class="tallas-container">
-        <h3>Selecciona tu talla:</h3>
-        <div class="tallas-grid">
-          <button 
-            *ngFor="let talla of productoSeleccionado.tallas" 
-            [class.selected]="talla === getTallaSeleccionada(productoSeleccionado._id)"
-            (click)="seleccionarTalla(productoSeleccionado._id, talla)">
-            {{ formatearTalla(talla) }}
-          </button>
+      <div class="modal-body">
+        <div class="modal-imagen">
+          <img [src]="getImagenUrl(productoSeleccionado.imagen)" [alt]="productoSeleccionado.nombre">
         </div>
-      </div>
+        
+        <div class="modal-info">
+          <h2>{{ productoSeleccionado.nombre }}</h2>
+          <p class="modal-precio">{{ productoSeleccionado.precio | currency:'EUR' }}</p>
+          <p class="modal-descripcion">{{ productoSeleccionado.descripcion }}</p>
+          
+          <div class="modal-tallas">
+            <h4>
+              <i class="fas fa-ruler"></i>
+              Selecciona tu talla
+            </h4>
+            <div class="tallas-grid">
+              <button 
+                *ngFor="let talla of productoSeleccionado.tallas" 
+                class="talla-btn"
+                [class.selected]="talla === getTallaSeleccionada(productoSeleccionado._id)"
+                (click)="seleccionarTalla(productoSeleccionado._id, talla)">
+                {{ formatearTalla(talla) }}
+              </button>
+            </div>
+          </div>
 
-      <div class="acciones">
-        <button 
-          class="btn-carrito" 
-          (click)="agregarAlCarrito(productoSeleccionado)" 
-          [disabled]="!getTallaSeleccionada(productoSeleccionado._id)">
-          Añadir al carrito
-        </button>
-        <button class="btn-cerrar" (click)="productoSeleccionado = null">
-          Cerrar
-        </button>
+          <div class="modal-acciones">
+            <button 
+              class="btn-carrito-modal" 
+              (click)="agregarAlCarrito(productoSeleccionado)" 
+              [disabled]="!getTallaSeleccionada(productoSeleccionado._id)">
+              <i class="fas fa-cart-plus"></i>
+              Añadir al carrito
+            </button>
+          </div>
+        </div>
       </div>
     </div>
   </div>

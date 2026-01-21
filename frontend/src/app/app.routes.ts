@@ -30,6 +30,7 @@ import { PostDetailComponent } from './posts/components/post-detail/post-detail.
 import { ProcesarResultadosComponent } from './competiciones/procesar-resultados/procesar-resultados.component';
 import { TiendaComponent } from './tienda/tienda.component';
 import { CrearProductoComponent } from './tienda/components/crear-producto/crear-producto.component';
+import { CalculadoraCombinadasComponent } from './calculadora-combinadas/calculadora-combinadas.component';
 
 
 export const routes: Routes = [
@@ -50,15 +51,18 @@ export const routes: Routes = [
     { path: 'datos-competiciones', component: CreateDatosCompeticionesComponent, canActivate: [AuthGuard, adminGuard] },
     { path: 'procesar-resultados', component: ProcesarResultadosComponent, canActivate: [AuthGuard, adminGuard] },
     
+    // Calculadora de combinadas
+    { path: 'calculadora-combinadas', component: CalculadoraCombinadasComponent },
+    
     // Rutas de ranking
     { path: 'ranking', component: RankingComponent },
     { path: 'ranking/create-performance', component: CreatePerformanceComponent, canActivate: [AuthGuard, adminGuard] },
     { path: 'edit-marca/:id', component: CreatePerformanceComponent, canActivate: [AuthGuard, adminGuard] },
     
     // Rutas de atletas
-    { path: 'atletas/:atletaId/perfil', component: PerfilAtletaComponent },
+    { path: 'atletas/:slug/perfil', component: PerfilAtletaComponent },
     { path: 'buscador-atletas', component: BuscadorAtletasComponent },
-    { path: 'perfil-atleta/:atletaId', component: PerfilAtletaComponent },
+    { path: 'perfil-atleta/:slug', component: PerfilAtletaComponent },
     
     // Rutas de inscripciones
     { path: 'inscripcion/:id', component: InscripcionComponent, canActivate: [AuthGuard, atletaGuard] },

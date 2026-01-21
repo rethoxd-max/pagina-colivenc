@@ -7,6 +7,7 @@ import { environment } from '../../../environments/environment';
 export interface Atleta {
   _id: string;
   nombre: string;
+  slug?: string;
   fecha_nacimiento: Date;
   genero: 'Masculino' | 'Femenino';
   usuario?: {
@@ -54,6 +55,13 @@ export interface PcAL {
   PcAL: string;
 }
 
+export interface LugarConocido {
+  nombre: string;
+  pcAL: 'PC' | 'AL';
+  totalMarcas: number;
+  variantes?: { pcAL: string; count: number }[];
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -92,9 +100,32 @@ export class RankingService {
     return this.http.get<Sector[]>(`${this.apiUrl}/sectores`);
   }
 
+  // Obtener sectores que tienen marcas para una categoría específica
+  getSectoresPorCategoria(categoriaId: string, genero?: string): Observable<Sector[]> {
+    let params = new HttpParams();
+    if (genero) {
+      params = params.set('genero', genero);
+    }
+    return this.http.get<Sector[]>(`${this.apiUrl}/sectores/por-categoria/${categoriaId}`, { params });
+  }
+
+  // Obtener pruebas que tienen marcas para una categoría y sector específicos
+  getPruebasPorCategoriaYSector(categoriaId: string, sectorId: string, genero?: string): Observable<Prueba[]> {
+    let params = new HttpParams();
+    if (genero) {
+      params = params.set('genero', genero);
+    }
+    return this.http.get<Prueba[]>(`${this.apiUrl}/pruebas/por-categoria-sector/${categoriaId}/${sectorId}`, { params });
+  }
+
   // Obtener todos los atletas
   getAtletas(): Observable<Atleta[]> {
     return this.http.get<Atleta[]>(`${this.apiUrl}/atletas`);
+  }
+
+  // Obtener lugares conocidos de las marcas existentes
+  getLugaresConocidos(): Observable<LugarConocido[]> {
+    return this.http.get<LugarConocido[]>(`${this.apiUrl}/marcas/lugares`);
   }
 
   // Obtener atletas por género
@@ -117,13 +148,27 @@ export class RankingService {
   }
 
   // Obtener mejores marcas por prueba
-  getMejoresMarcas(pruebaId: string): Observable<Marca[]> {
-    return this.http.get<Marca[]>(`${this.apiUrl}/ranking/mejores-marcas/${pruebaId}`);
+  getMejoresMarcas(pruebaId: string, mostrarSoloMejorMarca: boolean = true): Observable<Marca[]> {
+    const params = new HttpParams().set('todasMarcas', (!mostrarSoloMejorMarca).toString());
+    return this.http.get<Marca[]>(`${this.apiUrl}/ranking/mejores-marcas/${pruebaId}`, { params });
   }
 
   // Obtener mejores marcas por prueba y género
-  getMejoresMarcasPorGenero(pruebaId: string, genero: string): Observable<Marca[]> {
-    return this.http.get<Marca[]>(`${this.apiUrl}/ranking/mejores-marcas/${pruebaId}/genero/${genero}`);
+  getMejoresMarcasPorGenero(pruebaId: string, genero: string, mostrarSoloMejorMarca: boolean = true): Observable<Marca[]> {
+    const params = new HttpParams().set('todasMarcas', (!mostrarSoloMejorMarca).toString());
+    return this.http.get<Marca[]>(`${this.apiUrl}/ranking/mejores-marcas/${pruebaId}/genero/${genero}`, { params });
+  }
+
+  // Obtener mejores marcas por prueba y PcAL (sin categoría)
+  getMejoresMarcasPorPcAL(pruebaId: string, PcALId: string, mostrarSoloMejorMarca: boolean = true): Observable<Marca[]> {
+    const params = new HttpParams().set('todasMarcas', (!mostrarSoloMejorMarca).toString());
+    return this.http.get<Marca[]>(`${this.apiUrl}/ranking/mejores-marcas/${pruebaId}/pcal/${PcALId}`, { params });
+  }
+
+  // Obtener mejores marcas por prueba, PcAL y género (sin categoría)
+  getMejoresMarcasPorPcALYGenero(pruebaId: string, PcALId: string, genero: string, mostrarSoloMejorMarca: boolean = true): Observable<Marca[]> {
+    const params = new HttpParams().set('todasMarcas', (!mostrarSoloMejorMarca).toString());
+    return this.http.get<Marca[]>(`${this.apiUrl}/ranking/mejores-marcas/${pruebaId}/pcal/${PcALId}/genero/${genero}`, { params });
   }
 
   getMejoresMarcasPorCategoria(pruebaId: string, categoriaId: string, mostrarSoloMejorMarca: boolean = true): Observable<Marca[]> {
@@ -152,12 +197,37 @@ export class RankingService {
     return this.http.get<Categoria[]>(`${this.apiUrl}/categorias`);
   }
 
+  // Obtener categorías disponibles para una prueba (solo las que tienen marcas)
+  getCategoriasDisponibles(pruebaId: string): Observable<Categoria[]> {
+    return this.http.get<Categoria[]>(`${this.apiUrl}/ranking/categorias-disponibles/${pruebaId}`);
+  }
+
+  // Obtener años de temporada disponibles para una prueba
+  getAnyosDisponibles(pruebaId: string): Observable<number[]> {
+    return this.http.get<number[]>(`${this.apiUrl}/ranking/anyos-disponibles/${pruebaId}`);
+  }
+
+  // Inicializar categorías con valores por defecto
+  inicializarCategorias(forzar: boolean = false): Observable<any> {
+    return this.http.post(`${this.apiUrl}/categorias/inicializar`, { forzar });
+  }
+
   getPcAL(): Observable<PcAL[]> {
     return this.http.get<PcAL[]>(`${this.apiUrl}/pcAL`);
   }
 
   deleteMarca(marcaId: string): Observable<Marca> {
     return this.http.delete<Marca>(`${this.apiUrl}/marcas/${marcaId}`)
+  }
+
+  // Previsualizar importación de CSV
+  previsualizarCSV(csvData: string): Observable<any> {
+    return this.http.post(`${this.apiUrl}/marcas/previsualizar-csv`, { csvData });
+  }
+
+  // Importar marcas desde CSV
+  importarCSV(csvData: string): Observable<any> {
+    return this.http.post(`${this.apiUrl}/marcas/importar-csv`, { csvData });
   }
 
 }

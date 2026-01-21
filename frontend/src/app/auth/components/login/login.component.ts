@@ -35,7 +35,14 @@ export class LoginComponent implements OnInit {
     }
 
     // Obtener la URL de retorno de los query params
-    this.returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/home';
+    let returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/home';
+    
+    // Validar que no sea la página de login ni una URL malformada
+    if (returnUrl.includes('/login') || returnUrl.includes('%2F') || returnUrl.includes('returnUrl')) {
+      returnUrl = '/home';
+    }
+    
+    this.returnUrl = returnUrl;
     console.log('URL de retorno configurada:', this.returnUrl);
   }
 

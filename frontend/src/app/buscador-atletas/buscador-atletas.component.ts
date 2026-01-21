@@ -6,7 +6,8 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { Observable, startWith, map, of } from 'rxjs';
-import { RankingService, Atleta } from '../ranking/services/ranking.service';
+import { RankingService } from '../ranking/services/ranking.service';
+import { Atleta } from '../ranking/services/perfil-atleta.service';
 import { SearchAtletaComponent } from '../ranking/create-performance/components/search-atleta/search-atleta.component';
 
 @Component({
@@ -21,6 +22,7 @@ export class BuscadorAtletasComponent implements OnInit {
   buscadorForm!: FormGroup;
   nombreAtletaControl = new FormControl(''); // Inicializado aquí
   atletas: Atleta[] = [];
+  atletaSeleccionado: Atleta | null = null; // Guardar el atleta seleccionado completo
 
   constructor(private router: Router, private fb: FormBuilder, private rankingService: RankingService) { }
 
@@ -39,6 +41,7 @@ export class BuscadorAtletasComponent implements OnInit {
   }
 
   onAtletaSelected(atleta: Atleta) {
+    this.atletaSeleccionado = atleta; // Guardar el atleta completo
     this.buscadorForm.patchValue({
       nombre_atleta: atleta._id
     });
@@ -46,24 +49,21 @@ export class BuscadorAtletasComponent implements OnInit {
 
   resetAtleta(): void {
     this.nombreAtletaControl.reset();
+    this.atletaSeleccionado = null;
     this.buscadorForm.patchValue({
       nombre_atleta: null
     });
   }
 
   onSubmit(): void {
-    if (this.buscadorForm.valid) {
-      const atletaId = this.buscadorForm.get('nombre_atleta')?.value;
-
-      if (atletaId) {
-        this.router.navigate([`/perfil-atleta/${atletaId}`]);
-        this.buscadorForm.reset();
-        this.resetAtleta();
-      } else {
-        console.log('No se ha seleccionado un atleta.');
-      }
+    if (this.buscadorForm.valid && this.atletaSeleccionado) {
+      // Usar el slug si está disponible, sino usar el ID
+      const identificador = this.atletaSeleccionado.slug || this.atletaSeleccionado._id;
+      this.router.navigate(['/perfil-atleta', identificador]);
+      this.buscadorForm.reset();
+      this.resetAtleta();
     } else {
-      console.log('Formulario no válido');
+      console.log('No se ha seleccionado un atleta.');
     }
   }
 

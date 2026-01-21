@@ -1,62 +1,90 @@
-<section class="container mt-5">
-    <div class="row">
-        <div class="col-12 text-center mb-5">
-            <h1 class="display-4 fw-bold">Boletín Semanal</h1>
-            <p class="lead">Las últimas noticias y eventos de nuestro club</p>
+<div class="posts-page">
+    <!-- Header de la página -->
+    <div class="page-header">
+        <div class="header-content">
+            <span class="header-badge">
+                <i class="fas fa-newspaper"></i>
+                Actualidad
+            </span>
+            <h1 class="page-title">Boletín Semanal</h1>
+            <p class="page-subtitle">Las últimas noticias y eventos de nuestro club</p>
+        </div>
+    </div>
+
+    <!-- Contenido principal -->
+    <div class="posts-container">
+        <!-- Botón crear noticia -->
+        <div *ngIf="(isAdmin() || isEditor())" class="action-bar">
+            <button class="btn-create" [routerLink]="['/create']">
+                <i class="fas fa-plus"></i>
+                Crear nueva noticia
+            </button>
         </div>
 
-        <div class="col-12">
-            <div class="d-flex justify-content-end mb-4">
-                <button *ngIf="(isAdmin() || isEditor())" class="btn btn-primary" [routerLink]="['/create']">
-                    <i class="bi bi-plus-circle me-2"></i>Crear nueva noticia
-                </button>
-            </div>
+        <!-- Grid de noticias -->
+        <div *ngIf="posts.length > 0" class="posts-grid">
+            <article *ngFor="let post of posts; let i = index" 
+                     class="post-card" 
+                     [style.--delay]="i * 0.1 + 's'"
+                     (click)="verNoticia(post._id)">
+                
+                <!-- Imagen de la noticia -->
+                <div class="post-image-wrapper">
+                    <img *ngIf="post.imageUrl" 
+                         [src]="getImageUrl(post.imageUrl)" 
+                         [alt]="post.title"
+                         class="post-image">
+                    <div *ngIf="!post.imageUrl" class="post-image-placeholder">
+                        <i class="fas fa-image"></i>
+                    </div>
+                    <div class="post-category">
+                        <i class="fas fa-tag"></i>
+                        Noticia
+                    </div>
+                </div>
 
-            <div *ngIf="posts.length > 0" class="row g-4">
-                <div *ngFor="let post of posts" class="col-md-4">
-                    <div class="card h-100 hover-card" (click)="verNoticia(post._id)">
-                        <div class="card-body">
-                            <div class="d-flex justify-content-between align-items-center mb-3">
-                                <h3 class="card-title">{{ post.title }}</h3>
-                                <span class="post-date">{{ post.createdAt | date:'shortDate' }}</span>
-                            </div>
-                            
-                            <div class="post-preview">
-                                <p class="card-text">{{ post.content | slice:0:150 }}...</p>
-                                
-                                <div *ngIf="post.imageUrl" class="text-center my-3">
-                                    <img [src]="getImageUrl(post.imageUrl)" 
-                                         class="img-fluid" 
-                                         alt="Imagen de la noticia"
-                                         style="max-height: 200px; object-fit: cover;">
-                                </div>
-                            </div>
-
-                            <div class="d-flex justify-content-between align-items-center mt-3">
-                                <button class="btn btn-link">Leer más...</button>
-                                <div *ngIf="(isAdmin() || isEditor())" class="btn-group">
-                                    <button (click)="editarNoticia($event, post._id)" 
-                                            class="btn-action btn-edit">
-                                        <i class="bi bi-pencil"></i>
-                                        Editar
-                                    </button>
-                                    <button (click)="eliminarNoticia($event, post._id)" 
-                                            class="btn-action btn-delete">
-                                        <i class="bi bi-trash"></i>
-                                        Eliminar
-                                    </button>
-                                </div>
-                            </div>
+                <!-- Contenido de la noticia -->
+                <div class="post-content">
+                    <div class="post-meta">
+                        <span class="post-date">
+                            <i class="far fa-calendar-alt"></i>
+                            {{ post.createdAt | date:'dd MMM yyyy' }}
+                        </span>
+                    </div>
+                    
+                    <h3 class="post-title">{{ post.title }}</h3>
+                    <p class="post-excerpt">{{ post.content | slice:0:120 }}...</p>
+                    
+                    <div class="post-footer">
+                        <span class="read-more">
+                            Leer más
+                            <i class="fas fa-arrow-right"></i>
+                        </span>
+                        
+                        <div *ngIf="(isAdmin() || isEditor())" class="post-actions">
+                            <button (click)="editarNoticia($event, post._id)" 
+                                    class="btn-action btn-edit"
+                                    title="Editar">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button (click)="eliminarNoticia($event, post._id)" 
+                                    class="btn-action btn-delete"
+                                    title="Eliminar">
+                                <i class="fas fa-trash-alt"></i>
+                            </button>
                         </div>
                     </div>
                 </div>
-            </div>
+            </article>
+        </div>
 
-            <div *ngIf="posts.length === 0" class="text-center py-5">
-                <i class="bi bi-newspaper display-1 text-muted"></i>
-                <h3 class="mt-3">No hay noticias disponibles</h3>
-                <p class="text-muted">Vuelve pronto para ver las últimas actualizaciones</p>
+        <!-- Estado vacío -->
+        <div *ngIf="posts.length === 0" class="empty-state">
+            <div class="empty-icon">
+                <i class="fas fa-newspaper"></i>
             </div>
+            <h3>No hay noticias disponibles</h3>
+            <p>Vuelve pronto para ver las últimas actualizaciones</p>
         </div>
     </div>
-</section>
+</div>

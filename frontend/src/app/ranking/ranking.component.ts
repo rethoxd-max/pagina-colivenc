@@ -1,21 +1,26 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule, FormControl } from '@angular/forms';
 import { RankingService, Sector, Prueba, Marca, Categoria, PcAL } from './services/ranking.service';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { DecathlonModalComponent } from './components/decathlon-modal/decathlon-modal.component';
 import { AuthService } from '../auth/services/auth.service';
 import { Router, RouterModule } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
+import { SearchAtletaComponent } from './create-performance/components/search-atleta/search-atleta.component';
 
 @Component({
   selector: 'app-ranking',
   standalone: true,
-  imports: [CommonModule, FormsModule, MatDialogModule, RouterModule],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule, MatDialogModule, RouterModule, SearchAtletaComponent],
   templateUrl: './ranking.component.html',
   styleUrls: ['./ranking.component.css']
 })
 export class RankingComponent implements OnInit {
+  // Propiedades para el buscador de atletas
+  nombreAtletaControl = new FormControl('');
+  atletaSeleccionadoId: string | null = null;
+
   sectores: Sector[] = [];
   pruebas: Prueba[] = [];
   marcas: Marca[] = [];
@@ -26,46 +31,19 @@ export class RankingComponent implements OnInit {
   sectorSeleccionado: Sector | null = null;
   pruebaSeleccionada: Prueba | null = null;
   PcALSeleccionado: PcAL | null = null;
-  generoSeleccionado: string | null = null;
+  generoSeleccionado: string = 'Masculino';
   vientoValido: boolean = true; // Por defecto mostrar solo marcas con viento válido
   mostrarSoloMejorMarca: boolean = true; // Por defecto mostrar solo la mejor marca de cada atleta
 
   // Lista de pruebas que requieren medición de viento
   pruebasConViento: string[] = [
     // Pruebas de velocidad
-    '100m', '200m',
-    // Pruebas de vallas
-    '100mv (0.762) sub16 FEM',
-    '100mv (0.762) sub18 FEM',
-    '100mv (0.91) sub16 MASC',
-    '100mv FEM',
-    '110mv (0.91) sub18 MASC',
-    '110mv (0.99) sub20 MASC',
-    '110mv MASC',
-    '220mv sub14 FEM',
-    '220mv sub14 MASC',
-    '300mv sub16 FEM',
-    '300mv sub16 MASC',
-    '400mv FEM',
-    '400mv MASC',
-    '400mv sub18 FEM',
-    '400mv sub18 MASC',
-    '60mv (0.60) sub12 FEM',
-    '60mv (0.60) sub12 MASC',
-    '60mv (0.762) sub14 FEM',
-    '60mv (0.762) sub16 FEM',
-    '60mv (0.762) sub18 FEM',
-    '60mv (0.84) sub14 MASC',
-    '60mv (0.91) sub16 MASC',
-    '60mv (0.91) sub18 MASC',
-    '60mv (0.99) sub20 MASC',
-    '60mv FEM',
-    '60mv MASC',
-    '80mv (0.762) sub14 FEM',
-    '80mv (0.84) sub14 MASC',
+    '60ml', '100ml', '100m', '200m',
+    // Pruebas de vallas (60mv y 110mv)
+    '60mv', '110mv',
     // Pruebas de saltos
-    'Salto de Longitud', 
-    'Triple Salto'
+    'Longitud', 'Salto de Longitud', 
+    'Triple', 'Triple Salto'
   ];
   requiereMedicionViento: boolean = false;
 
@@ -80,14 +58,13 @@ export class RankingComponent implements OnInit {
 
   // Opciones de género para el select
   opcionesGenero = [
-    { valor: null, texto: 'Todos' },
     { valor: 'Masculino', texto: 'Masculino' },
     { valor: 'Femenino', texto: 'Femenino' }
   ];
 
   // Opciones de viento para el select
   opcionesViento = [
-    { valor: true, texto: 'Marcas válidas' },
+    { valor: true, texto: 'Viento legal (≤2.0 m/s)' },
     { valor: false, texto: 'Todas las marcas' }
   ];
 
@@ -102,10 +79,39 @@ export class RankingComponent implements OnInit {
   // Opción para mostrar todas las categorías
   todasLasCategorias: Categoria = { _id: 'todas', nombre_categoria: 'Todas las categorías' };
 
-  constructor(private rankingService: RankingService, private dialog: MatDialog, private authService: AuthService) { }
+  // Filtro de año de temporada
+  anyosTemporada: number[] = [];
+  anyoTemporadaSeleccionado: number | null = null;
+
+  constructor(
+    private rankingService: RankingService, 
+    private dialog: MatDialog, 
+    private authService: AuthService,
+    private router: Router
+  ) { }
+
+  // Métodos para el buscador de atletas
+  onAtletaSelected(atleta: any): void {
+    this.atletaSeleccionadoId = atleta?._id || null;
+  }
+
+  irAlPerfilAtleta(): void {
+    if (this.atletaSeleccionadoId) {
+      // Buscar el atleta para obtener su slug
+      this.rankingService.getAtletaById(this.atletaSeleccionadoId).subscribe({
+        next: (atleta) => {
+          const identificador = atleta.slug || atleta._id;
+          this.router.navigate(['/perfil-atleta', identificador]);
+        },
+        error: () => {
+          // Fallback al ID si hay error
+          this.router.navigate(['/perfil-atleta', this.atletaSeleccionadoId]);
+        }
+      });
+    }
+  }
 
   ngOnInit(): void {
-    this.getSectores();
     this.getCategorias();
     this.getPcAL();
     this.configurarColumnas();
@@ -160,9 +166,15 @@ export class RankingComponent implements OnInit {
     if (!this.pruebaSeleccionada) return false;
     
     // Comprueba si la prueba seleccionada está en la lista de pruebas con viento
-    this.requiereMedicionViento = this.pruebasConViento.some(
+    const pruebaRequiereViento = this.pruebasConViento.some(
       nombre => this.pruebaSeleccionada?.nombre_prueba.includes(nombre)
     );
+    
+    // Solo mostrar viento si es AL (Aire Libre), no en PC (Pista Cubierta)
+    const esAireLibre = this.PcALSeleccionado?.PcAL === 'AL' || 
+                        this.PcALSeleccionado?.PcAL === 'Ambas';
+    
+    this.requiereMedicionViento = pruebaRequiereViento && esAireLibre;
     
     return this.requiereMedicionViento;
   }
@@ -182,42 +194,125 @@ export class RankingComponent implements OnInit {
 
   onSectorSelected(): void {
     this.pruebaSeleccionada = null; // Reiniciar selección de prueba
-    this.categoriaSeleccionada = null; // Reiniciar selección de categoría
     this.marcas = []; // Limpiar marcas
     this.requiereMedicionViento = false; // Resetear flag de viento
     this.configurarColumnas();
 
-    if (this.sectorSeleccionado && this.sectorSeleccionado._id && this.sectorSeleccionado._id !== null && this.sectorSeleccionado !== null) {
-      this.getPruebas(this.sectorSeleccionado._id);
+    if (this.sectorSeleccionado && this.sectorSeleccionado._id && this.categoriaSeleccionada && this.categoriaSeleccionada._id !== 'todas') {
+      this.getPruebasPorCategoriaYSector();
     }
   }
 
-  getPruebas(sectorId: string): void {
-    this.rankingService.getPruebas().subscribe((pruebas) => {
-      // Validar que el sector_id exista antes de hacer el filtro
-      this.pruebas = pruebas.filter(prueba => prueba.sector_id && prueba.sector_id._id === sectorId);
+  getPruebasPorCategoriaYSector(): void {
+    if (!this.categoriaSeleccionada || this.categoriaSeleccionada._id === 'todas' || !this.sectorSeleccionado) {
+      return;
+    }
+    this.rankingService.getPruebasPorCategoriaYSector(
+      this.categoriaSeleccionada._id,
+      this.sectorSeleccionado._id,
+      this.generoSeleccionado
+    ).subscribe((pruebas) => {
+      this.pruebas = pruebas;
     });
   }
 
   onPruebaSelected(): void {
-    this.categoriaSeleccionada = null;
+    this.PcALSeleccionado = this.ambas; // Resetear PcAL a "Ambas"
+    this.anyoTemporadaSeleccionado = null; // Resetear año de temporada
     this.marcas = [];
     this.verificarSiRequiereViento();
     this.configurarColumnas();
+    
+    // Cargar años disponibles y marcas
+    if (this.pruebaSeleccionada) {
+      this.cargarAnyosDisponibles(this.pruebaSeleccionada._id);
+      this.cargarMarcasSegunFiltros();
+    }
+  }
+
+  // Cargar años de temporada disponibles para una prueba
+  cargarAnyosDisponibles(pruebaId: string): void {
+    this.rankingService.getAnyosDisponibles(pruebaId).subscribe({
+      next: (anyos) => {
+        this.anyosTemporada = anyos;
+      },
+      error: (err) => {
+        console.error('Error cargando años disponibles:', err);
+        this.anyosTemporada = [];
+      }
+    });
+  }
+
+  // Método para manejar cambio en el filtro de año de temporada
+  onAnyoTemporadaSelected(): void {
+    if (this.pruebaSeleccionada) {
+      this.cargarMarcasSegunFiltros();
+    }
+  }
+
+  // Obtener año de nacimiento del atleta
+  getAnyoNacimiento(fechaNacimiento: Date | string): number {
+    if (!fechaNacimiento) return 0;
+    const fecha = new Date(fechaNacimiento);
+    return fecha.getFullYear();
+  }
+
+  // Cargar categorías que tienen marcas para una prueba específica
+  cargarCategoriasDisponibles(pruebaId: string): void {
+    this.rankingService.getCategoriasDisponibles(pruebaId).subscribe({
+      next: (categorias) => {
+        // Añadir la opción de todas las categorías al principio
+        this.categorias = [this.todasLasCategorias, ...categorias];
+        
+        // Seleccionar automáticamente "Todas las categorías" y cargar marcas
+        this.categoriaSeleccionada = this.todasLasCategorias;
+        this.cargarMarcasSegunFiltros();
+      },
+      error: (err) => {
+        // Si hay error, cargar todas las categorías como fallback
+        this.getCategorias();
+      }
+    });
   }
 
   getCategorias(): void {
     this.rankingService.getCategorias().subscribe((categorias) => {
-      this.categorias = [this.todasLasCategorias, ...categorias]; // Añadir la opción de todas las categorías al principio
+      this.categorias = categorias; // Sin "Todas las categorías" porque ahora es el primer filtro
     });
   }
 
   onCategoriaSelected(): void {
+    // Resetear selecciones dependientes
+    this.sectorSeleccionado = null;
+    this.pruebaSeleccionada = null;
     this.PcALSeleccionado = this.ambas;
     this.marcas = [];
-    if (this.pruebaSeleccionada && this.categoriaSeleccionada) {
-      this.cargarMarcasSegunFiltros();
+    this.pruebas = [];
+    this.sectores = [];
+    
+    // Cargar sectores que tienen marcas para esta categoría
+    if (this.categoriaSeleccionada && this.categoriaSeleccionada._id !== 'todas') {
+      this.cargarSectoresPorCategoria();
     }
+  }
+
+  // Cargar sectores que tienen marcas para la categoría seleccionada
+  cargarSectoresPorCategoria(): void {
+    if (!this.categoriaSeleccionada || this.categoriaSeleccionada._id === 'todas') {
+      return;
+    }
+    this.rankingService.getSectoresPorCategoria(
+      this.categoriaSeleccionada._id,
+      this.generoSeleccionado
+    ).subscribe({
+      next: (sectores) => {
+        this.sectores = sectores;
+      },
+      error: (err) => {
+        console.error('Error cargando sectores:', err);
+        this.sectores = [];
+      }
+    });
   }
 
   getPcAL(): void {
@@ -228,14 +323,22 @@ export class RankingComponent implements OnInit {
 
   onPcALSelected(): void {
     if (this.pruebaSeleccionada && this.categoriaSeleccionada && this.PcALSeleccionado) {
+      // Reconfigurar columnas porque el viento depende de PC/AL
+      this.configurarColumnas();
       this.cargarMarcasSegunFiltros();
     }
   }
 
   onGeneroSelected(): void {
+    // Resetear selecciones dependientes
+    this.sectorSeleccionado = null;
+    this.pruebaSeleccionada = null;
     this.marcas = [];
-    if (this.pruebaSeleccionada) {
-      this.cargarMarcasSegunFiltros();
+    this.pruebas = [];
+    
+    // Recargar sectores para el nuevo género
+    if (this.categoriaSeleccionada && this.categoriaSeleccionada._id !== 'todas') {
+      this.cargarSectoresPorCategoria();
     }
   }
 
@@ -440,6 +543,14 @@ export class RankingComponent implements OnInit {
     }
   }
 
+  // Filtrar marcas por año de temporada
+  filtrarPorAnyo(marcas: Marca[]): Marca[] {
+    if (!this.anyoTemporadaSeleccionado) {
+      return marcas; // Si no hay año seleccionado, devolver todas
+    }
+    return marcas.filter(marca => marca.anyo === this.anyoTemporadaSeleccionado);
+  }
+
   // Método centralizado para cargar marcas según los filtros seleccionados
   cargarMarcasSegunFiltros(): void {
     if (!this.pruebaSeleccionada) return;
@@ -450,11 +561,22 @@ export class RankingComponent implements OnInit {
     const genero = this.generoSeleccionado;
 
     // Si se selecciona "Todas las categorías", cargar todas las marcas de la prueba
+    // pero respetando el filtro de PcAL si está seleccionado
     if (categoriaId === 'todas') {
-      if (genero) {
-        this.getMejoresMarcasPorGenero(pruebaId, genero);
+      if (PcALId && PcALId !== 'ambas') {
+        // Hay un PcAL específico seleccionado, filtrar por él
+        if (genero) {
+          this.getMejoresMarcasPorPcALYGenero(pruebaId, PcALId, genero);
+        } else {
+          this.getMejoresMarcasPorPcAL(pruebaId, PcALId);
+        }
       } else {
-        this.getMejoresMarcas(pruebaId);
+        // No hay PcAL específico, cargar todas
+        if (genero) {
+          this.getMejoresMarcasPorGenero(pruebaId, genero);
+        } else {
+          this.getMejoresMarcas(pruebaId);
+        }
       }
       return;
     }
@@ -478,10 +600,12 @@ export class RankingComponent implements OnInit {
   }
 
   getMejoresMarcas(pruebaId: string): void {
-    this.rankingService.getMejoresMarcas(pruebaId).subscribe(
+    this.rankingService.getMejoresMarcas(pruebaId, this.mostrarSoloMejorMarca).subscribe(
       async (marcas) => {
         // Validar que la prueba_id exista antes de hacer el filtro
         let marcasFiltradas = marcas.filter(marca => marca.nombre_prueba && marca.nombre_prueba._id === pruebaId);
+        // Aplicar filtro de año
+        marcasFiltradas = this.filtrarPorAnyo(marcasFiltradas);
         // Aplicar filtro de viento si es necesario
         this.marcas = await this.aplicarFiltroViento(marcasFiltradas);
       },
@@ -493,13 +617,45 @@ export class RankingComponent implements OnInit {
   }
 
   getMejoresMarcasPorGenero(pruebaId: string, genero: string): void {
-    this.rankingService.getMejoresMarcasPorGenero(pruebaId, genero).subscribe(
+    this.rankingService.getMejoresMarcasPorGenero(pruebaId, genero, this.mostrarSoloMejorMarca).subscribe(
       async (marcas) => {
+        // Aplicar filtro de año
+        let marcasFiltradas = this.filtrarPorAnyo(marcas);
         // Aplicar filtro de viento si es necesario
-        this.marcas = await this.aplicarFiltroViento(marcas);
+        this.marcas = await this.aplicarFiltroViento(marcasFiltradas);
       },
       (error) => {
         console.error('Error al obtener marcas por género:', error);
+        this.marcas = [];
+      }
+    );
+  }
+
+  getMejoresMarcasPorPcAL(pruebaId: string, PcALId: string): void {
+    this.rankingService.getMejoresMarcasPorPcAL(pruebaId, PcALId, this.mostrarSoloMejorMarca).subscribe(
+      async (marcas) => {
+        // Aplicar filtro de año
+        let marcasFiltradas = this.filtrarPorAnyo(marcas);
+        // Aplicar filtro de viento si es necesario
+        this.marcas = await this.aplicarFiltroViento(marcasFiltradas);
+      },
+      (error) => {
+        console.error('Error al obtener marcas por PcAL:', error);
+        this.marcas = [];
+      }
+    );
+  }
+
+  getMejoresMarcasPorPcALYGenero(pruebaId: string, PcALId: string, genero: string): void {
+    this.rankingService.getMejoresMarcasPorPcALYGenero(pruebaId, PcALId, genero, this.mostrarSoloMejorMarca).subscribe(
+      async (marcas) => {
+        // Aplicar filtro de año
+        let marcasFiltradas = this.filtrarPorAnyo(marcas);
+        // Aplicar filtro de viento si es necesario
+        this.marcas = await this.aplicarFiltroViento(marcasFiltradas);
+      },
+      (error) => {
+        console.error('Error al obtener marcas por PcAL y género:', error);
         this.marcas = [];
       }
     );
@@ -526,6 +682,8 @@ export class RankingComponent implements OnInit {
           return marca.nombre_prueba._id === pruebaId && marca.categoria._id === categoriaId;
         });
 
+        // Aplicar filtro de año
+        marcasFiltradas = this.filtrarPorAnyo(marcasFiltradas);
         // Aplicar filtro de viento si es necesario
         this.marcas = await this.aplicarFiltroViento(marcasFiltradas);
       },
@@ -539,8 +697,10 @@ export class RankingComponent implements OnInit {
   getMejoresMarcasPorCategoriaYGenero(pruebaId: string, categoriaId: string, genero: string): void {
     this.rankingService.getMejoresMarcasPorCategoriaYGenero(pruebaId, categoriaId, genero, this.mostrarSoloMejorMarca).subscribe(
       async (marcas) => {
+        // Aplicar filtro de año
+        let marcasFiltradas = this.filtrarPorAnyo(marcas);
         // Aplicar filtro de viento si es necesario
-        this.marcas = await this.aplicarFiltroViento(marcas);
+        this.marcas = await this.aplicarFiltroViento(marcasFiltradas);
       },
       (error) => {
         console.error('Error al obtener marcas por categoría y género:', error);
@@ -563,6 +723,8 @@ export class RankingComponent implements OnInit {
           marca.PcAL && marca.PcAL._id === PcALId
         );
         
+        // Aplicar filtro de año
+        marcasFiltradas = this.filtrarPorAnyo(marcasFiltradas);
         // Aplicar filtro de viento si es necesario
         this.marcas = await this.aplicarFiltroViento(marcasFiltradas);
       },
@@ -575,8 +737,10 @@ export class RankingComponent implements OnInit {
   getMejoresMarcasPorCategoriaYPcALYGenero(pruebaId: string, categoriaId: string, PcALId: string, genero: string): void {
     this.rankingService.getMejoresMarcasPorCategoriaYPcALYGenero(pruebaId, categoriaId, PcALId, genero, this.mostrarSoloMejorMarca).subscribe(
       async (marcas) => {
+        // Aplicar filtro de año
+        let marcasFiltradas = this.filtrarPorAnyo(marcas);
         // Aplicar filtro de viento si es necesario
-        this.marcas = await this.aplicarFiltroViento(marcas);
+        this.marcas = await this.aplicarFiltroViento(marcasFiltradas);
       },
       (error) => {
         console.error('Error al obtener marcas por categoría, PcAL y género:', error);
@@ -612,7 +776,10 @@ export class RankingComponent implements OnInit {
 
   openDecathlonModal(comentario: string): void {
     const dialogRef = this.dialog.open(DecathlonModalComponent, {
-      width: '400px',
+      width: 'auto',
+      maxWidth: '95vw',
+      maxHeight: '90vh',
+      panelClass: 'decathlon-dialog',
       data: { 
         comentario: comentario,
         tipoPrueba: this.pruebaSeleccionada ? this.pruebaSeleccionada.nombre_prueba : 'Decatlón MASC'

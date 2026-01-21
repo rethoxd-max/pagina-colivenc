@@ -8,13 +8,15 @@ import { Subscription, filter } from 'rxjs';
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [RouterModule, NgIf, RouterLink],  // Importa el RouterModule para usar router-outlet
+  imports: [RouterModule, NgIf, RouterLink, CommonModule],
   templateUrl: './app.component.html',
+  styleUrl: './app.component.css'
 })
 export class AppComponent implements OnInit, OnDestroy {
   title = 'pagina-colivenc';
   isLoggedIn: boolean = false;  // Variable para almacenar el estado de autenticación
   atletaId: string | null = null; // Variable para almacenar el ID del atleta
+  atletaSlug: string | null = null; // Variable para almacenar el slug del atleta
   private authSubscription: Subscription | null = null;
   private routerSubscription: Subscription | null = null;
 
@@ -65,22 +67,26 @@ export class AppComponent implements OnInit, OnDestroy {
         // Obtener el ID del atleta correspondiente al usuario logueado
         this.perfilAtletaService.getAtletaByUserId(userId).subscribe({
           next: (atleta) => {
-            if (atleta && atleta._id) {
+            if (atleta && (atleta.slug || atleta._id)) {
               this.atletaId = atleta._id;
+              this.atletaSlug = atleta.slug || atleta._id;
+              const identificador = atleta.slug || atleta._id;
               
               // Solo redirigir si estamos exactamente en la ruta '/perfil-atleta' sin ID
               const url = this.router.url;
               if (url === '/perfil-atleta') {
-                this.router.navigate(['/perfil-atleta', atleta._id]);
+                this.router.navigate(['/perfil-atleta', identificador]);
               }
             } else {
               console.warn('El usuario actual no tiene un atleta asociado');
               this.atletaId = null;
+              this.atletaSlug = null;
             }
           },
           error: (error) => {
             console.error('Error al obtener el atleta del usuario:', error);
             this.atletaId = null;
+            this.atletaSlug = null;
           }
         });
       } else {

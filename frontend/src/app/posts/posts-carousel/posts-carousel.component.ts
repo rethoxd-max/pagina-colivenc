@@ -17,7 +17,7 @@ interface Post {
 @Component({
   selector: 'app-posts-carousel',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, NgIf],
+  imports: [CommonModule, ReactiveFormsModule, NgIf, RouterLink],
   templateUrl: './posts-carousel.component.html',
   styleUrls: ['./posts-carousel.component.css']
 })

@@ -7,6 +7,7 @@ import { environment } from '../../../environments/environment';
 export interface Atleta {
   _id: string;
   nombre: string;
+  slug?: string;
   fecha_nacimiento: Date;
   genero: 'Masculino' | 'Femenino';
   usuario?: {
@@ -113,6 +114,42 @@ export class PerfilAtletaService {
   getMarcasByAtletaId(atletaId: string): Observable<Marca[]> {
     return this.http.get<Marca[]>(`${this.apiUrl}/perfil-atleta/marcas/atleta/${atletaId}`);
   }
+
+  // ==================== ENDPOINTS OPTIMIZADOS ====================
+  
+  // Obtener todas las mejores marcas del atleta en una sola llamada
+  getMejoresMarcasOptimizado(atletaId: string): Observable<{ mejoresMarcas: Marca[], mejoresMarcasIlegales: { [key: string]: Marca } }> {
+    return this.http.get<{ mejoresMarcas: Marca[], mejoresMarcasIlegales: { [key: string]: Marca } }>(
+      `${this.apiUrl}/perfil-atleta/mejores-marcas/atleta/${atletaId}`
+    );
+  }
+
+  // Obtener todas las mejores marcas del atleta por año en una sola llamada
+  getMejoresMarcasPorAnyoOptimizado(atletaId: string, anyo: number): Observable<{ mejoresMarcas: Marca[], mejoresMarcasIlegales: { [key: string]: Marca } }> {
+    return this.http.get<{ mejoresMarcas: Marca[], mejoresMarcasIlegales: { [key: string]: Marca } }>(
+      `${this.apiUrl}/perfil-atleta/mejores-marcas/atleta/${atletaId}/anyo/${anyo}`
+    );
+  }
+
+  // Obtener todas las marcas del atleta por año agrupadas por prueba
+  getTodasMarcasPorAnyoOptimizado(atletaId: string, anyo: number): Observable<{ marcasPorPrueba: { [key: string]: Marca[] } }> {
+    return this.http.get<{ marcasPorPrueba: { [key: string]: Marca[] } }>(
+      `${this.apiUrl}/perfil-atleta/todas-marcas/atleta/${atletaId}/anyo/${anyo}`
+    );
+  }
+
+  // Obtener datos de progresión: mejores marcas por prueba y año en una sola llamada
+  getProgresionOptimizado(atletaId: string): Observable<{ 
+    marcasPorPruebaAnyo: { [key: string]: Marca }, 
+    marcasIlegalesPorPruebaAnyo: { [key: string]: Marca } 
+  }> {
+    return this.http.get<{ 
+      marcasPorPruebaAnyo: { [key: string]: Marca }, 
+      marcasIlegalesPorPruebaAnyo: { [key: string]: Marca } 
+    }>(`${this.apiUrl}/perfil-atleta/progresion/atleta/${atletaId}`);
+  }
+
+  // ==================== FIN ENDPOINTS OPTIMIZADOS ====================
 
   // 1. Obtener la mejor marca por prueba de cada atleta
   getMejorMarcaPorPrueba(atletaId: string, pruebaId: string): Observable<Marca> {

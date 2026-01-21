@@ -22,7 +22,7 @@ const marcaSchema = new mongoose.Schema({
     categoria: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Categoria',
-        required: true,
+        required: false, // Se calcula automáticamente si no se proporciona
     },
     anyo: { 
         type: Number, 

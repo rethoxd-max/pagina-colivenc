@@ -3,18 +3,31 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { Atleta, Categoria, Marca, PcAL, Prueba, RankingService } from '../ranking/services/ranking.service';
 import { CommonModule } from '@angular/common';
 import { PerfilAtletaService } from '../ranking/services/perfil-atleta.service';
-import { FormsModule } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule, FormControl } from '@angular/forms';
 import { Observer, Subscription } from 'rxjs';
 import { AuthService } from '../auth/services/auth.service';
+import { SearchAtletaComponent } from '../ranking/create-performance/components/search-atleta/search-atleta.component';
 
 @Component({
   selector: 'app-perfil-atleta',
   templateUrl: './perfil-atleta.component.html',
   styleUrls: ['./perfil-atleta.component.css'],
   standalone: true,
-  imports: [CommonModule, FormsModule]
+  imports: [CommonModule, FormsModule, ReactiveFormsModule, SearchAtletaComponent]
 })
 export class PerfilAtletaComponent implements OnInit, OnDestroy {
+  // Propiedades para el buscador de atletas
+  nombreAtletaControl = new FormControl('');
+  atletaSeleccionadoId: string | null = null;
+
+  // Lista de pruebas que requieren medición de viento (solo AL)
+  pruebasConViento: string[] = [
+    '60ml', '100ml', '100m', '200m',
+    '60mv', '110mv',
+    'Longitud', 'Salto de Longitud',
+    'Triple', 'Triple Salto'
+  ];
+
   atleta: any;
   pruebas: Prueba[] = [];
   marcas: Marca[] = [];
@@ -31,7 +44,7 @@ export class PerfilAtletaComponent implements OnInit, OnDestroy {
   filtroPcAL: string = '';
   filtroAnyo: number | undefined;
   anyosPorPrueba!: { [pruebaId: string]: number[]; };
-  mejoresMarcasLegales: { [key: string]: Marca } = {};
+  mejoresMarcasIlegales: { [key: string]: Marca } = {};
   
   private routeSubscription!: Subscription;
   private authSubscription!: Subscription;
@@ -44,6 +57,35 @@ export class PerfilAtletaComponent implements OnInit, OnDestroy {
     private router: Router,
     private authService: AuthService
   ) { }
+
+  // Métodos para el buscador de atletas
+  onAtletaSelected(atleta: any): void {
+    this.atletaSeleccionadoId = atleta?._id || null;
+  }
+
+  irAlPerfilAtleta(): void {
+    if (this.atletaSeleccionadoId) {
+      // Buscar el atleta para obtener su slug
+      this.rankingService.getAtletaById(this.atletaSeleccionadoId).subscribe({
+        next: (atleta) => {
+          if (atleta.slug) {
+            this.router.navigate(['/perfil-atleta', atleta.slug]);
+          } else {
+            this.router.navigate(['/perfil-atleta', atleta._id]);
+          }
+          // Resetear el buscador
+          this.nombreAtletaControl.setValue('');
+          this.atletaSeleccionadoId = null;
+        },
+        error: () => {
+          // Fallback al ID si hay error
+          this.router.navigate(['/perfil-atleta', this.atletaSeleccionadoId]);
+          this.nombreAtletaControl.setValue('');
+          this.atletaSeleccionadoId = null;
+        }
+      });
+    }
+  }
 
   ngOnInit() {
     // Primero verificamos si el usuario está logueado
@@ -58,12 +100,12 @@ export class PerfilAtletaComponent implements OnInit, OnDestroy {
 
     // Suscribirse a los cambios de parámetros de la ruta
     this.routeSubscription = this.route.paramMap.subscribe(params => {
-      const atletaId = params.get('atletaId');
-      if (atletaId) {
-        // Si hay un atletaId en la ruta, cargar ese perfil específico
-        this.loadAtletaData(atletaId);
+      const slug = params.get('slug');
+      if (slug) {
+        // Si hay un slug en la ruta, cargar ese perfil específico
+        this.loadAtletaData(slug);
       } else {
-        // Si no hay atletaId y el usuario está logueado, cargar su perfil
+        // Si no hay slug y el usuario está logueado, cargar su perfil
         if (this.isLoggedIn) {
           this.loadCurrentUserAtleta();
         }
@@ -87,9 +129,10 @@ export class PerfilAtletaComponent implements OnInit, OnDestroy {
     if (userId) {
       this.perfilAtletaService.getAtletaByUserId(userId).subscribe({
         next: (atleta) => {
-          if (atleta && atleta._id) {
-            // Redirigir a la página del perfil con el ID correcto del atleta
-            this.router.navigate(['/perfil-atleta', atleta._id]);
+          if (atleta && (atleta.slug || atleta._id)) {
+            // Redirigir a la página del perfil con el slug o ID del atleta
+            const identificador = atleta.slug || atleta._id;
+            this.router.navigate(['/perfil-atleta', identificador]);
           } else {
             console.error('No se encontró el atleta para el usuario actual');
           }
@@ -111,21 +154,21 @@ export class PerfilAtletaComponent implements OnInit, OnDestroy {
     this.marcasPorPruebaAnyo = {};
     this.anyos = [];
     this.anyosPorPrueba = {};
-    this.mejoresMarcasLegales = {};
+    this.mejoresMarcasIlegales = {};
   }
 
-  // Método para cargar los datos del atleta
-  loadAtletaData(atletaId: string | null) {
-    if (!atletaId) {
-      console.error('No se proporcionó un ID de atleta válido');
+  // Método para cargar los datos del atleta (acepta slug o ID)
+  loadAtletaData(identificador: string | null) {
+    if (!identificador) {
+      console.error('No se proporcionó un identificador de atleta válido');
       return;
     }
 
     // Reiniciar los datos antes de cargar nuevos
     this.clearAtletaData();
 
-    // Cargar los datos del atleta utilizando el ID
-    this.rankingService.getAtletaById(atletaId).subscribe({
+    // Cargar los datos del atleta utilizando el slug o ID
+    this.rankingService.getAtletaById(identificador).subscribe({
       next: (atleta: Atleta) => {
         this.atleta = atleta;
 
@@ -157,6 +200,9 @@ export class PerfilAtletaComponent implements OnInit, OnDestroy {
             if (this.anyos.length > 0) {
               this.filtroAnyo = Math.max(...this.anyos);
             }
+
+            // Cargar las pruebas del atleta para mostrar las marcas
+            this.getPruebasPorAtleta(this.atleta._id);
           },
           error: (error) => {
             console.error('Error al cargar las marcas del atleta:', error);
@@ -170,7 +216,6 @@ export class PerfilAtletaComponent implements OnInit, OnDestroy {
 
     this.getCategorias();
     this.getPcAL();
-    this.getPruebasPorAtleta(atletaId);
   }
 
   activeTab: string = 'marcasPersonales'; // Tab activa por defecto
@@ -190,6 +235,29 @@ export class PerfilAtletaComponent implements OnInit, OnDestroy {
     if (this.activeTab === "resultados" && this.filtroAnyo) {
       this.getPruebasPorAtletaYAnyo(this.atleta._id, this.filtroAnyo);
     }
+
+    // Cargar datos de progresión cuando se cambia a esa pestaña
+    if (this.activeTab === 'progresion') {
+      this.cargarDatosProgresion();
+    }
+  }
+
+  // Cargar datos de progresión con endpoint optimizado
+  cargarDatosProgresion(): void {
+    this.perfilAtletaService.getProgresionOptimizado(this.atleta._id)
+      .subscribe({
+        next: (response) => {
+          this.marcasPorPruebaAnyo = {
+            ...response.marcasPorPruebaAnyo,
+            ...response.marcasIlegalesPorPruebaAnyo
+          };
+        },
+        error: (error) => {
+          if (error.status !== 404) {
+            console.error('Error cargando datos de progresión:', error);
+          }
+        }
+      });
   }
 
   getPcAL(): void {
@@ -276,8 +344,8 @@ export class PerfilAtletaComponent implements OnInit, OnDestroy {
         .subscribe((marca: Marca) => {
           this.marcasPorPruebaAnyo[key] = marca; // Guardar la marca en el objeto de cache
           
-          // Si la marca tiene viento ilegal, cargar la mejor marca legal
-          if (this.esVientoIlegal(marca.viento)) {
+          // Si la marca tiene viento ilegal (solo para pruebas con viento y AL), cargar la mejor marca legal
+          if (this.marcaTieneVientoIlegal(marca)) {
             const keyLegal = `${pruebaId}-${anyo}-legal`;
             this.perfilAtletaService.getMejorMarcaLegalPorPruebaYAnyo(this.atleta._id, pruebaId, anyo)
               .subscribe((marcaLegal: Marca) => {
@@ -292,40 +360,68 @@ export class PerfilAtletaComponent implements OnInit, OnDestroy {
     // Reiniciar el objeto de marcas
     this.marcasPorPrueba = {};
 
-    // Recorrer todas las pruebas
-    this.pruebas.forEach((prueba) => {
-      // Solo cargar marcas si hay un año seleccionado
-      if (this.filtroAnyo) {
-        // Llamada al servicio para obtener las marcas por año y prueba
-        const observableMarcas = this.perfilAtletaService.getAllMarcasPorAnyoYPrueba(
-          this.atleta._id,
-          prueba._id,
-          this.filtroAnyo
-        );
+    // Solo cargar marcas si hay un año seleccionado
+    if (!this.filtroAnyo) return;
 
-        // Definir el observer
-        const observer: Observer<Marca[]> = {
-          next: (data: Marca[]) => {
-            // Guardar los datos obtenidos en el objeto utilizando el ID de la prueba como clave
-            this.marcasPorPrueba[prueba._id] = data;
-          },
-          error: (error) => {
-            console.error('Error al obtener las marcas para la prueba:', prueba._id, error);
-          },
-          complete: function (): void {
+    // Usar endpoint optimizado que devuelve todas las marcas agrupadas por prueba
+    this.perfilAtletaService.getTodasMarcasPorAnyoOptimizado(this.atleta._id, this.filtroAnyo)
+      .subscribe({
+        next: (response) => {
+          this.marcasPorPrueba = response.marcasPorPrueba;
+        },
+        error: (error) => {
+          if (error.status !== 404) {
+            console.error('Error al obtener las marcas:', error);
           }
-        };
-
-        // Subscribirse al observable para obtener las marcas
-        observableMarcas.subscribe(observer);
-      }
-    });
+        }
+      });
   }
 
   cargarMejoresMarcas() {
-    const pruebaIds = this.pruebas.map(prueba => prueba._id);
     this.mejoresMarcas = [];
-    this.mejoresMarcasLegales = {};
+    this.mejoresMarcasIlegales = {};
+
+    // Si hay filtros específicos de categoría o PcAL, usar los endpoints individuales
+    if (this.filtroCategoria || this.filtroPcAL) {
+      this.cargarMejoresMarcasConFiltros();
+      return;
+    }
+
+    // Sin filtros específicos, usar endpoints optimizados (una sola llamada)
+    if ((this.activeTab === 'mejoresAnyo' || this.activeTab === 'resultados') && this.filtroAnyo) {
+      // Endpoint optimizado para año específico
+      this.perfilAtletaService.getMejoresMarcasPorAnyoOptimizado(this.atleta._id, this.filtroAnyo)
+        .subscribe({
+          next: (response) => {
+            this.mejoresMarcas = response.mejoresMarcas;
+            this.mejoresMarcasIlegales = response.mejoresMarcasIlegales;
+          },
+          error: (error) => {
+            if (error.status !== 404) {
+              console.error('Error obteniendo mejores marcas:', error);
+            }
+          }
+        });
+    } else {
+      // Endpoint optimizado para todas las marcas
+      this.perfilAtletaService.getMejoresMarcasOptimizado(this.atleta._id)
+        .subscribe({
+          next: (response) => {
+            this.mejoresMarcas = response.mejoresMarcas;
+            this.mejoresMarcasIlegales = response.mejoresMarcasIlegales;
+          },
+          error: (error) => {
+            if (error.status !== 404) {
+              console.error('Error obteniendo mejores marcas:', error);
+            }
+          }
+        });
+    }
+  }
+
+  // Método para cargar marcas cuando hay filtros específicos (categoría o PcAL)
+  cargarMejoresMarcasConFiltros() {
+    const pruebaIds = this.pruebas.map(prueba => prueba._id);
 
     pruebaIds.forEach((pruebaId) => {
       let observableMarca: any;
@@ -379,8 +475,8 @@ export class PerfilAtletaComponent implements OnInit, OnDestroy {
         if (mejorMarca && !this.mejoresMarcas.some(m => m._id === mejorMarca._id)) {
           this.mejoresMarcas.push(mejorMarca);
           
-          // Si la mejor marca tiene viento ilegal, buscamos la mejor marca legal
-          if (this.esVientoIlegal(mejorMarca.viento)) {
+          // Si la mejor marca tiene viento ilegal (solo para pruebas con viento y AL), buscamos la mejor marca legal
+          if (this.marcaTieneVientoIlegal(mejorMarca)) {
             let observableMarcaLegal: any;
             
             // Solo aplicar filtro de año en las pestañas de 'mejoresAnyo' y 'resultados'
@@ -428,9 +524,9 @@ export class PerfilAtletaComponent implements OnInit, OnDestroy {
               }
             }
 
-            observableMarcaLegal.subscribe((marcaLegal: Marca | null) => {
-              if (marcaLegal) {
-                this.mejoresMarcasLegales[pruebaId] = marcaLegal;
+            observableMarcaLegal.subscribe((marcaIlegal: Marca | null) => {
+              if (marcaIlegal) {
+                this.mejoresMarcasIlegales[pruebaId] = marcaIlegal;
               }
             });
           }
@@ -450,17 +546,11 @@ export class PerfilAtletaComponent implements OnInit, OnDestroy {
 
     const fechaNacimiento = new Date(this.atleta.fecha_nacimiento);
     const hoy = new Date();
-    let edad = hoy.getFullYear() - fechaNacimiento.getFullYear();
-    
-    // Ajustar la edad si aún no ha pasado el cumpleaños este año
-    const mesActual = hoy.getMonth();
-    const diaActual = hoy.getDate();
-    const mesNacimiento = fechaNacimiento.getMonth();
-    const diaNacimiento = fechaNacimiento.getDate();
-    
-    if (mesActual < mesNacimiento || (mesActual === mesNacimiento && diaActual < diaNacimiento)) {
-      edad--;
-    }
+    // La temporada empieza el 1 de diciembre del año anterior
+    // Si estamos en diciembre, ya cuenta como la temporada del año siguiente
+    const anyoTemporada = hoy.getMonth() === 11 ? hoy.getFullYear() + 1 : hoy.getFullYear();
+    // En atletismo la categoría se calcula por año de nacimiento, no por edad exacta
+    const edad = anyoTemporada - fechaNacimiento.getFullYear();
 
     if (edad < 10) {
       return 'Sub10';
@@ -530,6 +620,31 @@ export class PerfilAtletaComponent implements OnInit, OnDestroy {
   }
 
   esVientoIlegal(viento: number | undefined): boolean {
-    return viento !== undefined && Math.abs(viento) > 2.0;
+    return viento !== undefined && viento > 2.0;
+  }
+
+  // Verifica si una marca tiene viento ilegal (solo aplica para pruebas con viento y AL)
+  marcaTieneVientoIlegal(marca: Marca): boolean {
+    // Solo aplica si la marca debe mostrar viento (prueba con viento + AL)
+    if (!this.debeMostrarViento(marca)) {
+      return false;
+    }
+    return this.esVientoIlegal(marca.viento);
+  }
+
+  // Verifica si una marca debe mostrar el viento (solo para pruebas específicas y AL)
+  debeMostrarViento(marca: Marca): boolean {
+    if (!marca || marca.viento === undefined || marca.viento === null) {
+      return false;
+    }
+    
+    // Solo mostrar viento si es AL (Aire Libre)
+    if (marca.PcAL?.PcAL !== 'AL') {
+      return false;
+    }
+    
+    // Verificar si la prueba está en la lista de pruebas con viento
+    const nombrePrueba = marca.nombre_prueba?.nombre_prueba || '';
+    return this.pruebasConViento.some(p => nombrePrueba.includes(p));
   }
 }

@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const Marca = require('../models/ranking/Marca');
+const Categoria = require('../models/ranking/Categoria');
 const mongoose = require('mongoose');
 
 // GET all marcas
@@ -8,6 +9,52 @@ router.get('/', async (req, res) => {
     try {
         const marcas = await Marca.find().populate('nombre_atleta nombre_prueba categoria');
         res.json(marcas);
+    } catch (err) {
+        res.status(500).json({ message: err.message });
+    }
+});
+
+// GET categorías disponibles para una prueba (solo las que tienen marcas)
+router.get('/categorias-disponibles/:pruebaId', async (req, res) => {
+    try {
+        const { pruebaId } = req.params;
+
+        if (!mongoose.Types.ObjectId.isValid(pruebaId)) {
+            return res.status(400).json({ message: 'ID de prueba no válido.' });
+        }
+
+        // Obtener las categorías únicas que tienen marcas en esta prueba
+        const categoriasConMarcas = await Marca.distinct('categoria', { 
+            nombre_prueba: pruebaId 
+        });
+
+        // Obtener los detalles de las categorías
+        const categorias = await Categoria.find({ 
+            _id: { $in: categoriasConMarcas } 
+        }).sort({ orden: 1 });
+
+        res.json(categorias);
+    } catch (err) {
+        res.status(500).json({ message: err.message });
+    }
+});
+
+// GET años de temporada disponibles para una prueba
+router.get('/anyos-disponibles/:pruebaId', async (req, res) => {
+    try {
+        const { pruebaId } = req.params;
+
+        if (!mongoose.Types.ObjectId.isValid(pruebaId)) {
+            return res.status(400).json({ message: 'ID de prueba no válido.' });
+        }
+
+        // Obtener los años únicos que tienen marcas en esta prueba
+        const anyos = await Marca.distinct('anyo', { 
+            nombre_prueba: pruebaId 
+        });
+
+        // Ordenar de más reciente a más antiguo
+        res.json(anyos.sort((a, b) => b - a));
     } catch (err) {
         res.status(500).json({ message: err.message });
     }
@@ -84,6 +131,97 @@ router.get('/mejores-marcas/:pruebaId', async (req, res) => {
 
         // Enviar las mejores marcas ordenadas
         res.json(rankingOrdenado);
+    } catch (err) {
+        res.status(500).json({ message: err.message });
+    }
+});
+
+// GET mejores marcas por prueba y PcAL (sin categoría - para filtrar todas las categorías por PcAL)
+router.get('/mejores-marcas/:pruebaId/pcal/:PcALId', async (req, res) => {
+    try {
+        const { pruebaId, PcALId } = req.params;
+        const todasMarcas = req.query.todasMarcas === 'true';
+
+        // Validar que los IDs sean válidos
+        if (!mongoose.Types.ObjectId.isValid(pruebaId) || !mongoose.Types.ObjectId.isValid(PcALId)) {
+            return res.status(400).json({ message: 'ID de prueba o PcAL no válido.' });
+        }
+
+        // Obtener todas las marcas de la prueba y PcAL seleccionados
+        const marcas = await Marca.find({
+            nombre_prueba: pruebaId,
+            PcAL: PcALId
+        })
+            .populate('nombre_atleta nombre_prueba categoria PcAL')
+            .lean();
+
+        if (todasMarcas) {
+            return res.json(marcas.sort(ordenarMarcas));
+        }
+
+        // Agrupar las marcas por atleta
+        const marcasPorAtleta = marcas.reduce((acc, marca) => {
+            const atletaId = marca.nombre_atleta._id.toString();
+            if (!acc[atletaId]) acc[atletaId] = [];
+            acc[atletaId].push(marca);
+            return acc;
+        }, {});
+
+        // Filtrar la mejor marca para cada atleta
+        const mejoresMarcas = Object.values(marcasPorAtleta).map(marcasAtleta => obtenerMejorMarca(marcasAtleta));
+
+        res.json(mejoresMarcas.sort(ordenarMarcas));
+    } catch (err) {
+        res.status(500).json({ message: err.message });
+    }
+});
+
+// GET mejores marcas por prueba, PcAL y género (sin categoría)
+router.get('/mejores-marcas/:pruebaId/pcal/:PcALId/genero/:genero', async (req, res) => {
+    try {
+        const { pruebaId, PcALId, genero } = req.params;
+        const todasMarcas = req.query.todasMarcas === 'true';
+
+        // Validar que los IDs sean válidos
+        if (!mongoose.Types.ObjectId.isValid(pruebaId) || !mongoose.Types.ObjectId.isValid(PcALId)) {
+            return res.status(400).json({ message: 'ID de prueba o PcAL no válido.' });
+        }
+
+        if (genero !== 'Masculino' && genero !== 'Femenino') {
+            return res.status(400).json({ message: 'El género debe ser Masculino o Femenino' });
+        }
+
+        // Obtener todas las marcas de la prueba y PcAL seleccionados
+        const marcas = await Marca.find({
+            nombre_prueba: pruebaId,
+            PcAL: PcALId
+        })
+            .populate({
+                path: 'nombre_atleta',
+                match: { genero }
+            })
+            .populate('nombre_prueba categoria PcAL')
+            .lean();
+
+        // Filtrar marcas donde nombre_atleta existe (solo atletas del género seleccionado)
+        const marcasFiltradas = marcas.filter(marca => marca.nombre_atleta !== null);
+
+        if (todasMarcas) {
+            return res.json(marcasFiltradas.sort(ordenarMarcas));
+        }
+
+        // Agrupar las marcas por atleta
+        const marcasPorAtleta = marcasFiltradas.reduce((acc, marca) => {
+            const atletaId = marca.nombre_atleta._id.toString();
+            if (!acc[atletaId]) acc[atletaId] = [];
+            acc[atletaId].push(marca);
+            return acc;
+        }, {});
+
+        // Filtrar la mejor marca para cada atleta
+        const mejoresMarcas = Object.values(marcasPorAtleta).map(marcasAtleta => obtenerMejorMarca(marcasAtleta));
+
+        res.json(mejoresMarcas.sort(ordenarMarcas));
     } catch (err) {
         res.status(500).json({ message: err.message });
     }

@@ -57,7 +57,11 @@ export class AuthService {
 
   // Método para manejar la redirección después del login
   handleLoginRedirect(returnUrl: string | null) {
-    if (returnUrl && returnUrl !== '/login') {
+    // Validar que no sea la página de login ni una URL malformada
+    if (returnUrl && 
+        !returnUrl.includes('/login') && 
+        !returnUrl.includes('%2F') && 
+        !returnUrl.includes('returnUrl')) {
       this.router.navigateByUrl(returnUrl);
     } else {
       this.router.navigate(['/']);

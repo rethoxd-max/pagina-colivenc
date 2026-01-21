@@ -60,19 +60,41 @@ const ObjectId = require('mongoose').Types.ObjectId;
 
 router.post('/', auth, upload.single('image'), async (req, res) => {
     try {
-        const { nombre, fecha, lugar, descripcion, tipo, pruebas, categorias } = req.body;
+        const { nombre, fecha, lugar, descripcion, tipo } = req.body;
+        let { pruebas, categorias } = req.body;
+
+        // Parsear pruebas y categorias si vienen como string (multipart/form-data)
+        if (typeof pruebas === 'string') {
+            try {
+                pruebas = JSON.parse(pruebas);
+            } catch (e) {
+                pruebas = pruebas.split(',').filter(id => id.trim());
+            }
+        }
+        
+        if (typeof categorias === 'string') {
+            try {
+                categorias = JSON.parse(categorias);
+            } catch (e) {
+                categorias = categorias.split(',').filter(id => id.trim());
+            }
+        }
+
+        // Asegurar que son arrays
+        pruebas = Array.isArray(pruebas) ? pruebas : [];
+        categorias = Array.isArray(categorias) ? categorias : [];
 
         // Convertir las pruebas a un array de ObjectId
         let pruebaIds;
         try {
-            pruebaIds = pruebas.map(id => new ObjectId(id));
+            pruebaIds = pruebas.filter(id => id && mongoose.Types.ObjectId.isValid(id)).map(id => new ObjectId(id));
         } catch (error) {
             return res.status(400).json({ message: 'Invalid ObjectId format for pruebas' });
         }
 
         let categoriaIds;
         try {
-            categoriaIds = categorias.map(id => new ObjectId(id));
+            categoriaIds = categorias.filter(id => id && mongoose.Types.ObjectId.isValid(id)).map(id => new ObjectId(id));
         } catch (error) {
             return res.status(400).json({ message: 'Invalid ObjectId format for categorias' });
         }

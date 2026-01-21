@@ -58,7 +58,7 @@
     <div class="cumpleaneros-list">
         <div *ngFor="let atleta of cumpleanerosHoy" class="cumpleanero-item">
             <i class="fas fa-birthday-cake"></i>
-            <a [routerLink]="['/perfil-atleta', atleta._id]" class="cumpleanero-link">{{ atleta.nombre }}</a>
+            <a [routerLink]="['/perfil-atleta', $any(atleta).slug || atleta._id]" class="cumpleanero-link">{{ atleta.nombre }}</a>
         </div>
     </div>
 </div> 

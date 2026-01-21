@@ -1,56 +1,68 @@
 .calendario-container {
     background: white;
-    border-radius: 12px;
+    border-radius: 16px;
     padding: 1.5rem;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    width: 350px;
-    position: fixed;
-    right: 2rem;
-    top: 6rem;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+    width: 100%;
+    position: relative;
+    border: 1px solid rgba(0, 0, 0, 0.06);
+    height: 450px;
+    display: flex;
+    flex-direction: column;
 }
 
 .calendario-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 1.5rem;
+    margin-bottom: 1.25rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid #f1f5f9;
 }
 
 .calendario-header h3 {
     margin: 0;
-    color: #2c3e50;
-    font-size: 1.4rem;
-    font-weight: 600;
+    color: #1e293b;
+    font-size: 1.1rem;
+    font-weight: 700;
 }
 
 .nav-button {
-    background: none;
+    background: #f8fafc;
     border: none;
-    color: #2c3e50;
+    color: #64748b;
     cursor: pointer;
-    font-size: 1.2rem;
-    padding: 0.5rem;
-    transition: color 0.3s ease;
+    font-size: 0.9rem;
+    padding: 0.5rem 0.75rem;
+    transition: all 0.2s ease;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .nav-button:hover {
-    color: #1a252f;
+    background: #2563eb;
+    color: white;
 }
 
 .dias-semana {
     display: grid;
     grid-template-columns: repeat(7, 1fr);
-    gap: 0.5rem;
-    margin-bottom: 1rem;
+    gap: 0.25rem;
+    margin-bottom: 0.75rem;
     text-align: center;
-    color: #7f8c8d;
-    font-weight: 500;
+    color: #94a3b8;
+    font-weight: 600;
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
 }
 
 .calendario-grid {
     display: grid;
     grid-template-columns: repeat(7, 1fr);
-    gap: 0.5rem;
+    gap: 0.25rem;
 }
 
 .dia-calendario {
@@ -60,11 +72,17 @@
     justify-content: center;
     border-radius: 8px;
     cursor: pointer;
-    transition: all 0.3s ease;
+    transition: all 0.2s ease;
     position: relative;
-    background: #f8f9fa;
-    color: #2c3e50;
+    background: #f8fafc;
+    color: #334155;
     font-weight: 500;
+    font-size: 0.85rem;
+}
+
+.dia-calendario:not(.empty):hover {
+    background: #e2e8f0;
+    transform: scale(1.05);
 }
 
 .dia-calendario.empty {
@@ -73,17 +91,17 @@
 }
 
 .dia-calendario.has-competicion {
-    background: #e3f2fd;
-    color: #1976d2;
-    font-weight: 600;
-    border: 2px solid #1976d2;
+    background: linear-gradient(135deg, #dbeafe, #eff6ff);
+    color: #2563eb;
+    font-weight: 700;
+    border: 2px solid #2563eb;
 }
 
 .dia-calendario.has-competicion:hover {
-    background: #1976d2;
+    background: #2563eb;
     color: white;
     transform: scale(1.1);
-    box-shadow: 0 2px 8px rgba(25, 118, 210, 0.3);
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.35);
 }
 
 .competiciones-tooltip {
@@ -173,15 +191,7 @@
 
 @media (max-width: 1200px) {
     .calendario-container {
-        position: static;
-        width: 100%;
         margin-bottom: 1rem;
-    }
-
-    .cumpleanos-container {
-        position: static;
-        width: 100%;
-        margin-top: 1rem;
     }
 
     .competiciones-tooltip {
@@ -195,21 +205,28 @@
 }
 
 .cumpleanos-container {
-    background: white;
-    border-radius: 12px;
-    padding: 1.5rem;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    width: 350px;
-    position: fixed;
-    right: 2rem;
-    top: 30rem;
+    background: linear-gradient(135deg, #fdf2f8, #fce7f3);
+    border-radius: 16px;
+    padding: 1.25rem;
+    width: 100%;
+    position: relative;
+    margin-top: 1rem;
+    border: 1px solid rgba(236, 72, 153, 0.15);
 }
 
 .cumpleanos-container h4 {
-    color: #e91e63;
-    margin: 0 0 1rem 0;
-    font-size: 1.2rem;
-    text-align: center;
+    color: #be185d;
+    margin: 0 0 0.75rem 0;
+    font-size: 0.95rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.cumpleanos-container h4::before {
+    content: '🎂';
+    font-size: 1.1rem;
 }
 
 .cumpleaneros-list {
@@ -222,24 +239,31 @@
     display: flex;
     align-items: center;
     gap: 0.5rem;
-    padding: 0.5rem;
-    background: #fce4ec;
-    border-radius: 8px;
-    color: #e91e63;
+    padding: 0.625rem 0.75rem;
+    background: rgba(255, 255, 255, 0.7);
+    border-radius: 10px;
+    color: #be185d;
+    transition: all 0.2s ease;
+}
+
+.cumpleanero-item:hover {
+    background: white;
+    transform: translateX(4px);
 }
 
 .cumpleanero-item i {
-    font-size: 1.2rem;
+    font-size: 1rem;
+    color: #ec4899;
 }
 
 .cumpleanero-link {
-    color: #e91e63;
+    color: #be185d;
     text-decoration: none;
-    font-weight: 500;
-    transition: color 0.3s ease;
+    font-weight: 600;
+    font-size: 0.9rem;
+    transition: color 0.2s ease;
 }
 
 .cumpleanero-link:hover {
-    color: #c2185b;
-    text-decoration: underline;
+    color: #9d174d;
 } 

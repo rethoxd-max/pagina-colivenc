@@ -1,173 +1,186 @@
-.horarios-container {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 4rem 2rem;
-    background: linear-gradient(to bottom, #f8f9fa, #ffffff);
+/* ========================================
+   Horarios de Escuela - Diseño Moderno
+======================================== */
+.horarios-wrapper {
+    width: 100%;
 }
 
-.horarios-header {
+.temporada-subtitulo {
     text-align: center;
-    margin-bottom: 4rem;
-}
-
-.horarios-header h2 {
-    font-size: 2.8rem;
-    color: #2c3e50;
-    margin-bottom: 1rem;
-    font-weight: 700;
-    position: relative;
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #2563eb;
+    margin: 0 0 1.5rem;
+    padding: 0.5rem 1.5rem;
+    background: linear-gradient(135deg, #eff6ff, #dbeafe);
+    border-radius: 25px;
     display: inline-block;
-}
-
-.horarios-header h2::after {
-    content: '';
-    position: absolute;
-    bottom: -10px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 80px;
-    height: 4px;
-    background: #3498db;
-    border-radius: 2px;
-}
-
-.subtitle {
-    color: #7f8c8d;
-    font-size: 1.2rem;
-    margin-top: 1rem;
+    width: 100%;
+    box-sizing: border-box;
 }
 
 .horarios-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
-    gap: 2.5rem;
-}
-
-.horario-card {
-    background: white;
-    border-radius: 16px;
-    padding: 2rem;
-    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.08);
-    transition: all 0.3s ease;
-    position: relative;
-    overflow: hidden;
-}
-
-.horario-card::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 5px;
-    background: linear-gradient(90deg, #3498db, #2ecc71);
-}
-
-.horario-card:hover {
-    transform: translateY(-10px);
-    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.12);
-}
-
-.card-content {
-    display: flex;
-    flex-direction: column;
+    grid-template-columns: repeat(4, 1fr);
     gap: 1.5rem;
 }
 
-.categoria {
+.horario-card {
+    background: #ffffff;
+    border-radius: 16px;
+    overflow: hidden;
+    position: relative;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    animation: fadeInUp 0.6s ease-out calc(var(--delay, 0s)) both;
+    border: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.horario-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 20px 40px rgba(37, 99, 235, 0.15);
+    border-color: rgba(37, 99, 235, 0.2);
+}
+
+.card-accent {
+    height: 4px;
+    background: linear-gradient(90deg, #2563eb, #10b981);
+    transition: height 0.3s ease;
+}
+
+.horario-card:hover .card-accent {
+    height: 6px;
+}
+
+.card-content {
+    padding: 1.5rem;
+}
+
+.categoria-header {
     display: flex;
     align-items: center;
     gap: 1rem;
-    margin-bottom: 1rem;
+    margin-bottom: 1.25rem;
 }
 
-.categoria i {
-    font-size: 2rem;
-    color: #3498db;
-    background: #e8f4f8;
-    padding: 1rem;
+.categoria-icon {
+    width: 48px;
+    height: 48px;
+    background: linear-gradient(135deg, #eff6ff, #dbeafe);
     border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
 }
 
-.categoria h3 {
-    font-size: 1.8rem;
-    color: #2c3e50;
+.categoria-icon i {
+    font-size: 1.25rem;
+    color: #2563eb;
+}
+
+.categoria-header h3 {
+    font-size: 1.25rem;
+    color: #1e293b;
     margin: 0;
-    font-weight: 600;
+    font-weight: 700;
+    line-height: 1.3;
 }
 
 .horario-info {
+    margin-bottom: 1.25rem;
+}
+
+.info-item {
     display: flex;
     align-items: center;
-    gap: 1rem;
-    padding: 1rem;
-    background: #f8f9fa;
+    gap: 0.75rem;
+    padding: 0.875rem 1rem;
+    background: linear-gradient(135deg, #f8fafc, #f1f5f9);
     border-radius: 12px;
+    transition: all 0.3s ease;
 }
 
-.horario-info i {
-    font-size: 1.5rem;
-    color: #3498db;
+.horario-card:hover .info-item {
+    background: linear-gradient(135deg, #eff6ff, #dbeafe);
 }
 
-.horario-info span {
-    font-size: 1.2rem;
-    color: #2c3e50;
-    font-weight: 500;
+.info-item i {
+    font-size: 1.1rem;
+    color: #2563eb;
+}
+
+.info-item span {
+    font-size: 1rem;
+    color: #334155;
+    font-weight: 600;
+}
+
+.dias-section {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.dias-label {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #64748b;
+    font-weight: 600;
 }
 
 .dias-lista {
     display: flex;
     flex-wrap: wrap;
-    gap: 0.8rem;
-}
-
-.dia-item {
-    background: #e8f4f8;
-    padding: 0.8rem 1.2rem;
-    border-radius: 25px;
-    font-size: 1rem;
-    color: #2c3e50;
-    display: flex;
-    align-items: center;
     gap: 0.5rem;
-    transition: all 0.3s ease;
 }
 
-.dia-item i {
-    color: #3498db;
-    font-size: 0.9rem;
+.dia-chip {
+    background: linear-gradient(135deg, #f1f5f9, #e2e8f0);
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    color: #334155;
+    font-weight: 500;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    cursor: default;
 }
 
-.dia-item:hover {
-    background: #3498db;
+.dia-chip:hover {
+    background: linear-gradient(135deg, #2563eb, #1d4ed8);
     color: white;
-    transform: translateY(-2px);
+    transform: translateY(-2px) scale(1.05);
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
 }
 
-.dia-item:hover i {
-    color: white;
-}
-
+/* Responsive */
 @media (max-width: 768px) {
-    .horarios-container {
-        padding: 2rem 1rem;
-    }
-    
-    .horarios-header h2 {
-        font-size: 2.2rem;
-    }
-    
     .horarios-grid {
         grid-template-columns: 1fr;
-        gap: 2rem;
+        gap: 1rem;
     }
 
-    .horario-card {
-        padding: 1.5rem;
+    .card-content {
+        padding: 1.25rem;
     }
 
-    .categoria h3 {
-        font-size: 1.5rem;
+    .categoria-icon {
+        width: 42px;
+        height: 42px;
+    }
+
+    .categoria-header h3 {
+        font-size: 1.1rem;
     }
 } 

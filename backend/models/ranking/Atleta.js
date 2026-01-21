@@ -2,6 +2,11 @@ const mongoose = require('mongoose');
 
 const atletaSchema = new mongoose.Schema({
     nombre: { type: String, required: true },
+    slug: { 
+        type: String, 
+        unique: true,
+        sparse: true // Permite valores null temporalmente para migración
+    },
     fecha_nacimiento: { 
         type: Date, 
         required: true,
