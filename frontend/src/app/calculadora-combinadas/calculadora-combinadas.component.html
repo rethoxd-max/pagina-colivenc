@@ -1,0 +1,153 @@
+<div class="calculadora-container">
+  <!-- Header -->
+  <div class="calculadora-header">
+    <div class="header-content">
+      <button *ngIf="combinadaSeleccionada" class="btn-back" (click)="volver()">
+        <i class="fas fa-arrow-left"></i>
+      </button>
+      <div class="header-text">
+        <h1>
+          <i class="fas fa-calculator"></i>
+          {{ combinadaSeleccionada ? combinadaSeleccionada.nombre : 'Calculadora de Combinadas' }}
+        </h1>
+        <p *ngIf="!combinadaSeleccionada">Sistema de puntuación IAAF</p>
+        <p *ngIf="combinadaSeleccionada">
+          <span class="badge" [class.masculino]="combinadaSeleccionada.genero === 'M'" 
+                              [class.femenino]="combinadaSeleccionada.genero === 'F'">
+            <i class="fas" [class.fa-mars]="combinadaSeleccionada.genero === 'M'"
+                           [class.fa-venus]="combinadaSeleccionada.genero === 'F'"></i>
+            {{ getGeneroLabel(combinadaSeleccionada.genero) }}
+          </span>
+          <span class="badge categoria">{{ combinadaSeleccionada.categoria }}</span>
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Selector de combinada -->
+  <div class="selector-section" *ngIf="!combinadaSeleccionada">
+    <!-- Filtros -->
+    <div class="filtros-container">
+      <div class="filtro-grupo">
+        <label>Género</label>
+        <div class="btn-group">
+          <button class="btn-filtro" [class.active]="generoFiltro === 'todos'" (click)="generoFiltro = 'todos'">
+            Todos
+          </button>
+          <button class="btn-filtro" [class.active]="generoFiltro === 'M'" (click)="generoFiltro = 'M'">
+            <i class="fas fa-mars"></i> Masculino
+          </button>
+          <button class="btn-filtro" [class.active]="generoFiltro === 'F'" (click)="generoFiltro = 'F'">
+            <i class="fas fa-venus"></i> Femenino
+          </button>
+        </div>
+      </div>
+      
+      <div class="filtro-grupo">
+        <label>Categoría</label>
+        <select class="form-select" [(ngModel)]="categoriaFiltro">
+          <option value="todos">Todas las categorías</option>
+          <option *ngFor="let cat of categorias" [value]="cat">{{ cat }}</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Grid de combinadas -->
+    <div class="combinadas-grid">
+      <div class="combinada-card" 
+           *ngFor="let combinada of combinadasFiltradas"
+           (click)="seleccionarCombinada(combinada)"
+           [class.masculino]="combinada.genero === 'M'"
+           [class.femenino]="combinada.genero === 'F'">
+        <div class="card-icon">
+          <i class="fas" [class.fa-mars]="combinada.genero === 'M'"
+                         [class.fa-venus]="combinada.genero === 'F'"></i>
+        </div>
+        <div class="card-content">
+          <h3>{{ combinada.nombre }}</h3>
+          <p class="pruebas-count">{{ combinada.pruebas.length }} pruebas</p>
+          <span class="categoria-badge">{{ combinada.categoria }}</span>
+        </div>
+        <div class="card-arrow">
+          <i class="fas fa-chevron-right"></i>
+        </div>
+      </div>
+    </div>
+
+    <div class="no-results" *ngIf="combinadasFiltradas.length === 0">
+      <i class="fas fa-search"></i>
+      <p>No se encontraron pruebas combinadas con los filtros seleccionados</p>
+    </div>
+  </div>
+
+  <!-- Calculadora -->
+  <div class="calculadora-section" *ngIf="combinadaSeleccionada">
+    <!-- Puntuación total -->
+    <div class="total-card">
+      <div class="total-label">Puntuación Total</div>
+      <div class="total-puntos" [class.has-points]="puntuacionTotal > 0">
+        {{ puntuacionTotal | number }}
+      </div>
+      <button class="btn-limpiar" (click)="limpiarTodo()" *ngIf="puntuacionTotal > 0">
+        <i class="fas fa-eraser"></i> Limpiar todo
+      </button>
+    </div>
+
+    <!-- Lista de pruebas -->
+    <div class="pruebas-list">
+      <div class="prueba-item" *ngFor="let prueba of combinadaSeleccionada.pruebas; let i = index">
+        <div class="prueba-header">
+          <div class="prueba-numero">{{ i + 1 }}</div>
+          <div class="prueba-info">
+            <span class="prueba-icon">
+              <i class="fas" [ngClass]="getTipoPruebaIcon(prueba.tipoPrueba)"></i>
+            </span>
+            <span class="prueba-nombre">{{ prueba.nombreDisplay }}</span>
+          </div>
+        </div>
+        
+        <div class="prueba-input-group">
+          <div class="input-wrapper">
+            <label class="input-label">{{ getInputLabel(prueba.tipoPrueba) }}</label>
+            <input type="text" 
+                   class="form-control marca-input"
+                   [(ngModel)]="marcas[i].valor"
+                   (input)="calcularPuntos(i)"
+                   (blur)="calcularPuntos(i)"
+                   [placeholder]="prueba.placeholder"
+                   autocomplete="off">
+          </div>
+          
+          <div class="puntos-display" [class.has-points]="marcas[i].puntos > 0">
+            <span class="puntos-value">{{ marcas[i].puntos }}</span>
+            <span class="puntos-label">pts</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Resumen final -->
+    <div class="resumen-card" *ngIf="puntuacionTotal > 0">
+      <h3><i class="fas fa-chart-bar"></i> Resumen</h3>
+      <div class="resumen-grid">
+        <div class="resumen-item" *ngFor="let prueba of combinadaSeleccionada.pruebas; let i = index">
+          <span class="resumen-prueba">{{ prueba.nombreDisplay }}</span>
+          <span class="resumen-marca">{{ marcas[i].valor || '-' }}</span>
+          <span class="resumen-puntos">{{ marcas[i].puntos }} pts</span>
+        </div>
+      </div>
+      <div class="resumen-total">
+        <span>TOTAL</span>
+        <span class="resumen-total-puntos">{{ puntuacionTotal | number }} puntos</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Info footer -->
+  <div class="info-footer">
+    <p>
+      <i class="fas fa-info-circle"></i>
+      Los puntos se calculan utilizando las tablas de puntuación IAAF oficiales para pruebas combinadas.
+    </p>
+  </div>
+</div>

@@ -161,7 +161,7 @@ export class CalendarioLateralComponent implements OnInit {
       this.hoveredDate = null;
       return;
     }
-    this.hoveredDate = new Date(this.currentYear, this.currentMonth, day);
+    this.hoveredDate = new Date(this.currentDate.getFullYear(), this.currentDate.getMonth(), day);
   }
 
   clearHoveredDate(): void {

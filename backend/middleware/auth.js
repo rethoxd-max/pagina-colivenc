@@ -32,7 +32,7 @@ const auth = async (req, res, next) => {
         console.log('Usuario añadido a la request:', {
             id: user._id,
             email: user.email,
-            rol: user.rol
+            userTypes: user.userTypes
         });
 
         next();

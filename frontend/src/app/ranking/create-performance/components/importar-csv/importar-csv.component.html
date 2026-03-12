@@ -1,0 +1,300 @@
+<div class="importar-csv-container">
+    <mat-card>
+        <mat-card-header>
+            <mat-card-title>Importar Marcas desde CSV</mat-card-title>
+        </mat-card-header>
+
+        <mat-card-content>
+            <!-- Instrucciones -->
+            <div class="instrucciones">
+                <h4>Formato del CSV:</h4>
+                <ul>
+                    <li><strong>Línea 1:</strong> Lugar, Fecha (DD/MM/YYYY), PC o AL</li>
+                    <li><strong>Línea 2:</strong> Sector, Prueba <em>(ej: Saltos,Longitud)</em></li>
+                    <li><strong>Líneas siguientes:</strong> Nombre, Fecha Nac (DD/MM/YYYY), Género (M/F), Marca[, Comentario]</li>
+                    <li><strong>Nueva prueba:</strong> 1 línea vacía = otra prueba de la misma competición</li>
+                    <li><strong>Nueva competición:</strong> 2 líneas vacías = nueva competición diferente</li>
+                    <li><strong>Combinadas:</strong> Añade las marcas individuales al final: <code>5000,7.50/6.80/12.50</code></li>
+                    <li><strong>Nuevo sector/prueba:</strong> Si no existe, se creará automáticamente</li>
+                </ul>
+                
+                <div class="ejemplos-btn">
+                    <button mat-stroked-button (click)="cargarEjemplo('saltos')" matTooltip="Saltos/Lanzamientos">
+                        Ejemplo Saltos
+                    </button>
+                    <button mat-stroked-button (click)="cargarEjemplo('carreras')" matTooltip="Carreras con tiempo">
+                        Ejemplo Carreras
+                    </button>
+                    <button mat-stroked-button (click)="cargarEjemplo('combinadas')" matTooltip="Combinadas con puntos y marcas individuales">
+                        Ejemplo Combinadas
+                    </button>
+                    <button mat-stroked-button (click)="cargarEjemplo('multiple')" matTooltip="Múltiples pruebas y competiciones">
+                        Ejemplo Múltiple
+                    </button>
+                </div>
+            </div>
+
+            <!-- Textarea para CSV con autocompletado -->
+            <div class="csv-input">
+                <label for="csvData">Pega aquí los datos CSV:</label>
+                <div class="textarea-container">
+                    <textarea 
+                        #csvTextarea
+                        id="csvData"
+                        [(ngModel)]="csvData" 
+                        (input)="onTextareaInput($event)"
+                        (keydown)="onTextareaKeydown($event)"
+                        (blur)="mostrarSugerencias = false"
+                        rows="10" 
+                        placeholder="Valencia,19/12/2025,PC
+Saltos,Longitud
+Pablo García,05/04/2000,M,6.70
+María López,15/08/2005,F,5.50 +1.2"
+                    ></textarea>
+                    
+                    <!-- Dropdown de sugerencias -->
+                    <div class="sugerencias-atletas" *ngIf="mostrarSugerencias && sugerenciasActuales.length > 0">
+                        <!-- Header según tipo -->
+                        <div class="sugerencia-header" *ngIf="tipoAutocompletado === 'lugar'">
+                            <mat-icon>location_on</mat-icon>
+                            <span>Lugares (↑↓ navegar, Tab/Enter seleccionar)</span>
+                        </div>
+                        <div class="sugerencia-header" *ngIf="tipoAutocompletado === 'prueba' && sugerenciasActuales[0]?.tipo === 'sector'">
+                            <mat-icon>category</mat-icon>
+                            <span>Sectores (↑↓ navegar, Tab/Enter seleccionar)</span>
+                        </div>
+                        <div class="sugerencia-header" *ngIf="tipoAutocompletado === 'prueba' && sugerenciasActuales[0]?.tipo === 'prueba'">
+                            <mat-icon>sports</mat-icon>
+                            <span>Pruebas (↑↓ navegar, Tab/Enter seleccionar)</span>
+                        </div>
+                        <div class="sugerencia-header" *ngIf="tipoAutocompletado === 'atleta'">
+                            <mat-icon>person_search</mat-icon>
+                            <span>Atletas (↑↓ navegar, Tab/Enter seleccionar)</span>
+                        </div>
+                        
+                        <!-- Sugerencias de lugares -->
+                        <ng-container *ngIf="tipoAutocompletado === 'lugar'">
+                            <div 
+                                *ngFor="let lugar of sugerenciasActuales; let i = index"
+                                class="sugerencia-item"
+                                [class.seleccionada]="i === sugerenciaSeleccionada"
+                                (mousedown)="seleccionarLugar(lugar)"
+                                (mouseenter)="sugerenciaSeleccionada = i">
+                                <div class="atleta-info">
+                                    <span class="atleta-nombre">{{ lugar.nombre }}</span>
+                                    <span class="atleta-detalles">{{ lugar.pcAL }} · {{ lugar.totalMarcas }} marcas</span>
+                                </div>
+                            </div>
+                        </ng-container>
+                        
+                        <!-- Sugerencias de sectores o pruebas -->
+                        <ng-container *ngIf="tipoAutocompletado === 'prueba'">
+                            <div 
+                                *ngFor="let item of sugerenciasActuales; let i = index"
+                                class="sugerencia-item"
+                                [class.seleccionada]="i === sugerenciaSeleccionada"
+                                (mousedown)="seleccionarSugerencia(item)"
+                                (mouseenter)="sugerenciaSeleccionada = i">
+                                <div class="atleta-info">
+                                    <span class="atleta-nombre">{{ item.tipo === 'sector' ? item.nombre_sector : item.nombre_prueba }}</span>
+                                    <span class="atleta-detalles">{{ item.tipo === 'sector' ? 'Sector' : item.sector_id?.nombre_sector }}</span>
+                                </div>
+                            </div>
+                        </ng-container>
+                        
+                        <!-- Sugerencias de atletas -->
+                        <ng-container *ngIf="tipoAutocompletado === 'atleta'">
+                            <div 
+                                *ngFor="let atleta of sugerenciasActuales; let i = index"
+                                class="sugerencia-item"
+                                [class.seleccionada]="i === sugerenciaSeleccionada"
+                                (mousedown)="seleccionarAtleta(atleta)"
+                                (mouseenter)="sugerenciaSeleccionada = i">
+                                <div class="atleta-info">
+                                    <span class="atleta-nombre">{{ atleta.nombre }}</span>
+                                    <span class="atleta-detalles">
+                                        {{ atleta.fecha_nacimiento | date:'dd/MM/yyyy' }} · 
+                                        {{ atleta.genero === 'Masculino' ? 'M' : 'F' }}
+                                    </span>
+                                </div>
+                            </div>
+                        </ng-container>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Botones de acción -->
+            <div class="acciones">
+                <button mat-raised-button color="primary" (click)="previsualizar()" [disabled]="cargando || !csvData.trim()">
+                    <mat-icon *ngIf="!cargando">visibility</mat-icon>
+                    <mat-spinner *ngIf="cargando" diameter="20"></mat-spinner>
+                    Previsualizar
+                </button>
+                <button mat-stroked-button (click)="limpiar()" [disabled]="cargando || importando">
+                    <mat-icon>clear</mat-icon>
+                    Limpiar
+                </button>
+            </div>
+
+            <!-- Previsualización -->
+            <div *ngIf="previsualizacion" class="previsualizacion">
+                <h4>Previsualización</h4>
+                
+                <!-- Resumen Global -->
+                <div class="resumen-global">
+                    <span class="total">Competiciones: {{ previsualizacion.totalCompeticiones }}</span>
+                    <span class="total">Pruebas: {{ previsualizacion.totalPruebas }}</span>
+                    <span class="total">Marcas: {{ previsualizacion.resumenGlobal.totalMarcas }}</span>
+                    <span class="validos">✓ Válidas: {{ previsualizacion.resumenGlobal.validos }}</span>
+                    <span class="invalidos" *ngIf="previsualizacion.resumenGlobal.invalidos > 0">
+                        ✗ Errores: {{ previsualizacion.resumenGlobal.invalidos }}
+                    </span>
+                </div>
+
+                <!-- Competiciones -->
+                <mat-accordion multi class="competiciones-accordion">
+                    <mat-expansion-panel *ngFor="let competicion of previsualizacion.competiciones" [expanded]="true" class="competicion-panel">
+                        <mat-expansion-panel-header>
+                            <mat-panel-title>
+                                <mat-icon *ngIf="competicion.valido" color="primary">check_circle</mat-icon>
+                                <mat-icon *ngIf="!competicion.valido" color="warn">error</mat-icon>
+                                {{ competicion.cabecera?.lugar || 'Sin lugar' }} - {{ competicion.cabecera?.fecha || 'Sin fecha' }}
+                            </mat-panel-title>
+                            <mat-panel-description>
+                                {{ competicion.pruebas.length }} prueba(s)
+                            </mat-panel-description>
+                        </mat-expansion-panel-header>
+
+                        <!-- Cabecera de la competición -->
+                        <div class="cabecera-info" *ngIf="competicion.cabecera">
+                            <div class="info-item" [class.error]="!competicion.cabecera.pcALValido">
+                                <strong>Lugar:</strong> {{ competicion.cabecera.lugar }}
+                            </div>
+                            <div class="info-item">
+                                <strong>Fecha:</strong> {{ competicion.cabecera.fecha }}
+                            </div>
+                            <div class="info-item" [class.error]="!competicion.cabecera.pcALValido">
+                                <strong>PC/AL:</strong> {{ competicion.cabecera.pcAL }}
+                                <mat-icon *ngIf="!competicion.cabecera.pcALValido" color="warn">error</mat-icon>
+                            </div>
+                        </div>
+
+                        <!-- Pruebas de esta competición -->
+                        <div *ngFor="let prueba of competicion.pruebas" class="prueba-container">
+                            <div class="prueba-info" [class.error]="!prueba.encontrada && !prueba.seCrearaPrueba">
+                                <strong>{{ prueba.numero }}. {{ prueba.nombre }}</strong>
+                                <span *ngIf="prueba.encontrada" class="sector-badge">({{ prueba.sector }})</span>
+                                <span *ngIf="prueba.seCrearaPrueba" class="nuevo-badge sector-badge">
+                                    NUEVA ({{ prueba.sector }})
+                                </span>
+                                <span *ngIf="prueba.seCrearaSector" class="nuevo-badge">
+                                    + Sector nuevo
+                                </span>
+                                <mat-icon *ngIf="!prueba.encontrada && !prueba.seCrearaPrueba" color="warn">error</mat-icon>
+                                <span *ngIf="!prueba.encontrada && !prueba.seCrearaPrueba" class="error-text">Prueba no encontrada (use formato: Sector,Prueba)</span>
+                                <span class="resumen-prueba">
+                                    {{ prueba.resumen.validos }}/{{ prueba.resumen.totalMarcas }} válidas
+                                </span>
+                            </div>
+
+                            <!-- Tabla de marcas de la prueba -->
+                            <table class="tabla-marcas">
+                                <thead>
+                                    <tr>
+                                        <th>Estado</th>
+                                        <th>Atleta</th>
+                                        <th>Fecha Nac.</th>
+                                        <th>Género</th>
+                                        <th>Categoría</th>
+                                        <th>Marca</th>
+                                        <th>Comentario</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr *ngFor="let marca of prueba.marcas" [class.error-row]="!marca.valido">
+                                        <td>
+                                            <mat-icon *ngIf="marca.valido" color="primary">check_circle</mat-icon>
+                                            <mat-icon *ngIf="!marca.valido" color="warn">error</mat-icon>
+                                        </td>
+                                        <td>
+                                            <span *ngIf="marca.valido">
+                                                {{ marca.atleta }}
+                                                <span *ngIf="!marca.atletaExiste" class="nuevo-badge">NUEVO</span>
+                                            </span>
+                                            <span *ngIf="!marca.valido" class="error-text">{{ marca.error }}</span>
+                                        </td>
+                                        <td>{{ marca.fechaNacimiento || '-' }}</td>
+                                        <td>{{ marca.genero || '-' }}</td>
+                                        <td>{{ marca.categoria || '-' }}</td>
+                                        <td>
+                                            <span *ngIf="marca.marcaParsed">{{ formatearMarca(marca.marcaParsed) }}</span>
+                                            <span *ngIf="!marca.marcaParsed">{{ marca.marca || '-' }}</span>
+                                        </td>
+                                        <td>{{ marca.comentario || '-' }}</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </mat-expansion-panel>
+                </mat-accordion>
+
+                <!-- Botón de importar -->
+                <div class="importar-acciones" *ngIf="previsualizacion.resumenGlobal.validos > 0 && puedeImportar()">
+                    <button mat-raised-button color="accent" (click)="importar()" [disabled]="importando">
+                        <mat-icon *ngIf="!importando">cloud_upload</mat-icon>
+                        <mat-spinner *ngIf="importando" diameter="20"></mat-spinner>
+                        Importar {{ previsualizacion.resumenGlobal.validos }} marcas
+                    </button>
+                </div>
+            </div>
+
+            <!-- Resultado de importación -->
+            <div *ngIf="resultadoImportacion" class="resultado-importacion">
+                <h4>Resultado de la Importación</h4>
+                
+                <!-- Resumen global de importación -->
+                <div class="resultado-resumen-global">
+                    <p class="exito"><strong>Total marcas creadas:</strong> {{ resultadoImportacion.resumen.totalMarcasCreadas }}</p>
+                    <p *ngIf="resultadoImportacion.resumen.totalErrores > 0" class="error-count">
+                        <strong>Total errores:</strong> {{ resultadoImportacion.resumen.totalErrores }}
+                    </p>
+                    <p><strong>Competiciones procesadas:</strong> {{ resultadoImportacion.resumen.bloquesImportados }}</p>
+                </div>
+
+                <!-- Resultados por competición -->
+                <mat-accordion multi>
+                    <mat-expansion-panel *ngFor="let resultado of resultadoImportacion.resultados; let i = index" [expanded]="true">
+                        <mat-expansion-panel-header>
+                            <mat-panel-title>
+                                {{ resultado.lugar }} - {{ resultado.prueba }}
+                            </mat-panel-title>
+                            <mat-panel-description>
+                                {{ resultado.fecha }} | {{ resultado.marcasCreadas?.length || 0 }} marcas
+                            </mat-panel-description>
+                        </mat-expansion-panel-header>
+
+                        <div *ngIf="resultado.marcasCreadas?.length > 0" class="marcas-creadas">
+                            <h5>Marcas importadas:</h5>
+                            <ul>
+                                <li *ngFor="let marca of resultado.marcasCreadas">
+                                    {{ marca.atleta }} - {{ marca.categoria }} - {{ marca.marca }}
+                                    <span *ngIf="marca.comentario"> ({{ marca.comentario }})</span>
+                                    <span *ngIf="marca.atletaCreado" class="nuevo-badge">Atleta creado</span>
+                                </li>
+                            </ul>
+                        </div>
+
+                        <div *ngIf="resultado.errores?.length > 0" class="errores-lista">
+                            <h5>Errores:</h5>
+                            <ul>
+                                <li *ngFor="let error of resultado.errores" class="error-item">
+                                    Línea {{ error.linea }}: {{ error.error }}
+                                </li>
+                            </ul>
+                        </div>
+                    </mat-expansion-panel>
+                </mat-accordion>
+            </div>
+        </mat-card-content>
+    </mat-card>
+</div>
