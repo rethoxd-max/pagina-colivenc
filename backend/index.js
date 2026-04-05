@@ -91,13 +91,19 @@ if (!isProduction) {
 }
 
 // Configuración de archivos estáticos
+// no-cache + ETag: el navegador siempre pregunta al servidor si el archivo cambió.
+// Si no cambió -> 304 Not Modified (rápido, sin descarga). Si cambió -> descarga la nueva versión.
+// Esto garantiza que imágenes actualizadas (posts, productos, competiciones) se muestren
+// siempre al instante sin necesidad de forzar recarga en el navegador.
 const staticOptions = {
+    etag: true,
+    lastModified: true,
     setHeaders: (res, filePath) => {
         res.set('Access-Control-Allow-Origin', '*');
         res.set('Access-Control-Allow-Methods', 'GET, OPTIONS');
         res.set('Access-Control-Allow-Headers', 'Content-Type');
         res.set('Cross-Origin-Resource-Policy', 'cross-origin');
-        res.set('Cache-Control', 'public, max-age=31536000');
+        res.set('Cache-Control', 'no-cache, must-revalidate');
     }
 };
 
