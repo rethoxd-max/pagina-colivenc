@@ -4,6 +4,7 @@ const Entrenamiento = require('../../models/entrenamientos/Entrenamiento');
 const DiaEntrenamiento = require('../../models/entrenamientos/DiaEntrenamiento');
 const Atleta = require('../../models/ranking/Atleta');
 const mongoose = require('mongoose');
+const auth = require('../../middleware/auth');
 
 // Obtener todos los entrenamientos de un día específico
 router.get('/dia/:diaId', async (req, res) => {
@@ -30,7 +31,7 @@ router.get('/:id', async (req, res) => {
 });
 
 // Crear un nuevo entrenamiento
-router.post('/:diaId', async (req, res) => {
+router.post('/:diaId', auth, async (req, res) => {
     try {
         // Verificar que el día existe
         const dia = await DiaEntrenamiento.findById(req.params.diaId);
@@ -58,7 +59,7 @@ router.post('/:diaId', async (req, res) => {
 });
 
 // Actualizar un entrenamiento por ID
-router.put('/:id', async (req, res) => {
+router.put('/:id', auth, async (req, res) => {
     try {
         const entrenamiento = await Entrenamiento.findByIdAndUpdate(
             req.params.id,
@@ -75,7 +76,7 @@ router.put('/:id', async (req, res) => {
 });
 
 // Eliminar un entrenamiento por ID
-router.delete('/:id', async (req, res) => {
+router.delete('/:id', auth, async (req, res) => {
     try {
         const entrenamiento = await Entrenamiento.findById(req.params.id);
         if (!entrenamiento) {
@@ -98,7 +99,7 @@ router.delete('/:id', async (req, res) => {
 });
 
 // Añadir resultado a un entrenamiento
-router.post('/:id/resultados', async (req, res) => {
+router.post('/:id/resultados', auth, async (req, res) => {
     try {
         const { atletaId, resultado } = req.body;
         

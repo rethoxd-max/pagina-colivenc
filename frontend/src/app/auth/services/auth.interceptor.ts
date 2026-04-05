@@ -11,9 +11,12 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
     // Excluir rutas de autenticación de la verificación de token
     const isAuthRoute = req.url.includes('/auth/login') || 
                         req.url.includes('/auth/register');
+    
+    // Excluir rutas de checkout de la tienda (accesibles sin cuenta)
+    const isCheckoutRoute = req.url.includes('/tienda/crear-sesion');
 
-    // Verificar si el token está expirado antes de hacer la petición (excepto rutas de auth)
-    if (!isAuthRoute && authService.getToken() && authService.isTokenExpired()) {
+    // Verificar si el token está expirado antes de hacer la petición (excepto rutas de auth y checkout)
+    if (!isAuthRoute && !isCheckoutRoute && authService.getToken() && authService.isTokenExpired()) {
         console.log('Interceptor - Token expirado localmente, limpiando sesión');
         authService.handleExpiredToken();
         router.navigate(['/login'], { 
@@ -43,6 +46,11 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
             
             if (err.status === 401) {
                 const errorCode = err.error?.code;
+                
+                // No redirigir a login si el error viene de las rutas de checkout
+                if (isCheckoutRoute) {
+                    return throwError(() => err);
+                }
                 
                 if (errorCode === 'TOKEN_EXPIRED') {
                     console.log('Interceptor - Token expirado en servidor');

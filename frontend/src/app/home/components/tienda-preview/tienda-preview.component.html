@@ -1,0 +1,20 @@
+<div class="tienda-preview-wrapper">
+    <div class="productos-grid" *ngIf="productos.length > 0">
+        <a *ngFor="let producto of productos"
+           class="producto-card"
+           [routerLink]="['/tienda']">
+            <div class="producto-imagen">
+                <img [src]="getImagenUrl(producto.imagen)" [alt]="producto.nombre">
+            </div>
+            <div class="producto-info">
+                <h4>{{ producto.nombre }}</h4>
+                <span class="producto-precio">{{ producto.precio | number:'1.2-2' }} €</span>
+            </div>
+        </a>
+    </div>
+
+    <div class="empty-state" *ngIf="productos.length === 0">
+        <i class="fas fa-store"></i>
+        <p>Próximamente productos disponibles</p>
+    </div>
+</div>

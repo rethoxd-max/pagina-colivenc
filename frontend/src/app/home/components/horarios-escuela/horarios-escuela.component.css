@@ -9,10 +9,10 @@
     text-align: center;
     font-size: 1.1rem;
     font-weight: 600;
-    color: #2563eb;
+    color: #92400e;
     margin: 0 0 1.5rem;
     padding: 0.5rem 1.5rem;
-    background: linear-gradient(135deg, #eff6ff, #dbeafe);
+    background: linear-gradient(135deg, #fef3c7, #fde68a);
     border-radius: 25px;
     display: inline-block;
     width: 100%;
@@ -22,7 +22,7 @@
 .horarios-grid {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
-    gap: 1.5rem;
+    gap: 1rem;
 }
 
 .horario-card {
@@ -48,13 +48,13 @@
 
 .horario-card:hover {
     transform: translateY(-8px);
-    box-shadow: 0 20px 40px rgba(37, 99, 235, 0.15);
-    border-color: rgba(37, 99, 235, 0.2);
+    box-shadow: 0 20px 40px rgba(245, 158, 11, 0.15);
+    border-color: rgba(245, 158, 11, 0.2);
 }
 
 .card-accent {
     height: 4px;
-    background: linear-gradient(90deg, #2563eb, #10b981);
+    background: linear-gradient(90deg, #f59e0b, #fbbf24);
     transition: height 0.3s ease;
 }
 
@@ -112,12 +112,12 @@
 }
 
 .horario-card:hover .info-item {
-    background: linear-gradient(135deg, #eff6ff, #dbeafe);
+    background: linear-gradient(135deg, #fef3c7, #fde68a);
 }
 
 .info-item i {
     font-size: 1.1rem;
-    color: #2563eb;
+    color: #d97706;
 }
 
 .info-item span {
@@ -158,10 +158,10 @@
 }
 
 .dia-chip:hover {
-    background: linear-gradient(135deg, #2563eb, #1d4ed8);
+    background: linear-gradient(135deg, #f59e0b, #d97706);
     color: white;
     transform: translateY(-2px) scale(1.05);
-    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+    box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
 }
 
 /* Responsive */

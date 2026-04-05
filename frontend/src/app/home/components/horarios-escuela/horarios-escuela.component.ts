@@ -46,10 +46,7 @@ export class HorariosEscuelaComponent implements OnInit {
       añoTemporada = año + 1;
     }
     
-    // Formato: "Temporada 2025-26"
-    const añoInicio = añoTemporada - 1;
-    const añoFinCorto = añoTemporada.toString().slice(-2);
-    this.temporadaActual = `Temporada ${añoInicio}-${añoFinCorto}`;
+    
   }
 
   private getAñoNacimientoCategoria(edadMinima: number, edadMaxima: number): string {

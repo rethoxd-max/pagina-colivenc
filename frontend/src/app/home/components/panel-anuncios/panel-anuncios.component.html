@@ -1,0 +1,26 @@
+<div class="panel-anuncios" *ngIf="visible && anuncios.length > 0">
+    <button *ngIf="anuncios.length > 1" class="panel-nav panel-nav-prev" (click)="prev()">
+        <i class="fas fa-chevron-left"></i>
+    </button>
+
+    <div class="panel-contenido">
+        <span class="panel-badge">
+            <i class="fas fa-bullhorn"></i>
+        </span>
+        <span class="panel-texto">{{ anuncioActual?.texto }}</span>
+        <a *ngIf="anuncioActual?.enlace"
+           [routerLink]="anuncioActual!.enlace"
+           class="panel-link">
+            {{ anuncioActual?.enlaceTexto || 'Ver más' }}
+            <i class="fas fa-arrow-right"></i>
+        </a>
+    </div>
+
+    <button *ngIf="anuncios.length > 1" class="panel-nav panel-nav-next" (click)="next()">
+        <i class="fas fa-chevron-right"></i>
+    </button>
+
+    <button class="panel-cerrar" (click)="cerrar()">
+        <i class="fas fa-times"></i>
+    </button>
+</div>

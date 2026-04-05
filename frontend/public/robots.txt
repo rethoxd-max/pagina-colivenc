@@ -1,0 +1,39 @@
+User-agent: *
+
+# Zonas públicas — indexar
+Allow: /home
+Allow: /noticias
+Allow: /noticia/
+Allow: /competiciones
+Allow: /ranking
+Allow: /buscador-atletas
+Allow: /atletas/
+Allow: /tienda
+Allow: /calculadora-combinadas
+Allow: /inscripcion-publica/
+
+# Panel de administración y áreas privadas — no indexar
+Disallow: /login
+Disallow: /register
+Disallow: /create
+Disallow: /edit/
+Disallow: /create-competicion
+Disallow: /edit-competicion/
+Disallow: /datos-competiciones
+Disallow: /procesar-resultados
+Disallow: /ranking/create-performance
+Disallow: /edit-marca/
+Disallow: /inscripcion/
+Disallow: /mis-inscripciones/
+Disallow: /inscripciones/
+Disallow: /entrenamientos
+Disallow: /calendario/
+Disallow: /crear-grupo
+Disallow: /editar-grupo/
+Disallow: /crear-entrenamiento/
+Disallow: /tienda/crear-producto
+Disallow: /tienda/editar-producto/
+Disallow: /cambiar-password
+Disallow: /perfil-atleta/
+
+Sitemap: https://cecolivenc.es/sitemap.xml

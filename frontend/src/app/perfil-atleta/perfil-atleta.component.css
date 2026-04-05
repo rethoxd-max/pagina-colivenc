@@ -896,3 +896,338 @@
         padding: 0.4rem 0.75rem;
     }
 }
+
+/* ========================================
+   TABLA DE MARCAS — Opción A
+======================================== */
+.marks-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9rem;
+}
+
+.marks-table thead tr {
+    background: linear-gradient(135deg, var(--accent-color), var(--accent-light));
+}
+
+.marks-table thead th {
+    padding: 0.875rem 1rem;
+    text-align: left;
+    font-size: 0.78rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: rgba(255,255,255,0.85);
+    white-space: nowrap;
+}
+
+.marks-table thead th.col-marca {
+    text-align: right;
+}
+
+.marks-table tbody tr {
+    border-bottom: 1px solid #f1f5f9;
+    transition: background 0.15s;
+}
+
+.marks-table tbody tr:hover {
+    background: #f8fafc;
+}
+
+.sector-header-row td {
+    background: #f1f5f9;
+    color: #1e3c72;
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    padding: 0.5rem 1rem;
+    border-top: 2px solid #e2e8f0;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.marks-table tbody td {
+    padding: 0.75rem 1rem;
+    color: var(--text-color);
+    vertical-align: middle;
+}
+
+.prueba-cell {
+    font-weight: 600;
+    color: var(--accent-color) !important;
+    white-space: nowrap;
+}
+
+.marca-highlight {
+    font-size: 1.15rem;
+    font-weight: 800;
+    color: var(--primary-color) !important;
+    text-align: right;
+    white-space: nowrap;
+    letter-spacing: -0.02em;
+}
+
+.btn-detail {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.3rem 0.6rem;
+    background: #eff6ff;
+    color: var(--primary-color);
+    border: none;
+    border-radius: 6px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    margin-left: 0.4rem;
+    vertical-align: middle;
+}
+
+.btn-detail:hover {
+    background: var(--primary-color);
+    color: white;
+}
+
+/* Fila de marca ilegal */
+.table-illegal-row {
+    background: #fefce8 !important;
+}
+
+.table-illegal-row:hover {
+    background: #fef9c3 !important;
+}
+
+.table-illegal-row td {
+    padding-top: 0.5rem !important;
+    padding-bottom: 0.5rem !important;
+}
+
+.prueba-cell-illegal {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #b45309 !important;
+    padding-left: 2rem !important;
+    white-space: nowrap;
+}
+
+.prueba-cell-illegal i {
+    margin-right: 0.35rem;
+}
+
+.marca-highlight-illegal {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: #d97706 !important;
+    text-align: right;
+}
+
+.viento-legal {
+    color: #0ea5e9 !important;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.viento-ilegal {
+    color: #dc2626 !important;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.sin-viento {
+    color: #cbd5e1;
+    font-size: 0.9rem;
+}
+
+.prueba-sub-header-row td {
+    background: #f8fafc;
+    color: var(--accent-color);
+    font-size: 0.85rem;
+    font-weight: 600;
+    padding: 0.4rem 1rem 0.4rem 2rem;
+    border-bottom: 1px solid #e2e8f0;
+    font-style: italic;
+}
+
+/* ========================================
+   Tabla Pivot de Progresión
+======================================== */
+.pivot-container {
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid #e2e8f0;
+    box-shadow: var(--shadow-sm);
+}
+
+.pivot-nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.875rem 1.25rem;
+    background: white;
+    border-bottom: 1px solid #e2e8f0;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.pivot-nav-info {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.pivot-range-label {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text-light);
+}
+
+.pivot-dots {
+    display: flex;
+    gap: 0.4rem;
+    align-items: center;
+}
+
+.pivot-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #cbd5e1;
+    transition: background 0.2s;
+}
+
+.pivot-dot.active {
+    background: var(--primary-color);
+}
+
+.pivot-nav-btns {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.pivot-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.5rem 0.875rem;
+    background: white;
+    color: var(--primary-color);
+    border: 1px solid var(--primary-color);
+    border-radius: 8px;
+    font-size: 0.82rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.pivot-btn:hover:not(:disabled) {
+    background: var(--primary-color);
+    color: white;
+}
+
+.pivot-btn:disabled {
+    opacity: 0.35;
+    cursor: not-allowed;
+}
+
+.pivot-wrapper {
+    overflow-x: auto;
+    background: white;
+}
+
+.pivot-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.88rem;
+}
+
+.pivot-table thead tr {
+    background: linear-gradient(135deg, var(--accent-color), var(--accent-light));
+}
+
+.pivot-table thead th {
+    padding: 0.875rem 1rem;
+    text-align: center;
+    font-size: 0.8rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: rgba(255,255,255,0.9);
+    white-space: nowrap;
+}
+
+.pivot-col-prueba {
+    text-align: left !important;
+    min-width: 160px;
+}
+
+.pivot-col-year {
+    min-width: 90px;
+}
+
+.pivot-table tbody tr {
+    border-bottom: 1px solid #f1f5f9;
+    transition: background 0.15s;
+}
+
+.pivot-table tbody tr:hover {
+    background: #f8fafc;
+}
+
+.pivot-prueba-cell {
+    font-weight: 600;
+    color: var(--accent-color);
+    padding: 0.75rem 1rem;
+    white-space: nowrap;
+}
+
+.pivot-mark-cell {
+    text-align: center;
+    padding: 0.6rem 0.75rem;
+    vertical-align: middle;
+}
+
+.pivot-mark-value {
+    font-weight: 800;
+    font-size: 1rem;
+    color: var(--primary-color);
+    line-height: 1.3;
+}
+
+.pivot-mark-illegal {
+    font-weight: 600;
+    font-size: 0.75rem;
+    color: #d97706;
+    margin-left: 0.35rem;
+}
+
+.pivot-viento {
+    font-size: 0.7rem;
+    color: #0ea5e9;
+    margin-left: 0.3rem;
+    white-space: nowrap;
+}
+
+.pivot-viento-ilegal {
+    color: #dc2626;
+}
+
+.pivot-empty {
+    color: #cbd5e1;
+    font-size: 1rem;
+}
+
+.pivot-mark-best {
+    background: #f0f5ff;
+}
+
+@media (max-width: 768px) {
+    .pivot-nav {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .pivot-col-prueba {
+        min-width: 120px;
+    }
+}

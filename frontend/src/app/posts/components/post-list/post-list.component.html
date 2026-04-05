@@ -1,90 +1,162 @@
 <div class="posts-page">
     <!-- Header de la página -->
     <div class="page-header">
-        <div class="header-content">
-            <span class="header-badge">
-                <i class="fas fa-newspaper"></i>
-                Actualidad
-            </span>
-            <h1 class="page-title">Boletín Semanal</h1>
-            <p class="page-subtitle">Las últimas noticias y eventos de nuestro club</p>
-        </div>
+        <h1 class="page-title">Últimas Noticias</h1>
+        <p class="page-subtitle">Mantente informado sobre todas las novedades deportivas del municipio de Arona.</p>
     </div>
 
     <!-- Contenido principal -->
     <div class="posts-container">
-        <!-- Botón crear noticia -->
-        <div *ngIf="(isAdmin() || isEditor())" class="action-bar">
-            <button class="btn-create" [routerLink]="['/create']">
+
+        <!-- Barra de búsqueda + fechas + acciones -->
+        <div class="controls-bar">
+            <div class="search-box">
+                <i class="fas fa-search"></i>
+                <input type="text"
+                       class="search-input"
+                       placeholder="Buscar noticia..."
+                       [(ngModel)]="searchTerm"
+                       (ngModelChange)="filterPosts()">
+                <button *ngIf="searchTerm" class="search-clear" (click)="searchTerm = ''; filterPosts()" title="Limpiar">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+
+            <div class="fecha-filter">
+                <div class="fecha-input-wrap">
+                    <label><i class="far fa-calendar-alt"></i> Desde</label>
+                    <input type="date" [(ngModel)]="fechaDesde" (ngModelChange)="applyFilters()" [max]="fechaHasta || ''">
+                </div>
+                <div class="fecha-input-wrap">
+                    <label><i class="far fa-calendar-alt"></i> Hasta</label>
+                    <input type="date" [(ngModel)]="fechaHasta" (ngModelChange)="applyFilters()" [min]="fechaDesde || ''">
+                </div>
+                <button *ngIf="fechaDesde || fechaHasta" class="btn-limpiar-fecha" (click)="limpiarFechas()" title="Limpiar fechas">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+
+            <button *ngIf="(isAdmin() || isEditor())" class="btn-create" [routerLink]="['/create']">
                 <i class="fas fa-plus"></i>
                 Crear nueva noticia
             </button>
         </div>
 
+        <!-- Resultado de búsqueda/filtro -->
+        <p *ngIf="(searchTerm || fechaDesde || fechaHasta) && filteredPosts.length > 0" class="search-result-info">
+            {{ filteredPosts.length }} resultado{{ filteredPosts.length !== 1 ? 's' : '' }}
+            <ng-container *ngIf="searchTerm"> para <strong>"{{ searchTerm }}"</strong></ng-container>
+            <ng-container *ngIf="(fechaDesde || fechaHasta) && !searchTerm"> en el rango de fechas seleccionado</ng-container>
+        </p>
+
+        <!-- Noticia destacada (pin) -->
+        <ng-container *ngIf="getPinnedPost() as featured">
+            <div class="featured-post" (click)="verNoticia(featured._id)">
+                <div class="featured-image-wrap">
+                    <img *ngIf="featured.imageUrl" [src]="getImageUrl(featured.imageUrl)" [alt]="featured.title" class="featured-image">
+                    <div *ngIf="!featured.imageUrl" class="featured-image-placeholder"><i class="fas fa-newspaper"></i></div>
+                    <span class="featured-badge"><i class="fas fa-thumbtack"></i> Destacada</span>
+                </div>
+                <div class="featured-content">
+                    <span class="featured-date"><i class="far fa-calendar-alt"></i> {{ (featured.createdAt || featured.date) | date:'dd MMM yyyy' }}</span>
+                    <h2 class="featured-title">{{ featured.title }}</h2>
+                    <p class="featured-excerpt">{{ featured.content | slice:0:220 }}...</p>
+                    <div class="featured-footer">
+                        <span class="featured-read-more">Leer más <i class="fas fa-arrow-right"></i></span>
+                        <button *ngIf="isAdmin()" class="btn-unpin" (click)="togglePin($event, featured._id)" title="Quitar destacada">
+                            <i class="fas fa-thumbtack"></i> Quitar destacada
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </ng-container>
+
         <!-- Grid de noticias -->
-        <div *ngIf="posts.length > 0" class="posts-grid">
-            <article *ngFor="let post of posts; let i = index" 
-                     class="post-card" 
+        <div *ngIf="getNonPinnedPagedPosts().length > 0" class="posts-grid">
+            <article *ngFor="let post of getNonPinnedPagedPosts(); let i = index"
+                     class="post-card"
                      [style.--delay]="i * 0.1 + 's'"
                      (click)="verNoticia(post._id)">
-                
+
                 <!-- Imagen de la noticia -->
                 <div class="post-image-wrapper">
-                    <img *ngIf="post.imageUrl" 
-                         [src]="getImageUrl(post.imageUrl)" 
+                    <img *ngIf="post.imageUrl"
+                         [src]="getImageUrl(post.imageUrl)"
                          [alt]="post.title"
                          class="post-image">
                     <div *ngIf="!post.imageUrl" class="post-image-placeholder">
                         <i class="fas fa-image"></i>
                     </div>
                     <div class="post-category">
-                        <i class="fas fa-tag"></i>
-                        Noticia
+                        {{ post.category || 'SIN CATEGORIZAR' }}
                     </div>
                 </div>
 
                 <!-- Contenido de la noticia -->
                 <div class="post-content">
-                    <div class="post-meta">
-                        <span class="post-date">
-                            <i class="far fa-calendar-alt"></i>
-                            {{ post.createdAt | date:'dd MMM yyyy' }}
-                        </span>
-                    </div>
-                    
+                    <span class="post-date">
+                        <i class="far fa-calendar-alt"></i>
+                        {{ (post.createdAt || post.date) | date:'dd MMMM, yyyy' }}
+                    </span>
                     <h3 class="post-title">{{ post.title }}</h3>
                     <p class="post-excerpt">{{ post.content | slice:0:120 }}...</p>
-                    
+
                     <div class="post-footer">
                         <span class="read-more">
-                            Leer más
-                            <i class="fas fa-arrow-right"></i>
+                            LEER MÁS &nbsp;<i class="fas fa-arrow-right"></i>
                         </span>
-                        
-                        <div *ngIf="(isAdmin() || isEditor())" class="post-actions">
-                            <button (click)="editarNoticia($event, post._id)" 
-                                    class="btn-action btn-edit"
-                                    title="Editar">
-                                <i class="fas fa-edit"></i>
+
+                        <div class="post-actions-row">
+                            <!-- Compartir -->
+                            <button class="btn-action btn-share"
+                                    (click)="compartirNoticia($event, post)"
+                                    [class.copied]="copiedPostId === post._id"
+                                    [title]="copiedPostId === post._id ? 'Enlace copiado' : 'Compartir'">
+                                <i class="fas" [class.fa-check]="copiedPostId === post._id" [class.fa-share-alt]="copiedPostId !== post._id"></i>
                             </button>
-                            <button (click)="eliminarNoticia($event, post._id)" 
-                                    class="btn-action btn-delete"
-                                    title="Eliminar">
-                                <i class="fas fa-trash-alt"></i>
+                            <!-- Pin (solo admin) -->
+                            <button *ngIf="isAdmin()" class="btn-action btn-pin"
+                                    (click)="togglePin($event, post._id)"
+                                    [class.active]="pinnedPostId === post._id"
+                                    [title]="pinnedPostId === post._id ? 'Quitar destacada' : 'Destacar noticia'">
+                                <i class="fas fa-thumbtack"></i>
                             </button>
+                            <!-- Admin: editar / borrar -->
+                            <ng-container *ngIf="(isAdmin() || isEditor())">
+                                <button (click)="editarNoticia($event, post._id)"
+                                        class="btn-action btn-edit" title="Editar">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button (click)="eliminarNoticia($event, post._id)"
+                                        class="btn-action btn-delete" title="Eliminar">
+                                    <i class="fas fa-trash-alt"></i>
+                                </button>
+                            </ng-container>
                         </div>
                     </div>
                 </div>
             </article>
         </div>
 
+        <!-- Ver más -->
+        <div *ngIf="hayMas()" class="ver-mas-container">
+            <button class="btn-ver-mas" (click)="verMas()">
+                <i class="fas fa-chevron-down"></i>
+                Ver más noticias
+                <span class="ver-mas-count">({{ filteredPosts.length - pagedPosts.length }} restantes)</span>
+            </button>
+        </div>
+
         <!-- Estado vacío -->
-        <div *ngIf="posts.length === 0" class="empty-state">
+        <div *ngIf="filteredPosts.length === 0" class="empty-state">
             <div class="empty-icon">
-                <i class="fas fa-newspaper"></i>
+                <i class="fas fa-search"></i>
             </div>
-            <h3>No hay noticias disponibles</h3>
-            <p>Vuelve pronto para ver las últimas actualizaciones</p>
+            <h3>{{ searchTerm || fechaDesde || fechaHasta ? 'Sin resultados' : 'No hay noticias disponibles' }}</h3>
+            <p>{{ searchTerm ? 'No se encontraron noticias con "' + searchTerm + '"' : (fechaDesde || fechaHasta) ? 'No hay noticias en el rango de fechas seleccionado' : 'Vuelve pronto para ver las últimas actualizaciones' }}</p>
+            <button *ngIf="searchTerm || fechaDesde || fechaHasta" class="btn-clear-search" (click)="searchTerm = ''; limpiarFechas()">
+                <i class="fas fa-times"></i> Limpiar filtros
+            </button>
         </div>
     </div>
 </div>

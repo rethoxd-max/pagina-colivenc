@@ -1,77 +1,53 @@
 import { Component, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
+import { CommonModule, NgIf } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { PostService } from '../../services/posts.service';
 import { AuthService } from '../../../auth/services/auth.service';
+import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { environment } from '../../../../environments/environment';
-
-interface Post {
-  _id: string;
-  title: string;
-  content: string;
-  imageUrl?: string;
-}
 
 @Component({
   selector: 'app-edit-post',
   standalone: true,
-  imports: [CommonModule, FormsModule],
-  template: `
-    <div class="container mt-5">
-      <div class="row justify-content-center">
-        <div class="col-md-8">
-          <div class="card shadow">
-            <div class="card-body">
-              <h2 class="card-title mb-4">Editar Noticia</h2>
-              <form (ngSubmit)="onSubmit()">
-                <div class="mb-3">
-                  <label for="title" class="form-label">Título</label>
-                  <input type="text" class="form-control" id="title" [(ngModel)]="post.title" name="title" required>
-                </div>
-                <div class="mb-3">
-                  <label for="content" class="form-label">Contenido</label>
-                  <textarea class="form-control" id="content" [(ngModel)]="post.content" name="content" rows="5" required></textarea>
-                </div>
-                <div class="mb-3">
-                  <label for="image" class="form-label">Imagen</label>
-                  <input type="file" class="form-control" id="image" (change)="onFileSelected($event)" name="image">
-                </div>
-                <div class="d-flex justify-content-between">
-                  <button type="button" class="btn btn-outline-secondary" (click)="volver()">Cancelar</button>
-                  <button type="submit" class="btn btn-primary">Guardar Cambios</button>
-                </div>
-              </form>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  `
+  imports: [CommonModule, NgIf, ReactiveFormsModule],
+  templateUrl: './edit-post.component.html',
+  styleUrls: ['./edit-post.component.css']
 })
 export class EditPostComponent implements OnInit {
-  post: Post = {
-    _id: '',
-    title: '',
-    content: '',
-    imageUrl: ''
-  };
+  postForm: FormGroup;
+  postId: string | null = null;
   selectedFile: File | null = null;
+  imageUrl: string | null = null;
+  isEditMode = true;
   baseURL: string = environment.apiUrl;
 
   constructor(
     private route: ActivatedRoute,
     private router: Router,
     private postService: PostService,
-    private authService: AuthService
-  ) { }
+    private authService: AuthService,
+    private fb: FormBuilder
+  ) {
+    this.postForm = this.fb.group({
+      title: ['', Validators.required],
+      content: ['', Validators.required],
+      category: [''],
+    });
+  }
 
   ngOnInit() {
-    const id = this.route.snapshot.paramMap.get('id');
-    if (id) {
-      this.postService.getPost(id).subscribe({
-        next: (data: Post) => {
-          this.post = data;
+    this.postId = this.route.snapshot.paramMap.get('id');
+    if (this.postId) {
+      this.postService.getPost(this.postId).subscribe({
+        next: (post: any) => {
+          this.postForm.patchValue({
+            title: post.title,
+            content: post.content,
+            category: post.category || '',
+          });
+          if (post.imageUrl) {
+            this.imageUrl = post.imageUrl;
+          }
         },
         error: (error: Error) => {
           console.error('Error al cargar la noticia:', error);
@@ -85,18 +61,29 @@ export class EditPostComponent implements OnInit {
     const input = event.target as HTMLInputElement;
     if (input.files && input.files[0]) {
       this.selectedFile = input.files[0];
+      const reader = new FileReader();
+      reader.onload = (e: any) => {
+        this.imageUrl = e.target.result;
+      };
+      reader.readAsDataURL(this.selectedFile);
     }
   }
 
   onSubmit() {
+    if (this.postForm.invalid) {
+      this.postForm.markAllAsTouched();
+      return;
+    }
+
     const formData = new FormData();
-    formData.append('title', this.post.title);
-    formData.append('content', this.post.content);
+    formData.append('title', this.postForm.get('title')?.value);
+    formData.append('content', this.postForm.get('content')?.value);
+    formData.append('category', this.postForm.get('category')?.value || '');
     if (this.selectedFile) {
       formData.append('image', this.selectedFile);
     }
 
-    this.postService.updatePost(this.post._id, formData).subscribe({
+    this.postService.updatePost(this.postId!, formData).subscribe({
       next: () => {
         this.router.navigate(['/noticias']);
       },
@@ -110,3 +97,4 @@ export class EditPostComponent implements OnInit {
     this.router.navigate(['/noticias']);
   }
 }
+

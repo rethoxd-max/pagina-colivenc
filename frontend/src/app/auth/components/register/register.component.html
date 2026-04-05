@@ -42,6 +42,26 @@
                                 </div>
                             </div>
 
+                            <!-- Fecha de nacimiento -->
+                            <div class="mb-3">
+                                <label class="form-label">Fecha de nacimiento</label>
+                                <input [(ngModel)]="user.fechaNacimiento" type="date" class="form-control"
+                                    name="fechaNacimiento" />
+                            </div>
+
+                            <!-- Número de licencia -->
+                            <div class="mb-3">
+                                <input [(ngModel)]="user.numeroLicencia" type="text" class="form-control"
+                                    placeholder="Nº de licencia (opcional)" name="numeroLicencia" />
+                            </div>
+
+                            <!-- Activo -->
+                            <div class="mb-3 form-check">
+                                <input [(ngModel)]="user.activo" type="checkbox" class="form-check-input"
+                                    id="activoCheck" name="activo" />
+                                <label class="form-check-label" for="activoCheck">Usuario activo</label>
+                            </div>
+
                             <button type="submit" class="btn btn-primary w-100"
                                 [disabled]="registerForm.invalid">Registrarse</button>
 

@@ -6,10 +6,16 @@ export const atletaGuard: CanActivateFn = (route, state) => {
   const authService = inject(AuthService);
   const router = inject(Router);
 
+  if (authService.isTokenExpired()) {
+    authService.handleExpiredToken();
+    router.navigate(['/login']);
+    return false;
+  }
+
   if (authService.isAtleta()) {
-    return true; // El usuario es admin, permite el acceso
+    return true;
   } else {
-    router.navigate(['/home']); // Redirige al login si no es admin
-    return false; // Bloquea el acceso
+    router.navigate(['/home']);
+    return false;
   }
 };

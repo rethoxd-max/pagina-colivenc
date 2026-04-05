@@ -1,15 +1,37 @@
+-- SEGURIDAD / DESPLIEGUE
+
+[PENDIENTE] RESTRINGIR LA API KEY DE GOOGLE MAPS A LOS DOMINIOS cecolivenc.es Y www.cecolivenc.es
+  - Ir a: console.cloud.google.com/apis/credentials
+  - Seleccionar la clave AIzaSyCVxRugq5VZW-mHOQpR1u3C1NkqEWvE4iY
+  - "Restricciones de aplicaciones" → "Sitios web HTTP referentes"
+  - Añadir: https://cecolivenc.es/* y https://www.cecolivenc.es/*
+
+[PENDIENTE] Confirmar la URL de la API en producción en frontend/src/environments/environment.ts
+  - Actualmente configurada como: https://api.cecolivenc.es
+  - Cambiar si el backend estará en otra URL (ej: https://cecolivenc.es/api)
+
+[PENDIENTE] Configurar el archivo .env en el servidor de producción
+  - Crear el fichero .env en el servidor con NODE_ENV=production
+  - Incluir todas las credenciales ya rotadas (MongoDB URI, JWT_SECRET, Stripe keys, etc.)
+  - NUNCA subir el .env al repositorio (ya protegido en .gitignore)
+
+[PENDIENTE / OPCIONAL] Ejecutar npm audit fix en el backend
+  - Se detectaron 15 vulnerabilidades en dependencias: 3 bajas, 3 moderadas, 8 altas, 1 crítica
+  - Ejecutar: cd backend && npm audit fix
+  - Si hay breaking changes: npm audit fix --force (revisar antes)
+
+
+-- CALCULADORA DE combinadas
+
+AÑADIR GRÁFICOS Y ARREGLAR PUNTOS DE CATEGORIAS MENORES
+
 -- ENTRENAMIENTOS
 
 OCULTAR SEMANAS A CIERTOS ATLETAS
 
 -- INSCRIPCIONES
 
-EXPORTAR A EXCEL
-
-MAXIMO 3 PRUEBAS POR ATLETA EN CADA COMPETICION
-
 MIRAR A VER COMO FUNCIONA LA PÁGINA DE INSCRIPCIONES RFEA PARA INTENTAR AUTOMATIZAR O EXPORTAR UN CÓDIGO INSERTABLE EN LA PÁGINA A PARTIR DE LAS INSCRIPCIONES
-
 
 -- USUARIOS 
 

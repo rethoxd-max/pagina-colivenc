@@ -16,9 +16,29 @@ const UserSchema = new Schema({
     required: true
   },
   userTypes: {
-    type: [String], // Array de strings para los tipos de usuario
-    enum: ['Admin', 'Entrenador', 'Atleta', 'Viewer', 'Editor'], // Opciones válidas para los tipos de usuario
-    default: ['Viewer'] // Valor por defecto
+    type: [String],
+    enum: ['Admin', 'Entrenador', 'Atleta', 'Viewer', 'Editor'],
+    default: ['Viewer']
+  },
+  telefono: {
+    type: String,
+    default: ''
+  },
+  fechaNacimiento: {
+    type: Date,
+    default: null
+  },
+  numeroLicencia: {
+    type: String,
+    default: ''
+  },
+  activo: {
+    type: Boolean,
+    default: true
+  },
+  stripeCustomerId: {
+    type: String,
+    default: ''
   }
 });
 

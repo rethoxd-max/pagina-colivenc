@@ -9,7 +9,10 @@ export interface Usuario {
   name: string;
   email: string;
   password: string;
-  userTypes: string[]; // Definir userTypes como arreglo de strings
+  userTypes: string[];
+  fechaNacimiento?: string;
+  numeroLicencia?: string;
+  activo?: boolean;
 }
 
 @Injectable({

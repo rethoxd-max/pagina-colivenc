@@ -1,6 +1,7 @@
-const express = require('express');
+﻿const express = require('express');
 const router = express.Router();
 const Marca = require('../models/ranking/Marca');
+const Categoria = require('../models/ranking/Categoria');
 const mongoose = require('mongoose');
 
 // Obtener pruebas en las que un atleta tenga al menos una marca
@@ -150,7 +151,12 @@ router.get('/mejores-marcas/atleta/:atletaId', async (req, res) => {
         // Obtener todas las marcas del atleta en una sola consulta
         const todasLasMarcas = await Marca.find({
             nombre_atleta: new mongoose.Types.ObjectId(atletaId)
-        }).populate('nombre_atleta nombre_prueba PcAL categoria').lean();
+        }).populate([
+            { path: 'nombre_atleta' },
+            { path: 'nombre_prueba', populate: { path: 'sector_id' } },
+            { path: 'PcAL' },
+            { path: 'categoria' }
+        ]).lean();
 
         if (!todasLasMarcas || todasLasMarcas.length === 0) {
             return res.status(404).json({ message: 'No se encontraron marcas para este atleta.' });
@@ -214,7 +220,12 @@ router.get('/mejores-marcas/atleta/:atletaId/anyo/:anyo', async (req, res) => {
         const todasLasMarcas = await Marca.find({
             nombre_atleta: new mongoose.Types.ObjectId(atletaId),
             anyo: parseInt(anyo)
-        }).populate('nombre_atleta nombre_prueba PcAL categoria').lean();
+        }).populate([
+            { path: 'nombre_atleta' },
+            { path: 'nombre_prueba', populate: { path: 'sector_id' } },
+            { path: 'PcAL' },
+            { path: 'categoria' }
+        ]).lean();
 
         if (!todasLasMarcas || todasLasMarcas.length === 0) {
             return res.status(404).json({ message: 'No se encontraron marcas para este atleta en este año.' });
@@ -278,7 +289,12 @@ router.get('/todas-marcas/atleta/:atletaId/anyo/:anyo', async (req, res) => {
         const todasLasMarcas = await Marca.find({
             nombre_atleta: new mongoose.Types.ObjectId(atletaId),
             anyo: parseInt(anyo)
-        }).populate('nombre_atleta nombre_prueba PcAL categoria').lean();
+        }).populate([
+    { path: 'nombre_atleta' },
+    { path: 'nombre_prueba', populate: { path: 'sector_id' } },
+    { path: 'PcAL' },
+    { path: 'categoria' }
+]).lean();
 
         if (!todasLasMarcas || todasLasMarcas.length === 0) {
             return res.status(404).json({ message: 'No se encontraron marcas para este atleta en este año.' });
@@ -322,7 +338,12 @@ router.get('/progresion/atleta/:atletaId', async (req, res) => {
         // Obtener TODAS las marcas del atleta
         const todasLasMarcas = await Marca.find({
             nombre_atleta: new mongoose.Types.ObjectId(atletaId)
-        }).populate('nombre_atleta nombre_prueba PcAL categoria').lean();
+        }).populate([
+    { path: 'nombre_atleta' },
+    { path: 'nombre_prueba', populate: { path: 'sector_id' } },
+    { path: 'PcAL' },
+    { path: 'categoria' }
+]).lean();
 
         if (!todasLasMarcas || todasLasMarcas.length === 0) {
             return res.status(404).json({ message: 'No se encontraron marcas para este atleta.' });
@@ -399,7 +420,12 @@ router.get('/marcas/atleta/:atletaId', async (req, res) => {
 
         // Obtener las marcas sin filtrar por año
         const marcas = await Marca.find(query)
-            .populate('nombre_atleta nombre_prueba categoria PcAL')
+            .populate([
+                { path: 'nombre_atleta' },
+                { path: 'nombre_prueba', populate: { path: 'sector_id' } },
+                { path: 'PcAL' },
+                { path: 'categoria' }
+            ])
             .lean();
 
         if (!marcas || marcas.length === 0) {
@@ -429,7 +455,12 @@ router.get('/mejor-marca/prueba/:pruebaId/atleta/:atletaId', async (req, res) =>
         const marcas = await Marca.find({
             nombre_prueba: pruebaId,
             nombre_atleta: atletaId
-        }).populate('nombre_atleta nombre_prueba PcAL').lean();
+        }).populate([
+    { path: 'nombre_atleta' },
+    { path: 'nombre_prueba', populate: { path: 'sector_id' } },
+    { path: 'PcAL' },
+    { path: 'categoria' }
+]).lean();
 
         if (!marcas || marcas.length === 0) {
             return res.status(404).json({ message: 'No se encontraron marcas para el atleta en esta prueba.' });
@@ -457,7 +488,12 @@ router.get('/mejor-marca/prueba/:pruebaId/categoria/:categoriaId/atleta/:atletaI
             nombre_prueba: pruebaId,
             categoria: categoriaId,
             nombre_atleta: atletaId
-        }).populate('nombre_atleta nombre_prueba categoria').lean();
+        }).populate([
+    { path: 'nombre_atleta' },
+    { path: 'nombre_prueba', populate: { path: 'sector_id' } },
+    { path: 'PcAL' },
+    { path: 'categoria' }
+]).lean();
 
         if (!marcas || marcas.length === 0) {
             return res.status(404).json({ message: 'No se encontraron marcas para el atleta en esta prueba y categoría.' });
@@ -486,7 +522,12 @@ router.get('/mejor-marca/prueba/:pruebaId/PcAL/:PcALId/atleta/:atletaId', async 
             nombre_prueba: pruebaId,
             PcAL: PcALId,
             nombre_atleta: atletaId
-        }).populate('nombre_atleta nombre_prueba PcAL').lean();
+        }).populate([
+    { path: 'nombre_atleta' },
+    { path: 'nombre_prueba', populate: { path: 'sector_id' } },
+    { path: 'PcAL' },
+    { path: 'categoria' }
+]).lean();
 
         if (!marcas || marcas.length === 0) {
             return res.status(404).json({ message: 'No se encontraron marcas para el atleta en esta prueba y categoría.' });
@@ -515,7 +556,12 @@ router.get('/mejor-marca/prueba/:pruebaId/categoria/:categoriaId/PcAL/:PcALId/at
             categoria: categoriaId,
             PcAL: PcALId,
             nombre_atleta: atletaId
-        }).populate('nombre_atleta nombre_prueba categoria PcAL').lean();
+        }).populate([
+    { path: 'nombre_atleta' },
+    { path: 'nombre_prueba', populate: { path: 'sector_id' } },
+    { path: 'PcAL' },
+    { path: 'categoria' }
+]).lean();
 
         if (!marcas || marcas.length === 0) {
             return res.status(404).json({ message: 'No se encontraron marcas para el atleta en esta prueba, categoría y PcAL.' });
@@ -543,7 +589,12 @@ router.get('/mejor-marca/prueba/:pruebaId/anyo/:anyo/atleta/:atletaId', async (r
             nombre_prueba: pruebaId,
             anyo: anyo,
             nombre_atleta: atletaId
-        }).populate('nombre_atleta nombre_prueba PcAL').lean();
+        }).populate([
+    { path: 'nombre_atleta' },
+    { path: 'nombre_prueba', populate: { path: 'sector_id' } },
+    { path: 'PcAL' },
+    { path: 'categoria' }
+]).lean();
 
         if (!marcas || marcas.length === 0) {
             return res.status(404).json({ message: 'No se encontraron marcas para el atleta en esta prueba y año.' });
@@ -572,7 +623,12 @@ router.get('/mejor-marca/prueba/:pruebaId/categoria/:categoriaId/anyo/:anyo/atle
             categoria: categoriaId,
             anyo: anyo,
             nombre_atleta: atletaId
-        }).populate('nombre_atleta nombre_prueba categoria').lean();
+        }).populate([
+    { path: 'nombre_atleta' },
+    { path: 'nombre_prueba', populate: { path: 'sector_id' } },
+    { path: 'PcAL' },
+    { path: 'categoria' }
+]).lean();
 
         if (!marcas || marcas.length === 0) {
             return res.status(404).json({ message: 'No se encontraron marcas para el atleta en esta prueba, categoría y año.' });
@@ -607,7 +663,12 @@ router.get('/mejor-marca/prueba/:pruebaId/PcAL/:PcALId/anyo/:anyo/atleta/:atleta
             PcAL: PcALId,  // PcAL es ahora un ObjectId que hace referencia al documento de PcAL
             anyo: anyo,
             nombre_atleta: atletaId
-        }).populate('nombre_atleta nombre_prueba PcAL').lean();  // Populamos PcAL, nombre_atleta y nombre_prueba
+        }).populate([
+    { path: 'nombre_atleta' },
+    { path: 'nombre_prueba', populate: { path: 'sector_id' } },
+    { path: 'PcAL' },
+    { path: 'categoria' }
+]).lean();
 
         if (!marcas || marcas.length === 0) {
             return res.status(404).json({ message: 'No se encontraron marcas para el atleta en esta prueba, PcAL y año.' });
@@ -638,7 +699,12 @@ router.get('/mejor-marca/prueba/:pruebaId/categoria/:categoriaId/PcAL/:PcALId/an
             PcAL: PcALId,
             anyo: anyo,
             nombre_atleta: atletaId
-        }).populate('nombre_atleta nombre_prueba categoria PcAL').lean();
+        }).populate([
+    { path: 'nombre_atleta' },
+    { path: 'nombre_prueba', populate: { path: 'sector_id' } },
+    { path: 'PcAL' },
+    { path: 'categoria' }
+]).lean();
 
         if (!marcas || marcas.length === 0) {
             return res.status(404).json({ message: 'No se encontraron marcas para el atleta en esta prueba, categoría, PcAL y año.' });
@@ -672,7 +738,12 @@ router.get('/marcas/prueba/:pruebaId/anyo/:anyo/atleta/:atletaId', async (req, r
             nombre_prueba: pruebaId,
             anyo: anyo,
             nombre_atleta: atletaId
-        }).populate('nombre_atleta nombre_prueba PcAL').lean();
+        }).populate([
+    { path: 'nombre_atleta' },
+    { path: 'nombre_prueba', populate: { path: 'sector_id' } },
+    { path: 'PcAL' },
+    { path: 'categoria' }
+]).lean();
 
         // Si no se encuentran marcas, devolver un mensaje de error
         if (!marcas || marcas.length === 0) {
@@ -739,7 +810,12 @@ router.get('/mejor-marca-legal/prueba/:pruebaId/atleta/:atletaId', async (req, r
             nombre_prueba: pruebaId,
             nombre_atleta: atletaId,
             viento: { $exists: true, $lte: 2.0 } // Viento legal: <= 2.0 m/s (negativo sin límite)
-        }).populate('nombre_atleta nombre_prueba PcAL').lean();
+        }).populate([
+    { path: 'nombre_atleta' },
+    { path: 'nombre_prueba', populate: { path: 'sector_id' } },
+    { path: 'PcAL' },
+    { path: 'categoria' }
+]).lean();
 
         if (!marcas || marcas.length === 0) {
             return res.status(404).json({ message: 'No se encontraron marcas con viento legal para el atleta en esta prueba.' });
@@ -768,7 +844,12 @@ router.get('/mejor-marca-legal/prueba/:pruebaId/categoria/:categoriaId/atleta/:a
             categoria: categoriaId,
             nombre_atleta: atletaId,
             viento: { $exists: true, $lte: 2.0 }
-        }).populate('nombre_atleta nombre_prueba categoria').lean();
+        }).populate([
+    { path: 'nombre_atleta' },
+    { path: 'nombre_prueba', populate: { path: 'sector_id' } },
+    { path: 'PcAL' },
+    { path: 'categoria' }
+]).lean();
 
         if (!marcas || marcas.length === 0) {
             return res.status(404).json({ message: 'No se encontraron marcas con viento legal para el atleta en esta prueba y categoría.' });
@@ -797,7 +878,12 @@ router.get('/mejor-marca-legal/prueba/:pruebaId/PcAL/:PcALId/atleta/:atletaId', 
             PcAL: PcALId,
             nombre_atleta: atletaId,
             viento: { $exists: true, $lte: 2.0 }
-        }).populate('nombre_atleta nombre_prueba PcAL').lean();
+        }).populate([
+    { path: 'nombre_atleta' },
+    { path: 'nombre_prueba', populate: { path: 'sector_id' } },
+    { path: 'PcAL' },
+    { path: 'categoria' }
+]).lean();
 
         if (!marcas || marcas.length === 0) {
             return res.status(404).json({ message: 'No se encontraron marcas con viento legal para el atleta en esta prueba y PcAL.' });
@@ -827,7 +913,12 @@ router.get('/mejor-marca-legal/prueba/:pruebaId/categoria/:categoriaId/PcAL/:PcA
             PcAL: PcALId,
             nombre_atleta: atletaId,
             viento: { $exists: true, $lte: 2.0 }
-        }).populate('nombre_atleta nombre_prueba categoria PcAL').lean();
+        }).populate([
+    { path: 'nombre_atleta' },
+    { path: 'nombre_prueba', populate: { path: 'sector_id' } },
+    { path: 'PcAL' },
+    { path: 'categoria' }
+]).lean();
 
         if (!marcas || marcas.length === 0) {
             return res.status(404).json({ message: 'No se encontraron marcas con viento legal para el atleta en esta prueba, categoría y PcAL.' });
@@ -856,7 +947,12 @@ router.get('/mejor-marca-legal/prueba/:pruebaId/anyo/:anyo/atleta/:atletaId', as
             anyo: anyo,
             nombre_atleta: atletaId,
             viento: { $exists: true, $lte: 2.0 }
-        }).populate('nombre_atleta nombre_prueba PcAL').lean();
+        }).populate([
+    { path: 'nombre_atleta' },
+    { path: 'nombre_prueba', populate: { path: 'sector_id' } },
+    { path: 'PcAL' },
+    { path: 'categoria' }
+]).lean();
 
         if (!marcas || marcas.length === 0) {
             return res.status(404).json({ message: 'No se encontraron marcas con viento legal para el atleta en esta prueba y año.' });
@@ -886,7 +982,12 @@ router.get('/mejor-marca-legal/prueba/:pruebaId/PcAL/:PcALId/anyo/:anyo/atleta/:
             anyo: anyo,
             nombre_atleta: atletaId,
             viento: { $exists: true, $lte: 2.0 }
-        }).populate('nombre_atleta nombre_prueba PcAL').lean();
+        }).populate([
+    { path: 'nombre_atleta' },
+    { path: 'nombre_prueba', populate: { path: 'sector_id' } },
+    { path: 'PcAL' },
+    { path: 'categoria' }
+]).lean();
 
         if (!marcas || marcas.length === 0) {
             return res.status(404).json({ message: 'No se encontraron marcas con viento legal para el atleta en esta prueba, PcAL y año.' });
@@ -899,6 +1000,35 @@ router.get('/mejor-marca-legal/prueba/:pruebaId/PcAL/:PcALId/anyo/:anyo/atleta/:
         }
 
         res.json(mejorMarcaLegal);
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ message: err.message });
+    }
+});
+
+// GET categorías en las que un atleta tiene al menos una marca
+router.get('/categorias-con-marcas/:atletaId', async (req, res) => {
+    try {
+        const { atletaId } = req.params;
+
+        if (!mongoose.Types.ObjectId.isValid(atletaId)) {
+            return res.status(400).json({ message: 'ID de atleta no válido.' });
+        }
+
+        const grupos = await Marca.aggregate([
+            { $match: {
+                nombre_atleta: new mongoose.Types.ObjectId(atletaId),
+                categoria: { $exists: true, $ne: null }
+            }},
+            { $group: { _id: '$categoria' } }
+        ]);
+        const ids = grupos.map(g => g._id);
+
+        const categorias = await Categoria.find({
+            _id: { $in: ids }
+        }).sort({ orden: 1, nombre_categoria: 1 });
+
+        res.json(categorias);
     } catch (err) {
         console.error(err);
         res.status(500).json({ message: err.message });

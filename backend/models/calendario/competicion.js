@@ -1,4 +1,4 @@
-// models/competicion.js
+const crypto = require('crypto');
 const mongoose = require('mongoose');
 
 // Esquema para la colección de 'competicion'
@@ -9,9 +9,10 @@ const competicionSchema = new mongoose.Schema({
     descripcion: { type: String },
     tipo: { type: String },
     imageUrl: { type: String },
-    pruebas: [{ type: mongoose.Schema.Types.ObjectId, ref: 'PruebaCompeticion' }], // Referencia a las pruebas
-    sectores: [{ type: mongoose.Schema.Types.ObjectId, ref: 'SectorCompeticion' }],  // Referencia a los sectores
+    pruebas: [{ type: mongoose.Schema.Types.ObjectId, ref: 'PruebaCompeticion' }],
+    sectores: [{ type: mongoose.Schema.Types.ObjectId, ref: 'SectorCompeticion' }],
     categorias: [{ type: mongoose.Schema.Types.ObjectId, red: 'CategoriasCompeticion'}],
+    tokenPublico: { type: String, unique: true, default: () => crypto.randomBytes(8).toString('hex') },
 });
 
 module.exports = mongoose.model('Competicion', competicionSchema);

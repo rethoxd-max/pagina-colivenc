@@ -4,6 +4,9 @@ const auth = require('../../middleware/auth');
 
 // Modelo de inscripción
 const Inscripcion = require('../../models/calendario/Inscripcion');
+const Competicion = require('../../models/calendario/competicion');
+const User = require('../../models/User');
+const { registrarInscripcionEnSheets, eliminarInscripcionEnSheets, editarInscripcionEnSheets } = require('../../services/googleSheets');
 
 // Ruta para crear una inscripción
 router.post('/', auth, async (req, res) => {
@@ -14,6 +17,12 @@ router.post('/', auth, async (req, res) => {
         // Validar datos
         if (!nombre_atleta || !competicionId || !Array.isArray(pruebas)) {
             throw new Error('Datos inválidos');
+        }
+
+        // Verificar que el usuario esté activo
+        const usuarioActivo = await User.findById(usuario.id).select('activo');
+        if (!usuarioActivo || !usuarioActivo.activo) {
+            return res.status(403).json({ message: 'Tu cuenta no está activa. Contacta con el administrador.' });
         }
 
         // Crear la nueva inscripción
@@ -27,6 +36,31 @@ router.post('/', auth, async (req, res) => {
 
         // Guardar la inscripción
         await nuevaInscripcion.save();
+
+        // Registrar en Google Sheets
+        try {
+            const competicion = await Competicion.findById(competicionId);
+            const usuarioData = await User.findById(usuario.id);
+            const inscripcionPopulada = await Inscripcion.findById(nuevaInscripcion._id)
+                .populate({
+                    path: 'pruebasSeleccionadas',
+                    select: 'nombre_prueba'
+                });
+
+            await registrarInscripcionEnSheets({
+                inscripcionId: nuevaInscripcion._id.toString(),
+                nombreAtleta: nombre_atleta,
+                competicionNombre: competicion ? competicion.nombre : 'Sin nombre',
+                fechaCompeticion: competicion ? competicion.fecha : null,
+                pruebas: inscripcionPopulada.pruebasSeleccionadas.map(p => p.nombre_prueba),
+                usuarioNombre: usuarioData ? usuarioData.name : 'N/A',
+                fechaNacimiento: usuarioData ? usuarioData.fechaNacimiento : null,
+                numeroLicencia: usuarioData ? usuarioData.numeroLicencia : '',
+                fechaInscripcion: nuevaInscripcion.fechaInscripcion
+            });
+        } catch (sheetsError) {
+            console.error('Error al guardar en Google Sheets (no bloquea):', sheetsError.message);
+        }
 
         return res.status(201).json({ message: 'Inscripción creada con éxito' });
     } catch (error) {
@@ -65,6 +99,28 @@ router.put('/:inscripcionId/:competicionId', auth, async (req, res) => {
         // Guardamos los cambios en la inscripción existente
         await inscripcion.save();
 
+        // Actualizar en Google Sheets
+        try {
+            const competicion = await Competicion.findById(competicionId);
+            const usuarioData = inscripcion.usuario ? await User.findById(inscripcion.usuario) : null;
+            const inscripcionPopulada = await Inscripcion.findById(inscripcionId)
+                .populate({ path: 'pruebasSeleccionadas', select: 'nombre_prueba' });
+
+            await editarInscripcionEnSheets({
+                inscripcionId: inscripcionId,
+                nombreAtleta: nombre_atleta,
+                competicionNombre: competicion ? competicion.nombre : '',
+                fechaCompeticion: competicion ? competicion.fecha : null,
+                pruebas: inscripcionPopulada.pruebasSeleccionadas.map(p => p.nombre_prueba),
+                usuarioNombre: usuarioData ? usuarioData.name : 'N/A',
+                fechaNacimiento: usuarioData ? usuarioData.fechaNacimiento : null,
+                numeroLicencia: usuarioData ? usuarioData.numeroLicencia : '',
+                fechaInscripcion: inscripcion.fechaInscripcion
+            });
+        } catch (sheetsError) {
+            console.error('Error al actualizar en Google Sheets (no bloquea):', sheetsError.message);
+        }
+
         return res.status(200).json({
             message: 'Inscripción actualizada con éxito',
             inscripcion
@@ -77,15 +133,33 @@ router.put('/:inscripcionId/:competicionId', auth, async (req, res) => {
 
 
 // Ruta para eliminar una inscripción
-router.delete('/:id', async (req, res) => {
+router.delete('/:id', auth, async (req, res) => {
     try {
         const inscripcionId = req.params.id;
 
-        // Buscar la inscripción por ID y eliminarla
-        const inscripcionEliminada = await Inscripcion.findByIdAndDelete(inscripcionId);
-
-        if (!inscripcionEliminada) {
+        const inscripcion = await Inscripcion.findById(inscripcionId).populate('competicion');
+        if (!inscripcion) {
             return res.status(404).json({ message: 'Inscripción no encontrada' });
+        }
+
+        // Solo el propietario o un Admin pueden eliminar
+        const esAdmin = req.user.userTypes.includes('Admin');
+        const esPropietario = inscripcion.usuario && inscripcion.usuario.toString() === req.user._id.toString();
+        if (!esAdmin && !esPropietario) {
+            return res.status(403).json({ message: 'No autorizado para eliminar esta inscripción' });
+        }
+
+        await Inscripcion.findByIdAndDelete(inscripcionId);
+
+        // Eliminar de Google Sheets (no bloquea)
+        try {
+            await eliminarInscripcionEnSheets({
+                inscripcionId: inscripcionId,
+                competicionNombre: inscripcion.competicion?.nombre || '',
+                fechaCompeticion: inscripcion.competicion?.fecha || null
+            });
+        } catch (sheetsError) {
+            console.error('Error al eliminar de Google Sheets (no bloquea):', sheetsError.message);
         }
 
         res.status(200).json({ message: 'Inscripción eliminada con éxito' });

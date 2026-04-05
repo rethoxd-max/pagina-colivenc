@@ -7,12 +7,12 @@ import {
   ReactiveFormsModule,
   Validators,
 } from '@angular/forms';
-import { NgClass, NgIf } from '@angular/common';
+import { NgIf } from '@angular/common';
 import { environment } from '../../../../environments/environment';
 @Component({
   selector: 'app-post-form',
   standalone: true,
-  imports: [ReactiveFormsModule, NgIf, NgClass],
+  imports: [ReactiveFormsModule, NgIf],
   templateUrl: './post-form.component.html',
   styleUrls: ['./post-form.component.css'],
 })
@@ -35,6 +35,7 @@ export class PostFormComponent implements OnInit {
     this.postForm = this.fb.group({
       title: ['', Validators.required],
       content: ['', Validators.required],
+      category: [''],
     });
   }
 
@@ -50,6 +51,7 @@ export class PostFormComponent implements OnInit {
           this.postForm.patchValue({
             title: post.title,
             content: post.content,
+            category: post.category || '',
           });
         }
       });
@@ -76,6 +78,7 @@ export class PostFormComponent implements OnInit {
     const formData = new FormData();
     formData.append('title', this.postForm.get('title')?.value);
     formData.append('content', this.postForm.get('content')?.value);
+    formData.append('category', this.postForm.get('category')?.value || '');
 
     if (this.selectedFile) {
       formData.append('image', this.selectedFile);
@@ -90,5 +93,9 @@ export class PostFormComponent implements OnInit {
         console.error('Error al crear el post:', error);
       }
     );
+  }
+
+  volver(): void {
+    this.router.navigate(['/noticias']);
   }
 }

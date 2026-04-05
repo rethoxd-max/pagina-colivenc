@@ -421,3 +421,55 @@
 .register-container {
     padding: 160px;
 }
+
+/* ========================================
+   Footer
+======================================== */
+.site-footer {
+    background: linear-gradient(135deg, #1e3c72 0%, #2563eb 100%);
+    color: #ffffff;
+    padding: 2rem 1rem;
+    margin-top: auto;
+}
+
+.footer-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+}
+
+.footer-social {
+    display: flex;
+    gap: 1.25rem;
+    align-items: center;
+}
+
+.footer-social-link {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    background: rgba(255, 255, 255, 0.15);
+    border-radius: 50%;
+    color: #ffffff;
+    font-size: 1.2rem;
+    text-decoration: none;
+    transition: background 0.25s ease, transform 0.2s ease;
+}
+
+.footer-social-link:hover {
+    background: rgba(255, 255, 255, 0.3);
+    transform: translateY(-3px);
+    color: #ffffff;
+}
+
+.footer-copy {
+    margin: 0;
+    font-size: 0.85rem;
+    color: rgba(255, 255, 255, 0.75);
+    text-align: center;
+}

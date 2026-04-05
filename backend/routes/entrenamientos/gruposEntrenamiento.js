@@ -5,6 +5,7 @@ const GrupoEntrenamiento = require('../../models/entrenamientos/GrupoEntrenamien
 const Atleta = require('../../models/ranking/Atleta');
 const Usuario = require('../../models/User');
 const CalendarioEntrenamiento = require('../../models/entrenamientos/CalendarioEntrenamiento');
+const auth = require('../../middleware/auth');
 
 
 // Obtener todos los grupos de entrenamiento
@@ -51,7 +52,7 @@ router.get('/:id', async (req, res) => {
 });
 
 // Crear un nuevo grupo de entrenamiento
-router.post('/', async (req, res) => {
+router.post('/', auth, async (req, res) => {
     const { nombre_grupo, entrenador, atletas } = req.body; // Ahora debería coincidir con el frontend
 
     try {
@@ -78,7 +79,7 @@ router.post('/', async (req, res) => {
 
 
 // Actualizar un grupo de entrenamiento por ID
-router.put('/:id', async (req, res) => {
+router.put('/:id', auth, async (req, res) => {
     try {
         const grupo = await GrupoEntrenamiento.findByIdAndUpdate(req.params.id, req.body, { new: true });
         if (!grupo) return res.status(404).json({ message: 'Grupo no encontrado' });
@@ -89,7 +90,7 @@ router.put('/:id', async (req, res) => {
 });
 
 // Eliminar un grupo de entrenamiento por ID
-router.delete('/:id', async (req, res) => {
+router.delete('/:id', auth, async (req, res) => {
     try {
         const grupo = await GrupoEntrenamiento.findByIdAndDelete(req.params.id);
         if (!grupo) return res.status(404).json({ message: 'Grupo no encontrado' });
@@ -100,7 +101,7 @@ router.delete('/:id', async (req, res) => {
 });
 
 // Agregar un atleta al grupo
-router.post('/:id/atletas', async (req, res) => {
+router.post('/:id/atletas', auth, async (req, res) => {
     try {
         const { atletaId } = req.body;
         const grupo = await GrupoEntrenamiento.findById(req.params.id);
@@ -129,7 +130,7 @@ router.post('/:id/atletas', async (req, res) => {
 });
 
 // Eliminar un atleta del grupo
-router.delete('/:id/atletas/:atletaId', async (req, res) => {
+router.delete('/:id/atletas/:atletaId', auth, async (req, res) => {
     try {
         const grupo = await GrupoEntrenamiento.findById(req.params.id);
         

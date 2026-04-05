@@ -3,6 +3,7 @@ const router = express.Router();
 const DiaEntrenamiento = require('../../models/entrenamientos/DiaEntrenamiento');
 const CalendarioEntrenamiento = require('../../models/entrenamientos/CalendarioEntrenamiento');
 const mongoose = require('mongoose');
+const auth = require('../../middleware/auth');
 
 // Obtener todos los días de entrenamiento de un calendario específico
 router.get('/calendario/:calendarioId', async (req, res) => {
@@ -69,7 +70,7 @@ router.get('/:calendarioId/:fecha', async (req, res) => {
 });
 
 // Añadir un entrenamiento a un día específico
-router.post('/:diaId/entrenamientos', async (req, res) => {
+router.post('/:diaId/entrenamientos', auth, async (req, res) => {
     const { diaId } = req.params;
     const entrenamientoData = { ...req.body, dia_entrenamiento: diaId };
 
@@ -99,7 +100,7 @@ router.post('/:diaId/entrenamientos', async (req, res) => {
 });
 
 // Actualizar un día de entrenamiento por ID
-router.put('/:id', async (req, res) => {
+router.put('/:id', auth, async (req, res) => {
     try {
         const dia = await DiaEntrenamiento.findByIdAndUpdate(
             req.params.id, 
@@ -115,7 +116,7 @@ router.put('/:id', async (req, res) => {
 });
 
 // Eliminar un día de entrenamiento por ID
-router.delete('/:id', async (req, res) => {
+router.delete('/:id', auth, async (req, res) => {
     try {
         const dia = await DiaEntrenamiento.findById(req.params.id);
         if (!dia) return res.status(404).json({ message: 'Día no encontrado' });
@@ -131,7 +132,7 @@ router.delete('/:id', async (req, res) => {
         );
 
         // Eliminar el día
-        await dia.remove();
+        await DiaEntrenamiento.deleteOne({ _id: dia._id });
         
         res.json({ message: 'Día y sus entrenamientos eliminados' });
     } catch (err) {

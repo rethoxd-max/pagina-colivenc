@@ -25,6 +25,7 @@ export class CalendarioLateralComponent implements OnInit {
   atletas: Atleta[] = [];
   cumpleanerosHoy: Atleta[] = [];
   hoveredDate: Date | null = null;
+  selectedDate: Date | null = null;
 
   constructor(
     private competicionService: CompeticionService,
@@ -111,6 +112,7 @@ export class CalendarioLateralComponent implements OnInit {
   }
 
   prevMonth(): void {
+    this.selectedDate = null;
     this.currentDate = new Date(
       this.currentDate.getFullYear(),
       this.currentDate.getMonth() - 1,
@@ -120,6 +122,7 @@ export class CalendarioLateralComponent implements OnInit {
   }
 
   nextMonth(): void {
+    this.selectedDate = null;
     this.currentDate = new Date(
       this.currentDate.getFullYear(),
       this.currentDate.getMonth() + 1,
@@ -166,5 +169,16 @@ export class CalendarioLateralComponent implements OnInit {
 
   clearHoveredDate(): void {
     this.hoveredDate = null;
+  }
+
+  selectDate(day: number): void {
+    if (day === 0 || !this.hasCompeticiones(day)) {
+      return;
+    }
+    this.selectedDate = new Date(this.currentDate.getFullYear(), this.currentDate.getMonth(), day);
+  }
+
+  closeSelectedDate(): void {
+    this.selectedDate = null;
   }
 } 

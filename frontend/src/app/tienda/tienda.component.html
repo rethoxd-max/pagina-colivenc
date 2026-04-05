@@ -7,7 +7,7 @@
         Tienda Oficial
       </span>
       <h1 class="page-title">Tienda del Club</h1>
-      <p class="page-subtitle">Equipación y merchandising oficial de COLIVENC</p>
+      <p class="page-subtitle">Equipación y merchandising oficial del Centre Esportiu Colivenc</p>
     </div>
   </div>
 
@@ -76,7 +76,7 @@
               (ngModelChange)="seleccionarTalla(producto._id, $event)"
               class="talla-select">
               <option value="">Selecciona talla</option>
-              <option *ngFor="let talla of producto.tallas" [value]="talla">
+              <option *ngFor="let talla of producto.tallas" [value]="formatearTalla(talla)">
                 {{ formatearTalla(talla) }}
               </option>
             </select>
@@ -141,8 +141,8 @@
               <button 
                 *ngFor="let talla of productoSeleccionado.tallas" 
                 class="talla-btn"
-                [class.selected]="talla === getTallaSeleccionada(productoSeleccionado._id)"
-                (click)="seleccionarTalla(productoSeleccionado._id, talla)">
+                [class.selected]="formatearTalla(talla) === getTallaSeleccionada(productoSeleccionado._id)"
+                (click)="seleccionarTalla(productoSeleccionado._id, formatearTalla(talla))">
                 {{ formatearTalla(talla) }}
               </button>
             </div>

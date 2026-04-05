@@ -21,7 +21,7 @@ router.post(
             return res.status(400).json({ errors: errors.array() });
         }
 
-        const { name, email, password, userTypes } = req.body;
+        const { name, email, password, userTypes, fechaNacimiento, numeroLicencia, activo } = req.body;
 
         // Verificar si el usuario ya existe
         let user = await User.findOne({ email });
@@ -33,8 +33,11 @@ router.post(
         user = new User({
             name,
             email,
-            password: await bcrypt.hash(password, 10), // Encriptar la contraseña
-            userTypes: userTypes || ['Viewer'] // Asignar 'viewer' si no se proporcionan tipos
+            password: await bcrypt.hash(password, 10),
+            userTypes: userTypes || ['Viewer'],
+            fechaNacimiento: fechaNacimiento || null,
+            numeroLicencia: numeroLicencia || '',
+            activo: activo !== undefined ? activo : true
         });
 
         await user.save();
@@ -87,19 +90,23 @@ router.post(
     }
 );
 
-router.get('/users/:id?', async (req, res) => {
+router.get('/users/:id?', auth, async (req, res) => {
     try {
-        // Si se proporciona un ID, obtener un usuario específico
+        // Si se proporciona un ID, cualquier usuario autenticado puede consultar un perfil
         if (req.params.id) {
-            const user = await User.findById(req.params.id).select('-password'); // No devolver la contraseña
+            const user = await User.findById(req.params.id).select('-password');
             if (!user) {
                 return res.status(404).json({ msg: 'Usuario no encontrado' });
             }
             return res.json(user);
         }
 
-        // Si no se proporciona ID, obtener todos los usuarios
-        const users = await User.find().select('-password'); // No devolver las contraseñas
+        // Listar TODOS los usuarios requiere rol Admin
+        if (!req.user.userTypes.includes('Admin')) {
+            return res.status(403).json({ msg: 'Acceso denegado: se requiere rol Admin' });
+        }
+
+        const users = await User.find().select('-password');
         res.json(users);
     } catch (error) {
         console.error(error.message);

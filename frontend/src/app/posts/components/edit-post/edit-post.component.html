@@ -1,54 +1,90 @@
-<div class="container main-content">
-    <div class="row justify-content-center">
-        <div class="col-lg-8 col-md-10">
-            <div class="card shadow-sm p-4 mb-5 bg-body rounded">
-                <div class="card-body">
-                    <h3 class="text-center mb-4">Editar Post</h3>
+<div class="nf-page">
+    <div class="nf-wrapper">
 
-                    <form [formGroup]="postForm" (ngSubmit)="onSubmit()">
-                        <!-- Título -->
-                        <div class="mb-3">
-                            <label for="title" class="form-label">Título</label>
-                            <input type="text" id="title" class="form-control" formControlName="title"
-                                placeholder="Introduce el título"
-                                [ngClass]="{'is-invalid': postForm.get('title')?.invalid && postForm.get('title')?.touched}" />
-                            <div *ngIf="postForm.get('title')?.invalid && postForm.get('title')?.touched"
-                                class="invalid-feedback">
-                                El título es requerido.
-                            </div>
-                        </div>
-
-                        <!-- Contenido -->
-                        <div class="mb-3">
-                            <label for="content" class="form-label">Contenido</label>
-                            <textarea id="content" class="form-control" formControlName="content"
-                                placeholder="Introduce el contenido" rows="5"
-                                [ngClass]="{'is-invalid': postForm.get('content')?.invalid && postForm.get('content')?.touched}"></textarea>
-                            <div *ngIf="postForm.get('content')?.invalid && postForm.get('content')?.touched"
-                                class="invalid-feedback">
-                                El contenido es requerido.
-                            </div>
-                        </div>
-
-                        <!-- Imagen -->
-                        <div class="mb-3">
-                            <label for="image" class="form-label">Imagen</label>
-                            <input type="file" id="image" class="form-control" (change)="onFileSelected($event)" />
-                        </div>
-
-                        <!-- Vista previa de imagen -->
-                        <div *ngIf="imageUrl" class="mb-3">
-                            <img [src]="imageUrl" alt="Vista previa" class="img-fluid img-thumbnail" />
-                        </div>
-
-                        <div class="text-center">
-                            <button type="submit" class="btn btn-primary w-100" [disabled]="postForm.invalid">
-                                Actualizar Post
-                            </button>
-                        </div>
-                    </form>
-                </div>
+        <!-- Cabecera -->
+        <div class="nf-header">
+            <div class="nf-header-icon">
+                <i class="fas fa-edit"></i>
             </div>
+            <h1 class="nf-title">Editar noticia</h1>
+            <p class="nf-subtitle">Modifica los datos de la noticia y guarda los cambios.</p>
         </div>
+
+        <!-- Tarjeta del formulario -->
+        <div class="nf-card">
+            <form [formGroup]="postForm" (ngSubmit)="onSubmit()" novalidate>
+
+                <!-- Título -->
+                <div class="nf-field">
+                    <label class="nf-label" for="title">
+                        <i class="fas fa-heading"></i> Título <span class="nf-required">*</span>
+                    </label>
+                    <input type="text" id="title" class="nf-input"
+                        formControlName="title"
+                        placeholder="Escribe el título de la noticia..."
+                        [class.nf-input--error]="postForm.get('title')?.invalid && postForm.get('title')?.touched" />
+                    <span class="nf-error" *ngIf="postForm.get('title')?.invalid && postForm.get('title')?.touched">
+                        El título es obligatorio.
+                    </span>
+                </div>
+
+                <!-- Categoría -->
+                <div class="nf-field">
+                    <label class="nf-label" for="category">
+                        <i class="fas fa-tag"></i> Categoría
+                    </label>
+                    <input type="text" id="category" class="nf-input"
+                        formControlName="category"
+                        placeholder="Ej: News, Atletismo, Club..." />
+                </div>
+
+                <!-- Contenido -->
+                <div class="nf-field">
+                    <label class="nf-label" for="content">
+                        <i class="fas fa-align-left"></i> Contenido <span class="nf-required">*</span>
+                    </label>
+                    <textarea id="content" class="nf-input nf-textarea"
+                        formControlName="content"
+                        placeholder="Escribe el contenido de la noticia..."
+                        rows="9"
+                        [class.nf-input--error]="postForm.get('content')?.invalid && postForm.get('content')?.touched"></textarea>
+                    <span class="nf-error" *ngIf="postForm.get('content')?.invalid && postForm.get('content')?.touched">
+                        El contenido es obligatorio.
+                    </span>
+                </div>
+
+                <!-- Imagen -->
+                <div class="nf-field">
+                    <label class="nf-label">
+                        <i class="fas fa-image"></i> Imagen
+                    </label>
+                    <label class="nf-upload" for="image">
+                        <i class="fas fa-cloud-upload-alt nf-upload-icon"></i>
+                        <span class="nf-upload-text">Haz clic para cambiar la imagen</span>
+                        <span class="nf-upload-hint">JPG, PNG o WEBP · Máximo 5 MB</span>
+                        <input type="file" id="image" class="nf-upload-input"
+                            (change)="onFileSelected($event)" accept="image/*" />
+                    </label>
+                </div>
+
+                <!-- Vista previa -->
+                <div *ngIf="imageUrl" class="nf-preview">
+                    <span class="nf-preview-label"><i class="fas fa-eye"></i> Vista previa</span>
+                    <img [src]="imageUrl" alt="Vista previa" class="nf-preview-img" />
+                </div>
+
+                <!-- Acciones -->
+                <div class="nf-actions">
+                    <button type="button" class="nf-btn nf-btn--cancel" (click)="volver()">
+                        <i class="fas fa-arrow-left"></i> Cancelar
+                    </button>
+                    <button type="submit" class="nf-btn nf-btn--submit" [disabled]="postForm.invalid">
+                        <i class="fas fa-save"></i> Guardar cambios
+                    </button>
+                </div>
+
+            </form>
+        </div>
+
     </div>
 </div>

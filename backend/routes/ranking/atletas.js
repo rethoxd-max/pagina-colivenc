@@ -4,6 +4,7 @@ const Atleta = require('../../models/ranking/Atleta');
 const User = require('../../models/User');
 const { generarSlugUnico } = require('../../utils/slugUtils');
 const mongoose = require('mongoose');
+const auth = require('../../middleware/auth');
 
 // GET all atletas
 router.get('/', async (req, res) => {
@@ -86,7 +87,7 @@ router.get('/usuario/:userId', async (req, res) => {
 
 
 // POST new atleta
-router.post('/', async (req, res) => {
+router.post('/', auth, async (req, res) => {
   try {
     const { nombre, fecha_nacimiento, genero } = req.body;
 
@@ -124,7 +125,7 @@ router.post('/', async (req, res) => {
 
 
 // PUT update atleta by slug o ID
-router.put('/:identificador', async (req, res) => {
+router.put('/:identificador', auth, async (req, res) => {
   try {
     const { identificador } = req.params;
     const { nombre, fecha_nacimiento, genero } = req.body;
@@ -170,7 +171,7 @@ router.put('/:identificador', async (req, res) => {
 });
 
 // DELETE all atletas
-router.delete('/', async (req, res) => {
+router.delete('/', auth, async (req, res) => {
   try {
     await Atleta.deleteMany({});
     res.json({ message: 'Todos los atletas eliminados' });
@@ -180,7 +181,7 @@ router.delete('/', async (req, res) => {
 });
 
 // DELETE atleta by slug o ID
-router.delete('/:identificador', async (req, res) => {
+router.delete('/:identificador', auth, async (req, res) => {
   try {
     const { identificador } = req.params;
     let atleta;

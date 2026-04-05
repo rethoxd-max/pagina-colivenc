@@ -276,7 +276,7 @@ export class RankingComponent implements OnInit {
   }
 
   getCategorias(): void {
-    this.rankingService.getCategorias().subscribe((categorias) => {
+    this.rankingService.getCategoriasConMarcas().subscribe((categorias) => {
       this.categorias = categorias; // Sin "Todas las categorías" porque ahora es el primer filtro
     });
   }

@@ -1,0 +1,267 @@
+/* ========================================
+   Formulario de noticias — estilo moderno
+======================================== */
+
+.nf-page {
+    min-height: 100vh;
+    background: #f3f4f6;
+    padding: 2.5rem 1rem 4rem;
+}
+
+.nf-wrapper {
+    max-width: 780px;
+    margin: 0 auto;
+}
+
+/* --- Cabecera --- */
+.nf-header {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.nf-header-icon {
+    width: 64px;
+    height: 64px;
+    background: linear-gradient(135deg, #1a2b4b 0%, #2a4a8a 100%);
+    border-radius: 18px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 1rem;
+    box-shadow: 0 8px 20px rgba(26, 43, 75, 0.25);
+}
+
+.nf-header-icon i {
+    font-size: 1.6rem;
+    color: #fff;
+}
+
+.nf-title {
+    font-size: 1.9rem;
+    font-weight: 800;
+    color: #1a2b4b;
+    margin: 0 0 0.4rem;
+    letter-spacing: -0.4px;
+}
+
+.nf-subtitle {
+    color: #6b7280;
+    font-size: 0.97rem;
+    margin: 0;
+}
+
+/* --- Tarjeta del formulario --- */
+.nf-card {
+    background: #ffffff;
+    border-radius: 18px;
+    padding: 2.25rem 2.5rem;
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.07);
+    border: 1px solid #e5e7eb;
+}
+
+/* --- Campos --- */
+.nf-field {
+    margin-bottom: 1.5rem;
+}
+
+.nf-label {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.88rem;
+    font-weight: 600;
+    color: #374151;
+    margin-bottom: 0.45rem;
+}
+
+.nf-label i {
+    color: #6b7280;
+    font-size: 0.82rem;
+}
+
+.nf-required {
+    color: #ef4444;
+    font-weight: 700;
+}
+
+.nf-input {
+    width: 100%;
+    padding: 0.7rem 0.95rem;
+    border: 1.5px solid #d1d5db;
+    border-radius: 10px;
+    font-size: 0.95rem;
+    color: #1f2937;
+    background: #fafafa;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
+    font-family: inherit;
+    box-sizing: border-box;
+}
+
+.nf-input:focus {
+    border-color: #1a2b4b;
+    background: #fff;
+    box-shadow: 0 0 0 3px rgba(26, 43, 75, 0.1);
+}
+
+.nf-input--error {
+    border-color: #ef4444 !important;
+    box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1) !important;
+}
+
+.nf-textarea {
+    resize: vertical;
+    min-height: 200px;
+    line-height: 1.6;
+}
+
+.nf-error {
+    display: block;
+    margin-top: 0.35rem;
+    font-size: 0.82rem;
+    color: #ef4444;
+    font-weight: 500;
+}
+
+/* --- Zona de subida de imagen --- */
+.nf-upload {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.4rem;
+    border: 2px dashed #d1d5db;
+    border-radius: 12px;
+    padding: 2rem 1.5rem;
+    cursor: pointer;
+    background: #f9fafb;
+    transition: border-color 0.2s, background 0.2s;
+    text-align: center;
+}
+
+.nf-upload:hover {
+    border-color: #1a2b4b;
+    background: #f0f4ff;
+}
+
+.nf-upload-icon {
+    font-size: 2rem;
+    color: #9ca3af;
+    margin-bottom: 0.25rem;
+}
+
+.nf-upload:hover .nf-upload-icon {
+    color: #1a2b4b;
+}
+
+.nf-upload-text {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: #374151;
+}
+
+.nf-upload-hint {
+    font-size: 0.8rem;
+    color: #9ca3af;
+}
+
+.nf-upload-input {
+    display: none;
+}
+
+/* --- Vista previa --- */
+.nf-preview {
+    margin-bottom: 1.5rem;
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid #e5e7eb;
+    background: #f9fafb;
+}
+
+.nf-preview-label {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.6rem 1rem;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #6b7280;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.nf-preview-img {
+    width: 100%;
+    max-height: 340px;
+    object-fit: cover;
+    display: block;
+}
+
+/* --- Botones --- */
+.nf-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.85rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid #f3f4f6;
+    margin-top: 0.5rem;
+}
+
+.nf-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.7rem 1.5rem;
+    border-radius: 10px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.nf-btn--cancel {
+    background: #f3f4f6;
+    color: #374151;
+    border: 1.5px solid #e5e7eb;
+}
+
+.nf-btn--cancel:hover {
+    background: #e5e7eb;
+    border-color: #d1d5db;
+}
+
+.nf-btn--submit {
+    background: linear-gradient(135deg, #1a2b4b 0%, #2a4a8a 100%);
+    color: #fff;
+    box-shadow: 0 4px 12px rgba(26, 43, 75, 0.3);
+}
+
+.nf-btn--submit:hover:not(:disabled) {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 18px rgba(26, 43, 75, 0.35);
+}
+
+.nf-btn--submit:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+}
+
+/* --- Responsive --- */
+@media (max-width: 600px) {
+    .nf-card {
+        padding: 1.5rem 1.25rem;
+    }
+
+    .nf-title {
+        font-size: 1.5rem;
+    }
+
+    .nf-actions {
+        flex-direction: column-reverse;
+    }
+
+    .nf-btn {
+        width: 100%;
+        justify-content: center;
+    }
+}

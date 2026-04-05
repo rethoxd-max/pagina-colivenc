@@ -41,6 +41,11 @@ export class CompeticionListComponent implements OnInit {
   competicionId!: string;
   userId!: string | null;
 
+  // Vista lista o tarjetas
+  vistaActual: 'tarjetas' | 'lista' = 'tarjetas';
+  mesActual: number = new Date().getMonth();
+  anyoActual: number = new Date().getFullYear();
+
   private nombresMeses = [
     'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
     'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'
@@ -267,5 +272,57 @@ export class CompeticionListComponent implements OnInit {
   isAtleta(): boolean {
     const user = this.authService.getUser();
     return this.authService.isAuthenticated() && user && user.userTypes.includes('Atleta');
+  }
+
+  // ---- Vista Lista ----
+
+  cambiarVista(vista: 'tarjetas' | 'lista'): void {
+    this.vistaActual = vista;
+  }
+
+  mesAnterior(): void {
+    if (this.mesActual === 0) {
+      this.mesActual = 11;
+      this.anyoActual--;
+    } else {
+      this.mesActual--;
+    }
+  }
+
+  mesSiguiente(): void {
+    if (this.mesActual === 11) {
+      this.mesActual = 0;
+      this.anyoActual++;
+    } else {
+      this.mesActual++;
+    }
+  }
+
+  getNombreMes(): string {
+    return this.nombresMeses[this.mesActual];
+  }
+
+  getCompeticionesDelMes(): any[] {
+    return this.filteredCompeticiones
+      .filter(c => {
+        const fecha = new Date(c.fecha);
+        return fecha.getMonth() === this.mesActual && fecha.getFullYear() === this.anyoActual;
+      })
+      .sort((a, b) => new Date(a.fecha).getTime() - new Date(b.fecha).getTime());
+  }
+
+  isPasada(fecha: any): boolean {
+    return new Date(fecha) < new Date(new Date().setHours(0, 0, 0, 0));
+  }
+
+  copiadoId: string | null = null;
+
+  copiarLinkPublico(competicion: any): void {
+    if (!competicion.tokenPublico) return;
+    const url = `${window.location.origin}/inscripcion-publica/${competicion.tokenPublico}`;
+    navigator.clipboard.writeText(url).then(() => {
+      this.copiadoId = competicion._id;
+      setTimeout(() => this.copiadoId = null, 2000);
+    });
   }
 }

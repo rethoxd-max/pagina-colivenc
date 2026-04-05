@@ -20,6 +20,15 @@
             <input type="text" class="search-input" placeholder="Buscar competición..." [(ngModel)]="searchName"
                 (ngModelChange)="filterCompeticiones()">
             <i class="fas fa-search"></i>
+            <!-- Toggle de vista pegado al buscador -->
+            <div class="vista-toggle">
+                <button class="vista-btn" [class.active]="vistaActual === 'tarjetas'" (click)="cambiarVista('tarjetas')" title="Vista tarjetas">
+                    <i class="fas fa-th-large"></i>
+                </button>
+                <button class="vista-btn" [class.active]="vistaActual === 'lista'" (click)="cambiarVista('lista')" title="Vista lista">
+                    <i class="fas fa-list"></i>
+                </button>
+            </div>
         </div>
 
         <div class="filtros-fecha">
@@ -45,88 +54,190 @@
         </button>
     </div>
 
-    <!-- Lista de Competiciones Agrupadas -->
-    <div *ngIf="competicionesAgrupadas.length > 0" class="competiciones-agrupadas">
-        <div *ngFor="let grupo of competicionesAgrupadas" class="grupo-year">
-            <h2 class="year-titulo">{{ grupo.year }}</h2>
-            <div *ngFor="let mes of grupo.months" class="grupo-mes">
-                <h3 class="mes-titulo">{{ mes.monthName }}</h3>
-                <div class="competiciones-grid">
-                    <div *ngFor="let competicion of mes.competiciones" class="competicion-card">
-                        <div class="card-image" *ngIf="competicion.imageUrl">
-                            <img [src]="getImageUrl(competicion.imageUrl)" alt="Imagen de la competición">
-                        </div>
-                        
-                        <div class="card-content">
-                            <div class="card-header">
-                                <h3>{{ competicion.nombre }}</h3>
-                                <span class="fecha">{{ competicion.fecha | date:'dd/MM/yyyy' }}</span>
+    <!-- ==============================
+         VISTA TARJETAS
+    ============================== -->
+    <div *ngIf="vistaActual === 'tarjetas'">
+        <div *ngIf="competicionesAgrupadas.length > 0" class="competiciones-agrupadas">
+            <div *ngFor="let grupo of competicionesAgrupadas" class="grupo-year">
+                <h2 class="year-titulo">{{ grupo.year }}</h2>
+                <div *ngFor="let mes of grupo.months" class="grupo-mes">
+                    <h3 class="mes-titulo">{{ mes.monthName }}</h3>
+                    <div class="competiciones-grid">
+                        <div *ngFor="let competicion of mes.competiciones" class="competicion-card">
+                            <div class="card-image" *ngIf="competicion.imageUrl">
+                                <img [src]="getImageUrl(competicion.imageUrl)" alt="Imagen de la competición">
                             </div>
+                            
+                            <div class="card-content">
+                                <div class="card-header">
+                                    <h3>{{ competicion.nombre }}</h3>
+                                    <span class="fecha">{{ competicion.fecha | date:'dd/MM/yyyy' }}</span>
+                                </div>
 
-                            <div class="card-info">
-                                <p class="lugar"><i class="fas fa-map-marker-alt"></i> {{ competicion.lugar }}</p>
-                                <p class="tipo"><i class="fas fa-tag"></i> {{ competicion.tipo }}</p>
-                            </div>
+                                <div class="card-info">
+                                    <p class="lugar"><i class="fas fa-map-marker-alt"></i> {{ competicion.lugar }}</p>
+                                    <p class="tipo"><i class="fas fa-tag"></i> {{ competicion.tipo }}</p>
+                                </div>
 
-                            <div class="card-description">
-                                <p>{{ competicion.descripcion }}</p>
-                            </div>
+                                <div class="card-description">
+                                    <p>{{ competicion.descripcion }}</p>
+                                </div>
 
-                            <div class="card-tags">
-                                <div class="pruebas-tags" *ngIf="pruebas[competicion._id] && pruebas[competicion._id].length > 0">
-                                    <span class="tag-label">Pruebas:</span>
-                                    <div class="tags-container">
-                                        <span *ngFor="let prueba of pruebas[competicion._id]" class="tag">
-                                            {{ prueba.nombre_prueba }}
-                                        </span>
+                                <div class="card-tags">
+                                    <div class="pruebas-tags" *ngIf="pruebas[competicion._id] && pruebas[competicion._id].length > 0">
+                                        <span class="tag-label">Pruebas:</span>
+                                        <div class="tags-container">
+                                            <span *ngFor="let prueba of pruebas[competicion._id]" class="tag">
+                                                {{ prueba.nombre_prueba }}
+                                            </span>
+                                        </div>
+                                    </div>
+
+                                    <div class="categorias-tags" *ngIf="getCategoriasUnicas(competicion._id).length > 0">
+                                        <span class="tag-label">Categorías:</span>
+                                        <div class="tags-container">
+                                            <span *ngFor="let categoria of getCategoriasUnicas(competicion._id)" class="tag">
+                                                {{ categoria }}
+                                            </span>
+                                        </div>
                                     </div>
                                 </div>
 
-                                <div class="categorias-tags" *ngIf="getCategoriasUnicas(competicion._id).length > 0">
-                                    <span class="tag-label">Categorías:</span>
-                                    <div class="tags-container">
-                                        <span *ngFor="let categoria of getCategoriasUnicas(competicion._id)" class="tag">
-                                            {{ categoria }}
-                                        </span>
-                                    </div>
+                                <div class="card-actions">
+                                    <button *ngIf="(isAdmin() || isEditor())" (click)="deleteCompeticion(competicion._id)" 
+                                        class="btn-action btn-delete">
+                                        <i class="fas fa-trash"></i> Borrar
+                                    </button>
+                                    <button *ngIf="(isAdmin() || isEditor())" [routerLink]="['/edit-competicion', competicion._id]"
+                                        class="btn-action btn-edit">
+                                        <i class="fas fa-edit"></i> Editar
+                                    </button>
+                                    <button *ngIf="!isPasada(competicion.fecha) && (isAdmin() || isEntrenador() || (isAtleta() && !tieneInscripcionEnCompeticion(competicion._id)))"
+                                        [routerLink]="['/inscripcion', competicion._id]" class="btn-action btn-inscribir">
+                                        <i class="fas fa-user-plus"></i> Inscribirse
+                                    </button>
+                                    <button *ngIf="!isPasada(competicion.fecha) && (isAdmin() || isEntrenador())" (click)="copiarLinkPublico(competicion)"
+                                        class="btn-action btn-copiar-link" [title]="'Copiar enlace público'">
+                                        <i class="fas" [ngClass]="copiadoId === competicion._id ? 'fa-check' : 'fa-link'"></i>
+                                        {{ copiadoId === competicion._id ? 'Copiado' : 'Link público' }}
+                                    </button>
                                 </div>
-                            </div>
 
-                            <div class="card-actions">
-                                <button *ngIf="(isAdmin() || isEditor())" (click)="deleteCompeticion(competicion._id)" 
-                                    class="btn-action btn-delete">
-                                    <i class="fas fa-trash"></i> Borrar
-                                </button>
-                                <button *ngIf="(isAdmin() || isEditor())" [routerLink]="['/edit-competicion', competicion._id]"
-                                    class="btn-action btn-edit">
-                                    <i class="fas fa-edit"></i> Editar
-                                </button>
-                                <button *ngIf="(isAdmin() || isEntrenador() || (isAtleta() && !tieneInscripcionEnCompeticion(competicion._id)))"
-                                    [routerLink]="['/inscripcion', competicion._id]" class="btn-action btn-inscribir">
-                                    <i class="fas fa-user-plus"></i> Inscribirse
-                                </button>
-                            </div>
+                                <div class="card-inscripciones" *ngIf="!isPasada(competicion.fecha) && isEntrenador() && (inscripcionesPorCompeticion[competicion._id]?.length || 0) > 0">
+                                    <button [routerLink]="['/inscripciones', competicion._id]" class="btn-inscripciones">
+                                        <i class="fas fa-list"></i> Ver Inscripciones
+                                    </button>
+                                </div>
 
-                            <div class="card-inscripciones" *ngIf="isEntrenador() && (inscripcionesPorCompeticion[competicion._id]?.length || 0) > 0">
-                                <button [routerLink]="['/inscripciones', competicion._id]" class="btn-inscripciones">
-                                    <i class="fas fa-list"></i> Ver Inscripciones
-                                </button>
-                            </div>
-
-                            <div class="card-mis-inscripciones" *ngIf="(inscripcionesPorCompeticionYEntrenador[competicion._id]?.length || 0) > 0">
-                                <button [routerLink]="['/mis-inscripciones', userId, competicion._id]" class="btn-mis-inscripciones">
-                                    <i class="fas fa-user-check"></i> Mis Inscripciones
-                                </button>
+                                <div class="card-mis-inscripciones" *ngIf="!isPasada(competicion.fecha) && (inscripcionesPorCompeticionYEntrenador[competicion._id]?.length || 0) > 0">
+                                    <button [routerLink]="['/mis-inscripciones', userId, competicion._id]" class="btn-mis-inscripciones">
+                                        <i class="fas fa-user-check"></i> Mis Inscripciones
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
+
+        <div *ngIf="competicionesAgrupadas.length === 0" class="no-results">
+            <i class="fas fa-calendar-times"></i>
+            <p>No hay competiciones disponibles</p>
+        </div>
     </div>
 
-    <div *ngIf="competicionesAgrupadas.length === 0" class="no-results">
-        <i class="fas fa-calendar-times"></i>
-        <p>No hay competiciones disponibles</p>
+    <!-- ==============================
+         VISTA LISTA
+    ============================== -->
+    <div *ngIf="vistaActual === 'lista'" class="lista-view">
+
+        <!-- Navegación de mes -->
+        <div class="lista-nav-mes">
+            <button class="lista-nav-btn" (click)="mesAnterior()">
+                <i class="fas fa-chevron-left"></i>
+            </button>
+            <span class="lista-mes-label">{{ getNombreMes() }} {{ anyoActual }}</span>
+            <button class="lista-nav-btn" (click)="mesSiguiente()">
+                <i class="fas fa-chevron-right"></i>
+            </button>
+        </div>
+
+        <!-- Tabla de competiciones del mes -->
+        <div class="lista-table-wrap">
+            <ng-container *ngIf="getCompeticionesDelMes().length > 0; else sinCompeticionesMes">
+                <div class="lista-header-row">
+                    <span class="lista-col-fecha">Fecha</span>
+                    <span class="lista-col-nombre">Competición</span>
+                    <span class="lista-col-lugar">Lugar</span>
+                    <span class="lista-col-tipo">Tipo</span>
+                    <span class="lista-col-acciones">Acciones</span>
+                </div>
+
+                <div class="lista-row" *ngFor="let competicion of getCompeticionesDelMes()">
+                    <!-- Fila principal -->
+                    <div class="lista-row-main">
+                        <span class="lista-col-fecha">
+                            <i class="fas fa-calendar-day"></i>
+                            {{ competicion.fecha | date:'dd/MM' }}
+                        </span>
+                        <span class="lista-col-nombre">{{ competicion.nombre }}</span>
+                        <span class="lista-col-lugar">
+                            <i class="fas fa-map-marker-alt"></i>
+                            {{ competicion.lugar }}
+                        </span>
+                        <span class="lista-col-tipo">{{ competicion.tipo }}</span>
+                        <span class="lista-col-acciones">
+                            <!-- Acciones admin -->
+                            <button *ngIf="(isAdmin() || isEditor())" (click)="deleteCompeticion(competicion._id)"
+                                class="lista-btn lista-btn-delete" title="Borrar">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                            <button *ngIf="(isAdmin() || isEditor())" [routerLink]="['/edit-competicion', competicion._id]"
+                                class="lista-btn lista-btn-edit" title="Editar">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <!-- Acciones inscripción -->
+                            <button *ngIf="!isPasada(competicion.fecha) && (isAdmin() || isEntrenador() || (isAtleta() && !tieneInscripcionEnCompeticion(competicion._id)))"
+                                [routerLink]="['/inscripcion', competicion._id]"
+                                class="lista-btn lista-btn-inscribir" title="Inscribirse">
+                                <i class="fas fa-user-plus"></i>
+                            </button>
+                            <button *ngIf="!isPasada(competicion.fecha) && (isAdmin() || isEntrenador())" (click)="copiarLinkPublico(competicion)"
+                                class="lista-btn lista-btn-copiar" [title]="copiadoId === competicion._id ? 'Copiado' : 'Copiar enlace público'">
+                                <i class="fas" [ngClass]="copiadoId === competicion._id ? 'fa-check' : 'fa-link'"></i>
+                            </button>
+                            <button *ngIf="!isPasada(competicion.fecha) && isEntrenador() && (inscripcionesPorCompeticion[competicion._id]?.length || 0) > 0"
+                                [routerLink]="['/inscripciones', competicion._id]"
+                                class="lista-btn lista-btn-ver-inscrip" title="Ver inscripciones">
+                                <i class="fas fa-list"></i>
+                            </button>
+                            <button *ngIf="!isPasada(competicion.fecha) && (inscripcionesPorCompeticionYEntrenador[competicion._id]?.length || 0) > 0"
+                                [routerLink]="['/mis-inscripciones', userId, competicion._id]"
+                                class="lista-btn lista-btn-mis-inscrip" title="Mis inscripciones">
+                                <i class="fas fa-user-check"></i>
+                            </button>
+                        </span>
+                    </div>
+
+                    <!-- Sub-fila de pruebas (aparece en hover) -->
+                    <div class="lista-row-pruebas" *ngIf="pruebas[competicion._id] && pruebas[competicion._id].length > 0">
+                        <i class="fas fa-running lista-pruebas-icon"></i>
+                        <span *ngFor="let prueba of pruebas[competicion._id]; let last = last" class="lista-prueba-item">
+                            {{ prueba.nombre_prueba }}<ng-container *ngIf="!last"> · </ng-container>
+                        </span>
+                    </div>
+                </div>
+            </ng-container>
+
+            <ng-template #sinCompeticionesMes>
+                <div class="no-results lista-no-results">
+                    <i class="fas fa-calendar-times"></i>
+                    <p>No hay competiciones en {{ getNombreMes() }} {{ anyoActual }}</p>
+                </div>
+            </ng-template>
+        </div>
     </div>
+
 </section>

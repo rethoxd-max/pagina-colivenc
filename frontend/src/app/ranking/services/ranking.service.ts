@@ -197,6 +197,16 @@ export class RankingService {
     return this.http.get<Categoria[]>(`${this.apiUrl}/categorias`);
   }
 
+  // Categorías que tienen al menos una marca en toda la BBDD
+  getCategoriasConMarcas(): Observable<Categoria[]> {
+    return this.http.get<Categoria[]>(`${this.apiUrl}/ranking/categorias-con-marcas`);
+  }
+
+  // Categorías en las que un atleta concreto tiene al menos una marca
+  getCategoriasConMarcasAtleta(atletaId: string): Observable<Categoria[]> {
+    return this.http.get<Categoria[]>(`${this.apiUrl}/perfil-atleta/categorias-con-marcas/${atletaId}`);
+  }
+
   // Obtener categorías disponibles para una prueba (solo las que tienen marcas)
   getCategoriasDisponibles(pruebaId: string): Observable<Categoria[]> {
     return this.http.get<Categoria[]>(`${this.apiUrl}/ranking/categorias-disponibles/${pruebaId}`);

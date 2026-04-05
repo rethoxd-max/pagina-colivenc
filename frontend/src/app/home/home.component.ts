@@ -5,14 +5,22 @@ import { PostsCarouselComponent } from "../posts/posts-carousel/posts-carousel.c
 import { HorariosEscuelaComponent } from './components/horarios-escuela/horarios-escuela.component';
 import { CalendarioLateralComponent } from './components/calendario-lateral/calendario-lateral.component';
 import { SocialSidebarComponent } from './components/social-sidebar/social-sidebar.component';
+import { PanelAnunciosComponent, Anuncio } from './components/panel-anuncios/panel-anuncios.component';
+import { TiendaPreviewComponent } from './components/tienda-preview/tienda-preview.component';
 
 @Component({
   selector: 'app-home',
   standalone: true,
-  imports: [CommonModule, RouterModule, PostsCarouselComponent, HorariosEscuelaComponent, CalendarioLateralComponent, SocialSidebarComponent],
+  imports: [CommonModule, RouterModule, PostsCarouselComponent, HorariosEscuelaComponent, CalendarioLateralComponent, SocialSidebarComponent, PanelAnunciosComponent, TiendaPreviewComponent],
   templateUrl: './home.component.html',
   styleUrl: './home.component.css'
 })
 export class HomeComponent {
-
+  anuncios: Anuncio[] = [
+    {
+      texto: '📣 ¡Inscripciones abiertas para la próxima temporada!',
+      enlace: '/inscripciones',
+      enlaceTexto: 'Inscríbete'
+    }
+  ];
 }

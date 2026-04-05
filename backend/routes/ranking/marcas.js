@@ -6,6 +6,7 @@ const Prueba = require('../../models/ranking/Prueba');
 const Sector = require('../../models/ranking/Sector');
 const PcAL = require('../../models/ranking/PcAL');
 const { calcularCategoria, parsearFecha } = require('../../utils/categoriaUtils');
+const auth = require('../../middleware/auth');
 const { 
     obtenerConfigCombinada, 
     parsearMarcasCombinada 
@@ -471,7 +472,7 @@ async function procesarCompeticion(lineas, numeroCompeticion, soloPreview = fals
  * 200m
  * Ana García,22/09/2008,F,25.30
  */
-router.post('/importar-csv', async (req, res) => {
+router.post('/importar-csv', auth, async (req, res) => {
     try {
         const { csvData } = req.body;
         
@@ -753,7 +754,7 @@ router.post('/importar-csv', async (req, res) => {
  * POST /previsualizar-csv
  * Previsualiza la importación sin guardar en BD - soporta múltiples competiciones y pruebas
  */
-router.post('/previsualizar-csv', async (req, res) => {
+router.post('/previsualizar-csv', auth, async (req, res) => {
     try {
         const { csvData } = req.body;
         
@@ -958,7 +959,7 @@ router.get('/:id', async (req, res) => {
 });
 
 // POST new marca
-router.post('/', async (req, res) => {
+router.post('/', auth, async (req, res) => {
     const marca = new Marca({
         nombre_atleta: req.body.nombre_atleta,
         nombre_prueba: req.body.nombre_prueba,
@@ -984,7 +985,7 @@ router.post('/', async (req, res) => {
 });
 
 // Actualizar una marca
-router.put('/:id', async (req, res) => {
+router.put('/:id', auth, async (req, res) => {
     try {
         const marca = await Marca.findById(req.params.id);
         if (!marca) return res.status(404).json({ message: 'Marca no encontrada' });
@@ -1001,7 +1002,7 @@ router.put('/:id', async (req, res) => {
 
 
 // DELETE all marcas
-router.delete('/', async (req, res) => {
+router.delete('/', auth, async (req, res) => {
     try {
         await Marca.deleteMany({});
         res.json({ message: 'Todas las marcas eliminadas' });
@@ -1011,7 +1012,7 @@ router.delete('/', async (req, res) => {
 });
 
 // DELETE marca by ID
-router.delete('/:id', async (req, res) => {
+router.delete('/:id', auth, async (req, res) => {
     try {
         const marca = await Marca.findByIdAndDelete(req.params.id);
         if (!marca) return res.status(404).json({ message: 'Marca no encontrada' });

@@ -30,6 +30,7 @@ import { PostDetailComponent } from './posts/components/post-detail/post-detail.
 import { ProcesarResultadosComponent } from './competiciones/procesar-resultados/procesar-resultados.component';
 import { TiendaComponent } from './tienda/tienda.component';
 import { CrearProductoComponent } from './tienda/components/crear-producto/crear-producto.component';
+import { InscripcionPublicaComponent } from './calendario/components/inscripcion-publica/inscripcion-publica.component';
 import { CalculadoraCombinadasComponent } from './calculadora-combinadas/calculadora-combinadas.component';
 
 
@@ -66,6 +67,7 @@ export const routes: Routes = [
     
     // Rutas de inscripciones
     { path: 'inscripcion/:id', component: InscripcionComponent, canActivate: [AuthGuard, atletaGuard] },
+    { path: 'inscripcion-publica/:token', component: InscripcionPublicaComponent },
     { path: 'editar-inscripcion/:inscripcionId/:competicionId', component: InscripcionComponent, canActivate: [AuthGuard] },
     { path: 'mis-inscripciones/:entrenadorId/:competicionId', component: MisInscripcionesComponent, canActivate: [AuthGuard] },
     { path: 'inscripciones/:competicionId', component: InscripcionListComponent, canActivate: [AuthGuard, entrenadorGuard] },
@@ -112,5 +114,8 @@ export const routes: Routes = [
     },
     
     // Ruta por defecto
-    { path: '', redirectTo: '/home', pathMatch: 'full' }
+    { path: '', redirectTo: '/home', pathMatch: 'full' },
+
+    // Ruta 404 — debe ser la última
+    { path: '**', redirectTo: '/home' }
 ];

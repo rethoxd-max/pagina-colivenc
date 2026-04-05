@@ -14,6 +14,7 @@ import { Subscription, filter } from 'rxjs';
 })
 export class AppComponent implements OnInit, OnDestroy {
   title = 'pagina-colivenc';
+  currentYear = new Date().getFullYear();
   isLoggedIn: boolean = false;  // Variable para almacenar el estado de autenticación
   atletaId: string | null = null; // Variable para almacenar el ID del atleta
   atletaSlug: string | null = null; // Variable para almacenar el slug del atleta

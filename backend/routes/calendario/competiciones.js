@@ -58,7 +58,12 @@ router.get('/:id', async (req, res) => {
 // Añadir una nueva competición
 const ObjectId = require('mongoose').Types.ObjectId;
 
-router.post('/', auth, upload.single('image'), async (req, res) => {
+router.post('/', auth, (req, res, next) => {
+    if (!req.user.userTypes.includes('Admin')) {
+        return res.status(403).json({ message: 'Se requiere rol Admin' });
+    }
+    next();
+}, upload.single('image'), async (req, res) => {
     try {
         const { nombre, fecha, lugar, descripcion, tipo } = req.body;
         let { pruebas, categorias } = req.body;
@@ -137,7 +142,12 @@ router.post('/', auth, upload.single('image'), async (req, res) => {
 });
 
 // Editar una competición (ruta protegida)
-router.put('/:id', auth, upload.single('image'), async (req, res) => {
+router.put('/:id', auth, (req, res, next) => {
+    if (!req.user.userTypes.includes('Admin')) {
+        return res.status(403).json({ message: 'Se requiere rol Admin' });
+    }
+    next();
+}, upload.single('image'), async (req, res) => {
     try {
         const competicion = await Competicion.findById(req.params.id);
         if (!competicion) {
@@ -209,7 +219,12 @@ router.put('/:id', auth, upload.single('image'), async (req, res) => {
 });
 
 // Eliminar una competición (ruta protegida)
-router.delete('/:id', auth, async (req, res) => {
+router.delete('/:id', auth, (req, res, next) => {
+    if (!req.user.userTypes.includes('Admin')) {
+        return res.status(403).json({ message: 'Se requiere rol Admin' });
+    }
+    next();
+}, async (req, res) => {
     try {
         const competicion = await Competicion.findById(req.params.id);
         if (!competicion) {

@@ -1,4 +1,9 @@
 <div class="home-container">
+  <!-- Panel de anuncios -->
+  <div class="panel-anuncios-wrapper">
+    <app-panel-anuncios [anuncios]="anuncios"></app-panel-anuncios>
+  </div>
+
   <!-- Layout de 3 columnas: Redes Sociales | Noticias | Calendario -->
   <section class="three-column-section">
     <div class="section-grid">
@@ -34,10 +39,11 @@
       <!-- Columna Derecha: Calendario -->
       <div class="sidebar-column right-column">
         <div class="sidebar-card">
-          <div class="sidebar-header">
+          <a routerLink="/competiciones" class="sidebar-header sidebar-header-link">
             <span class="sidebar-icon">📅</span>
             <h3>Calendario</h3>
-          </div>
+            <i class="fas fa-chevron-right sidebar-header-arrow"></i>
+          </a>
           <div class="sidebar-content">
             <app-calendario-lateral></app-calendario-lateral>
           </div>
@@ -46,23 +52,37 @@
     </div>
   </section>
 
-  <!-- Sección de Horarios -->
-  <section class="schedule-section">
-    <div class="section-container">
-      <div class="section-header">
-        <div class="section-title-wrapper">
-          <span class="section-icon">⏰</span>
-          <h2 class="section-title">Horarios de Entrenamiento</h2>
+  <!-- Sección de Horarios + Tienda -->
+  <section class="schedule-store-section">
+    <div class="schedule-store-grid">
+      <!-- Columna Horarios -->
+      <div class="schedule-column">
+        <div class="schedule-header">
+          <span class="schedule-icon">⏰</span>
+          <h2>Horarios de Entrenamiento</h2>
         </div>
-        <div class="section-line"></div>
+        <app-horarios-escuela></app-horarios-escuela>
       </div>
-      <app-horarios-escuela></app-horarios-escuela>
+
+      <!-- Columna Tienda -->
+      <div class="store-column">
+        <div class="sidebar-card">
+          <a routerLink="/tienda" class="sidebar-header sidebar-header-link sidebar-header-gold">
+            <span class="sidebar-icon">🛍️</span>
+            <h3>Tienda</h3>
+            <i class="fas fa-chevron-right sidebar-header-arrow"></i>
+          </a>
+          <div class="sidebar-content store-content">
+            <app-tienda-preview></app-tienda-preview>
+          </div>
+        </div>
+      </div>
     </div>
   </section>
 
   <!-- CTA Section -->
   <section class="cta-section">
-    <div class="section-container">
+    <div class="cta-wrapper">
       <div class="cta-card">
         <div class="cta-content">
           <h3>¿Listo para empezar?</h3>

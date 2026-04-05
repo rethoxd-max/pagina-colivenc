@@ -3,10 +3,14 @@ const router = express.Router();
 const stripe = require('../config/stripe');
 const Producto = require('../models/Producto');
 const Orden = require('../models/Orden');
+const User = require('../models/User');
 const auth = require('../middleware/auth');
+const { optionalAuth } = require('../middleware/auth');
 const path = require('path');
 const fs = require('fs');
 const multer = require('multer');
+const { registrarCompraEnSheets } = require('../services/googleSheets');
+const { enviarConfirmacionCompra } = require('../services/emailService');
 
 // Verificar la clave de Stripe
 const stripeKey = process.env['STRIPE_SECRET_KEY'];
@@ -96,9 +100,9 @@ router.get('/productos/imagen/:filename', async (req, res) => {
 });
 
 // Crear una sesión de Stripe para el pago
-router.post('/crear-sesion', auth, async (req, res) => {
+router.post('/crear-sesion', optionalAuth, async (req, res) => {
     
-    const { productoId, talla } = req.body;
+    const { productoId, talla, telefono } = req.body;
 
     if (!productoId || !talla) {
         return res.status(400).json({ mensaje: "Faltan datos requeridos" });
@@ -111,12 +115,12 @@ router.post('/crear-sesion', auth, async (req, res) => {
             return res.status(404).json({ mensaje: "Producto no encontrado" });
         }
 
-        // Verificar que el usuario existe y tiene un ID válido
-        if (!req.user || !req.user._id) {
-            return res.status(401).json({ mensaje: "Usuario no autenticado" });
+        // Guardar teléfono en el usuario si está logueado
+        if (telefono && req.user) {
+            await User.findByIdAndUpdate(req.user._id, { telefono });
         }
 
-        const session = await stripeInstance.checkout.sessions.create({
+        const sessionParams = {
             payment_method_types: ["card"],
             line_items: [
                 {
@@ -137,9 +141,12 @@ router.post('/crear-sesion', auth, async (req, res) => {
             metadata: {
                 productoId: producto._id.toString(),
                 talla: talla,
-                usuarioId: req.user._id.toString()
+                usuarioId: req.user ? req.user._id.toString() : '',
+                telefono: telefono || ''
             },
-        });
+        };
+
+        const session = await stripeInstance.checkout.sessions.create(sessionParams);
 
         res.json({ sessionId: session.id });
     } catch (error) {
@@ -149,17 +156,17 @@ router.post('/crear-sesion', auth, async (req, res) => {
 });
 
 // Crear una sesión de Stripe para el pago del carrito completo
-router.post('/crear-sesion-carrito', auth, async (req, res) => {
-    const { items } = req.body;
+router.post('/crear-sesion-carrito', optionalAuth, async (req, res) => {
+    const { items, telefono } = req.body;
 
     if (!items || !Array.isArray(items) || items.length === 0) {
         return res.status(400).json({ mensaje: "El carrito está vacío" });
     }
 
     try {
-        // Verificar que el usuario existe y tiene un ID válido
-        if (!req.user || !req.user._id) {
-            return res.status(401).json({ mensaje: "Usuario no autenticado" });
+        // Guardar teléfono en el usuario si está logueado
+        if (telefono && req.user) {
+            await User.findByIdAndUpdate(req.user._id, { telefono });
         }
 
         // Obtener los productos del carrito
@@ -176,8 +183,7 @@ router.post('/crear-sesion-carrito', auth, async (req, res) => {
             })
         );
 
-        // Crear la sesión de Stripe
-        const session = await stripeInstance.checkout.sessions.create({
+        const sessionParams = {
             payment_method_types: ["card"],
             line_items: productos.map(item => ({
                 price_data: {
@@ -194,10 +200,13 @@ router.post('/crear-sesion-carrito', auth, async (req, res) => {
             success_url: `${process.env['FRONTEND_URL']}/tienda/success?session_id={CHECKOUT_SESSION_ID}`,
             cancel_url: `${process.env['FRONTEND_URL']}/tienda/cancel`,
             metadata: {
-                usuarioId: req.user._id.toString(),
-                items: JSON.stringify(items)
+                usuarioId: req.user ? req.user._id.toString() : '',
+                items: JSON.stringify(items),
+                telefono: telefono || ''
             },
-        });
+        };
+
+        const session = await stripeInstance.checkout.sessions.create(sessionParams);
 
         res.json({ sessionId: session.id });
     } catch (error) {
@@ -224,6 +233,11 @@ router.post('/webhook', async (req, res) => {
 
     if (event.type === 'checkout.session.completed') {
         const session = event.data.object;
+
+        // Solo procesar si el pago fue realmente cobrado
+        if (session.payment_status !== 'paid') {
+            return res.json({ received: true });
+        }
         
         try {
             // Verificar si es una compra de carrito o de un solo producto
@@ -248,19 +262,88 @@ router.post('/webhook', async (req, res) => {
             }
 
             // Crear la orden
+            let productosOrden = [];
+            let totalOrden = 0;
+
+            if (items) {
+                for (const item of items) {
+                    const prod = await Producto.findById(item.productoId);
+                    const precio = prod ? prod.precio : 0;
+                    productosOrden.push({
+                        producto: item.productoId,
+                        cantidad: item.cantidad || 1,
+                        talla: (item.talla || 'N/A').replace(/[\[\]"]/g, '').trim(),
+                        precio
+                    });
+                    totalOrden += precio * (item.cantidad || 1);
+                }
+            } else {
+                const prod = await Producto.findById(session.metadata.productoId);
+                const precio = prod ? prod.precio : 0;
+                productosOrden.push({
+                    producto: session.metadata.productoId,
+                    cantidad: 1,
+                    talla: (session.metadata.talla || 'N/A').replace(/[\[\]"]/g, '').trim(),
+                    precio
+                });
+                totalOrden = precio;
+            }
+
             const orden = new Orden({
                 usuario: session.metadata.usuarioId,
                 stripeSessionId: session.id,
                 stripePaymentIntentId: session.payment_intent,
                 estado: 'completada',
-                productos: items ? items : [{
-                    producto: session.metadata.productoId,
-                    cantidad: 1,
-                    talla: session.metadata.talla
-                }]
+                productos: productosOrden,
+                total: totalOrden
             });
 
             await orden.save();
+
+            // Preparar datos de productos con precio unitario para email y Sheets
+            const usuarioData = await User.findById(session.metadata.usuarioId);
+            const productosInfo = [];
+            for (const p of productosOrden) {
+                const prod = await Producto.findById(p.producto);
+                productosInfo.push({
+                    nombre:   prod ? prod.nombre : 'Producto desconocido',
+                    talla:    p.talla,
+                    cantidad: p.cantidad,
+                    precio:   p.precio
+                });
+            }
+            const compradorInfo = {
+                nombre:   session.customer_details?.name  || (usuarioData ? usuarioData.name  : 'N/A'),
+                email:    session.customer_details?.email || session.metadata.emailComprador || (usuarioData ? usuarioData.email : 'N/A'),
+                telefono: session.metadata.telefono || (usuarioData ? usuarioData.telefono : '') || 'N/A'
+            };
+
+            // Registrar en Google Sheets
+            try {
+                await registrarCompraEnSheets({
+                    usuario:        compradorInfo,
+                    productos:      productosInfo,
+                    total:          totalOrden,
+                    estado:         'Pagada',
+                    stripeSessionId: session.id,
+                    fecha:          new Date()
+                });
+            } catch (sheetsError) {
+                console.error('Error al guardar compra en Google Sheets (no bloquea):', sheetsError.message);
+            }
+
+            // Enviar email de confirmación con factura PDF
+            try {
+                await enviarConfirmacionCompra({
+                    comprador:   compradorInfo,
+                    productos:   productosInfo,
+                    total:       totalOrden,
+                    numeroOrden: orden._id.toString(),
+                    fecha:       new Date()
+                });
+            } catch (emailError) {
+                console.error('Error al enviar email de confirmación (no bloquea):', emailError.message);
+            }
         } catch (error) {
             console.error('Error al procesar el webhook:', error);
             return res.status(500).json({ error: 'Error al procesar el pago' });
@@ -326,7 +409,7 @@ router.post('/productos', auth, upload.single('imagen'), async (req, res) => {
 });
 
 // Actualizar un producto
-router.put('/productos/:id', upload.single('imagen'), async (req, res) => {
+router.put('/productos/:id', auth, upload.single('imagen'), async (req, res) => {
   try {
     const { nombre, descripcion, precio, tallas } = req.body;
     const productoId = req.params.id;

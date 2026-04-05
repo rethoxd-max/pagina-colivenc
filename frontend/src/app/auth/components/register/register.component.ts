@@ -17,7 +17,10 @@ export class RegisterComponent implements OnInit {
     name: '',
     email: '',
     password: '',
-    userTypes: [] // Inicializar userTypes como un arreglo vacío
+    userTypes: [],
+    fechaNacimiento: '',
+    numeroLicencia: '',
+    activo: true
   };
   errorMessage: string | null = null;
 

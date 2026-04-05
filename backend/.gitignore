@@ -1,2 +1,9 @@
 /node_modules
 /uploads
+
+# Variables de entorno — NUNCA subir al repositorio
+.env
+*.env
+.env.local
+.env.production
+.env.development

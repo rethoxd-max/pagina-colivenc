@@ -178,7 +178,7 @@ export class TiendaService {
     this.inicializarCarrito();
   }
 
-  async iniciarPagoCarrito(): Promise<string> {
+  async iniciarPagoCarrito(telefono: string = ''): Promise<string> {
     try {
       const headers = this.getHeaders();
       const carrito = this.carritoSubject.value;
@@ -192,7 +192,8 @@ export class TiendaService {
           productoId: item.productoId,
           talla: item.talla,
           cantidad: item.cantidad
-        }))
+        })),
+        telefono
       };
 
       const response = await this.http.post(

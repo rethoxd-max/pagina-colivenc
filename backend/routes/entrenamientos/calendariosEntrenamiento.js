@@ -1,10 +1,12 @@
 const express = require('express');
 const router = express.Router();
 const CalendarioEntrenamiento = require('../../models/entrenamientos/CalendarioEntrenamiento');
+const DiaEntrenamiento = require('../../models/entrenamientos/DiaEntrenamiento');
 const mongoose = require('mongoose');
 const Atleta = require('../../models/ranking/Atleta');
 const GrupoEntrenamiento = require('../../models/entrenamientos/GrupoEntrenamiento');
 const User = require('../../models/User');
+const auth = require('../../middleware/auth');
 
 // Obtener todos los calendarios de entrenamiento
 router.get('/', async (req, res) => {
@@ -81,7 +83,7 @@ router.get('/calendario/:id', async (req, res) => {
 });
 
 // Crear un nuevo calendario de entrenamiento
-router.post('/', async (req, res) => {
+router.post('/', auth, async (req, res) => {
     try {
         const calendario = new CalendarioEntrenamiento(req.body);
         const nuevoCalendario = await calendario.save();
@@ -92,7 +94,7 @@ router.post('/', async (req, res) => {
 });
 
 // Actualizar un calendario de entrenamiento por ID
-router.put('/:id', async (req, res) => {
+router.put('/:id', auth, async (req, res) => {
     try {
         const calendario = await CalendarioEntrenamiento.findByIdAndUpdate(
             req.params.id,
@@ -110,7 +112,7 @@ router.put('/:id', async (req, res) => {
 });
 
 // Eliminar un calendario de entrenamiento por ID
-router.delete('/:id', async (req, res) => {
+router.delete('/:id', auth, async (req, res) => {
     try {
         const calendario = await CalendarioEntrenamiento.findById(req.params.id);
         if (!calendario) {
@@ -123,7 +125,7 @@ router.delete('/:id', async (req, res) => {
         });
 
         // Eliminar el calendario
-        await calendario.remove();
+        await CalendarioEntrenamiento.deleteOne({ _id: calendario._id });
         
         res.json({ message: 'Calendario y días de entrenamiento eliminados' });
     } catch (err) {

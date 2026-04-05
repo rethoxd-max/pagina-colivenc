@@ -16,6 +16,7 @@ const PostSchema = new Schema({
         required: true
     },
     imageUrl: { type: String },
+    category: { type: String, default: '' },
     date: {
         type: Date,
         default: Date.now

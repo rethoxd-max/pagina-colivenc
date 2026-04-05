@@ -81,10 +81,14 @@
 
 .search-box {
     position: relative;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
 }
 
 .search-input {
-    width: 100%;
+    flex: 1;
+    min-width: 0;
     padding: 0.75rem 1rem 0.75rem 2.5rem;
     border: 2px solid #e0e0e0;
     border-radius: 8px;
@@ -97,7 +101,7 @@
     box-shadow: 0 0 0 0.2rem rgba(52,152,219,0.25);
 }
 
-.search-box i {
+.search-box > i {
     position: absolute;
     left: 1rem;
     top: 50%;
@@ -272,21 +276,25 @@
 
 .card-actions {
     display: flex;
+    flex-wrap: wrap;
     gap: 0.5rem;
     margin-bottom: 1rem;
 }
 
 .btn-action {
-    padding: 0.5rem 1rem;
+    padding: 0.5rem 0.75rem;
     border: none;
     border-radius: 6px;
     cursor: pointer;
     transition: all 0.3s ease;
     display: flex;
     align-items: center;
-    gap: 0.5rem;
-    font-size: 0.9rem;
+    justify-content: center;
+    gap: 0.4rem;
+    font-size: 0.82rem;
     font-weight: 500;
+    flex: 1 1 auto;
+    white-space: nowrap;
 }
 
 .btn-delete {
@@ -302,6 +310,15 @@
 .btn-inscribir {
     background: #2ecc71;
     color: white;
+}
+
+.btn-copiar-link {
+    background: #6366f1;
+    color: white;
+}
+
+.btn-copiar-link:hover {
+    background: #4f46e5;
 }
 
 .btn-action:hover {
@@ -396,7 +413,7 @@
     }
 
     .btn-action {
-        flex: 1;
+        flex: 1 1 auto;
         justify-content: center;
     }
 
@@ -407,4 +424,290 @@
     .mes-titulo {
         font-size: 1.25rem;
     }
+
+    .lista-col-tipo {
+        display: none;
+    }
+}
+
+/* ========================================
+   Toggle de vista
+======================================== */
+.vista-toggle {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    background: #f1f5f9;
+    border-radius: 8px;
+    padding: 0.25rem;
+    border: 1px solid #e2e8f0;
+}
+
+.vista-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 38px;
+    height: 38px;
+    border: none;
+    border-radius: 6px;
+    background: transparent;
+    color: #64748b;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-size: 1rem;
+}
+
+.vista-btn:hover {
+    background: #e2e8f0;
+    color: #1e3c72;
+}
+
+.vista-btn.active {
+    background: #1e3c72;
+    color: white;
+    box-shadow: 0 2px 4px rgba(30, 60, 114, 0.3);
+}
+
+/* ========================================
+   Vista Lista
+======================================== */
+.lista-view {
+    margin-top: 1.5rem;
+}
+
+/* Navegación de mes */
+.lista-nav-mes {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.lista-nav-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border: 2px solid #e2e8f0;
+    border-radius: 50%;
+    background: white;
+    color: #1e3c72;
+    cursor: pointer;
+    font-size: 0.95rem;
+    transition: all 0.2s ease;
+}
+
+.lista-nav-btn:hover {
+    background: #1e3c72;
+    border-color: #1e3c72;
+    color: white;
+    transform: scale(1.08);
+}
+
+.lista-mes-label {
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: #1e3c72;
+    min-width: 200px;
+    text-align: center;
+    text-transform: capitalize;
+}
+
+/* Tabla */
+.lista-table-wrap {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+    overflow: hidden;
+}
+
+.lista-header-row {
+    display: grid;
+    grid-template-columns: 80px 1fr 1fr 120px 160px;
+    gap: 0;
+    background: linear-gradient(135deg, #1e3c72, #2a5298);
+    padding: 0.875rem 1.25rem;
+    font-size: 0.78rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: rgba(255,255,255,0.85);
+}
+
+/* Fila de competición */
+.lista-row {
+    border-bottom: 1px solid #f1f5f9;
+    transition: background 0.15s;
+}
+
+.lista-row:last-child {
+    border-bottom: none;
+}
+
+/* Sub-fila de pruebas - oculta por defecto, visible en hover */
+.lista-row-pruebas {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease, padding 0.3s ease;
+    padding: 0 1.25rem;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.4rem;
+    background: #f8fafc;
+    border-top: 0px solid #e2e8f0;
+}
+
+.lista-row:hover .lista-row-pruebas {
+    max-height: 200px;
+    padding: 0.6rem 1.25rem;
+    border-top-width: 1px;
+}
+
+.lista-pruebas-icon {
+    color: #2563eb;
+    font-size: 0.8rem;
+    flex-shrink: 0;
+}
+
+.lista-prueba-item {
+    font-size: 0.78rem;
+    color: #475569;
+    font-weight: 500;
+}
+
+/* Fila principal */
+.lista-row-main {
+    display: grid;
+    grid-template-columns: 80px 1fr 1fr 120px 160px;
+    gap: 0;
+    align-items: center;
+    padding: 0.875rem 1.25rem;
+    transition: background 0.15s;
+}
+
+.lista-row:hover .lista-row-main {
+    background: #f8fafc;
+}
+
+/* En la cabecera, todos los spans comparten el mismo estilo blanco */
+.lista-header-row span {
+    color: rgba(255, 255, 255, 0.92) !important;
+    background: transparent !important;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    display: flex;
+    align-items: center;
+    border-radius: 0;
+    padding: 0;
+    white-space: nowrap;
+}
+
+.lista-col-fecha {
+    font-weight: 700;
+    font-size: 0.9rem;
+    color: #1e3c72;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    white-space: nowrap;
+}
+
+.lista-col-fecha i {
+    color: #2563eb;
+    font-size: 0.8rem;
+}
+
+.lista-col-nombre {
+    font-weight: 700;
+    color: #1e3c72;
+    font-size: 0.95rem;
+    padding-right: 1rem;
+}
+
+.lista-col-lugar {
+    font-size: 0.85rem;
+    color: #374151;
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding-right: 1rem;
+    font-weight: 500;
+}
+
+.lista-col-lugar i {
+    color: #2563eb;
+    font-size: 0.75rem;
+    flex-shrink: 0;
+}
+
+.lista-col-tipo {
+    font-size: 0.8rem;
+    color: #1e3c72;
+    background: #dbeafe;
+    padding: 0.2rem 0.6rem;
+    border-radius: 12px;
+    display: inline-block;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-weight: 600;
+}
+
+.lista-col-acciones {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    justify-content: flex-end;
+}
+
+/* Botones de acción en lista */
+.lista-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.8rem;
+    transition: all 0.2s ease;
+    text-decoration: none;
+    flex-shrink: 0;
+}
+
+.lista-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 3px 6px rgba(0,0,0,0.15);
+}
+
+.lista-btn-delete  { background: #fee2e2; color: #ef4444; }
+.lista-btn-delete:hover { background: #ef4444; color: white; }
+
+.lista-btn-edit    { background: #fef3c7; color: #f59e0b; }
+.lista-btn-edit:hover { background: #f59e0b; color: white; }
+
+.lista-btn-inscribir  { background: #d1fae5; color: #10b981; }
+.lista-btn-inscribir:hover { background: #10b981; color: white; }
+
+.lista-btn-ver-inscrip { background: #dbeafe; color: #2563eb; }
+.lista-btn-ver-inscrip:hover { background: #2563eb; color: white; }
+
+.lista-btn-mis-inscrip { background: #ede9fe; color: #7c3aed; }
+.lista-btn-mis-inscrip:hover { background: #7c3aed; color: white; }
+
+.lista-btn-copiar { background: #e0e7ff; color: #6366f1; }
+.lista-btn-copiar:hover { background: #6366f1; color: white; }
+
+/* Sin competiciones en el mes */
+.lista-no-results {
+    margin: 0;
+    border-radius: 0;
+    box-shadow: none;
 }

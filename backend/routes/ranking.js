@@ -631,4 +631,21 @@ function obtenerMejorMarca(marcasAtleta) {
     });
 }
 
+// GET categorías que tienen al menos una marca en toda la base de datos
+router.get('/categorias-con-marcas', async (req, res) => {
+    try {
+        const grupos = await Marca.aggregate([
+            { $match: { categoria: { $exists: true, $ne: null } } },
+            { $group: { _id: '$categoria' } }
+        ]);
+        const ids = grupos.map(g => g._id);
+        const categorias = await Categoria.find({
+            _id: { $in: ids }
+        }).sort({ orden: 1, nombre_categoria: 1 });
+        res.json(categorias);
+    } catch (err) {
+        res.status(500).json({ message: err.message });
+    }
+});
+
 module.exports = router;

@@ -24,18 +24,20 @@
              class="dia-calendario"
              [class.empty]="day === 0"
              [class.has-competicion]="hasCompeticiones(day)"
-             (mouseenter)="setHoveredDate(day)"
-             (mouseleave)="clearHoveredDate()">
+             (click)="selectDate(day)">
             {{ day === 0 ? '' : day }}
         </div>
     </div>
 
-    <div class="competiciones-tooltip" *ngIf="hoveredDate && hasCompeticiones(hoveredDate.getDate())">
+    <div class="competiciones-tooltip" *ngIf="selectedDate && hasCompeticiones(selectedDate.getDate())">
         <div class="tooltip-header">
-            <h4>{{ hoveredDate.getDate() }} de {{ getMonthName() }}</h4>
+            <h4>{{ selectedDate.getDate() }} de {{ getMonthName() }}</h4>
+            <button class="tooltip-close" (click)="closeSelectedDate()">
+                <i class="fas fa-times"></i>
+            </button>
         </div>
         <div class="competiciones-list">
-            <div *ngFor="let competicion of getCompeticionesDelDia(hoveredDate.getDate())" 
+            <div *ngFor="let competicion of getCompeticionesDelDia(selectedDate.getDate())" 
                  class="competicion-item">
                 <h5>{{ competicion.nombre }}</h5>
                 <p><i class="fas fa-map-marker-alt"></i> {{ competicion.lugar }}</p>

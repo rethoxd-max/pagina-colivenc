@@ -7,13 +7,15 @@ import { FormsModule, ReactiveFormsModule, FormControl } from '@angular/forms';
 import { Observer, Subscription } from 'rxjs';
 import { AuthService } from '../auth/services/auth.service';
 import { SearchAtletaComponent } from '../ranking/create-performance/components/search-atleta/search-atleta.component';
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
+import { DecathlonModalComponent } from '../ranking/components/decathlon-modal/decathlon-modal.component';
 
 @Component({
   selector: 'app-perfil-atleta',
   templateUrl: './perfil-atleta.component.html',
   styleUrls: ['./perfil-atleta.component.css'],
   standalone: true,
-  imports: [CommonModule, FormsModule, ReactiveFormsModule, SearchAtletaComponent]
+  imports: [CommonModule, FormsModule, ReactiveFormsModule, SearchAtletaComponent, MatDialogModule]
 })
 export class PerfilAtletaComponent implements OnInit, OnDestroy {
   // Propiedades para el buscador de atletas
@@ -45,7 +47,10 @@ export class PerfilAtletaComponent implements OnInit, OnDestroy {
   filtroAnyo: number | undefined;
   anyosPorPrueba!: { [pruebaId: string]: number[]; };
   mejoresMarcasIlegales: { [key: string]: Marca } = {};
-  
+
+  pivotOffset: number = 0;
+  readonly PIVOT_PAGE_SIZE = 4;
+
   private routeSubscription!: Subscription;
   private authSubscription!: Subscription;
   private isLoggedIn: boolean = false;
@@ -55,8 +60,19 @@ export class PerfilAtletaComponent implements OnInit, OnDestroy {
     private perfilAtletaService: PerfilAtletaService,
     private route: ActivatedRoute,
     private router: Router,
-    private authService: AuthService
+    private authService: AuthService,
+    private dialog: MatDialog
   ) { }
+
+  openDecathlonModal(comentario: string, tipoPrueba: string): void {
+    this.dialog.open(DecathlonModalComponent, {
+      width: 'auto',
+      maxWidth: '95vw',
+      maxHeight: '90vh',
+      panelClass: 'decathlon-dialog',
+      data: { comentario, tipoPrueba }
+    });
+  }
 
   // Métodos para el buscador de atletas
   onAtletaSelected(atleta: any): void {
@@ -171,8 +187,7 @@ export class PerfilAtletaComponent implements OnInit, OnDestroy {
     this.rankingService.getAtletaById(identificador).subscribe({
       next: (atleta: Atleta) => {
         this.atleta = atleta;
-
-        // Cargar las marcas del atleta usando su ID
+        this.getCategorias();
         this.perfilAtletaService.getMarcasByAtletaId(this.atleta._id).subscribe({
           next: (marcas: Marca[]) => {
             this.marcas = marcas;
@@ -214,7 +229,6 @@ export class PerfilAtletaComponent implements OnInit, OnDestroy {
       }
     });
 
-    this.getCategorias();
     this.getPcAL();
   }
 
@@ -267,9 +281,11 @@ export class PerfilAtletaComponent implements OnInit, OnDestroy {
   }
 
   getCategorias(): void {
-    this.rankingService.getCategorias().subscribe((categorias) => {
-      this.categorias = categorias; // Asignar correctamente a categorias
-    });
+    if (this.atleta?._id) {
+      this.rankingService.getCategoriasConMarcasAtleta(this.atleta._id).subscribe((categorias) => {
+        this.categorias = categorias;
+      });
+    }
   }
 
   onCategoriaChange(categoriaId: string): void {
@@ -646,5 +662,167 @@ export class PerfilAtletaComponent implements OnInit, OnDestroy {
     // Verificar si la prueba está en la lista de pruebas con viento
     const nombrePrueba = marca.nombre_prueba?.nombre_prueba || '';
     return this.pruebasConViento.some(p => nombrePrueba.includes(p));
+  }
+
+  getPruebasAgrupadasPorSectorResultados(): { sector: string, pruebas: { prueba: Prueba, marcas: Marca[] }[] }[] {
+    const SECTOR_ORDER: Record<string, number> = {
+      'velocidad': 0, 'medio fondo': 1, 'fondo': 2, 'marcha': 3,
+      'relevos': 4, 'vallas': 5, 'saltos': 6, 'lanzamientos': 7, 'combinadas': 8
+    };
+    const SECTORES_CARRERA = new Set(['velocidad', 'vallas', 'medio fondo', 'fondo', 'marcha', 'relevos']);
+    const getDistRe = (nombre: string) => parseInt(nombre.match(/(\d+)/)?.[1] ?? '0', 10);
+    const getSOrderR = (s: string) => SECTOR_ORDER[s.toLowerCase()] ?? 99;
+    const esCarreraR = (s: string) => SECTORES_CARRERA.has(s.toLowerCase());
+    const grupos = new Map<string, Prueba[]>();
+    for (const prueba of this.pruebas) {
+      const sector = prueba.sector_id?.nombre_sector ?? 'Sin sector';
+      if (!grupos.has(sector)) grupos.set(sector, []);
+      grupos.get(sector)!.push(prueba);
+    }
+    return Array.from(grupos.entries())
+      .sort((a, b) => getSOrderR(a[0]) - getSOrderR(b[0]))
+      .map(([sector, pruebas]) => ({
+        sector,
+        pruebas: (esCarreraR(sector)
+          ? pruebas.sort((a, b) => getDistRe(a.nombre_prueba) - getDistRe(b.nombre_prueba))
+          : pruebas.sort((a, b) => a.nombre_prueba.localeCompare(b.nombre_prueba, 'es'))
+        ).map(prueba => ({ prueba, marcas: this.marcasPorPrueba[prueba._id] || [] }))
+         .filter(item => item.marcas.length > 0)
+      }))
+      .filter(g => g.pruebas.length > 0);
+  }
+
+  // ==========================================
+  // Métodos para la tabla Pivot de Progresión
+  // ==========================================
+
+  getPivotYears(): number[] {
+    return [...this.anyos].sort((a, b) => b - a);
+  }
+
+  getPivotVisibleYears(): number[] {
+    return this.getPivotYears().slice(this.pivotOffset, this.pivotOffset + this.PIVOT_PAGE_SIZE);
+  }
+
+  pivotNavOlder(): void {
+    const total = this.getPivotYears().length;
+    this.pivotOffset = Math.min(this.pivotOffset + this.PIVOT_PAGE_SIZE, total - this.PIVOT_PAGE_SIZE);
+  }
+
+  pivotNavNewer(): void {
+    this.pivotOffset = Math.max(0, this.pivotOffset - this.PIVOT_PAGE_SIZE);
+  }
+
+  canPivotNewer(): boolean { return this.pivotOffset > 0; }
+  canPivotOlder(): boolean { return this.pivotOffset + this.PIVOT_PAGE_SIZE < this.getPivotYears().length; }
+
+  getPivotPages(): number[] {
+    return Array.from({ length: Math.ceil(this.getPivotYears().length / this.PIVOT_PAGE_SIZE) }, (_, i) => i);
+  }
+
+  getPivotCurrentPage(): number {
+    return Math.floor(this.pivotOffset / this.PIVOT_PAGE_SIZE);
+  }
+
+  getPivotMarca(pruebaId: string, anyo: number): Marca | null {
+    return this.marcasPorPruebaAnyo[pruebaId + '-' + anyo] ?? null;
+  }
+
+  esMejorMarcaPersonal(pruebaId: string, anyo: number): boolean {
+    const marcaAnyo = this.getPivotMarca(pruebaId, anyo);
+    if (!marcaAnyo) return false;
+
+    const getValor = (m: Marca): number | null => {
+      if (m.metros !== undefined && m.metros !== null) return m.metros;
+      if (m.puntos !== undefined && m.puntos !== null) return m.puntos;
+      if (m.horas !== undefined || m.minutos !== undefined || m.segundos !== undefined)
+        return (m.horas || 0) * 3600 + (m.minutos || 0) * 60 + (m.segundos || 0);
+      return null;
+    };
+
+    const esTiempo = !(marcaAnyo.metros !== undefined && marcaAnyo.metros !== null)
+      && !(marcaAnyo.puntos !== undefined && marcaAnyo.puntos !== null)
+      && (marcaAnyo.horas !== undefined || marcaAnyo.minutos !== undefined || marcaAnyo.segundos !== undefined);
+
+    const valorAnyo = getValor(marcaAnyo);
+    if (valorAnyo === null) return false;
+
+    for (const a of this.getPivotYears()) {
+      const m = this.getPivotMarca(pruebaId, a);
+      if (!m) continue;
+      const v = getValor(m);
+      if (v === null) continue;
+      if (esTiempo ? v < valorAnyo : v > valorAnyo) return false;
+    }
+    return true;
+  }
+
+  getPivotMarcaIlegal(pruebaId: string, anyo: number): Marca | null {
+    return this.marcasPorPruebaAnyo[pruebaId + '-' + anyo + '-ilegal'] ?? null;
+  }
+
+  getPruebasAgrupadasPorSectorProgresion(): { sector: string, pruebas: Prueba[] }[] {
+    const SECTOR_ORDER: Record<string, number> = {
+      'velocidad': 0, 'medio fondo': 1, 'fondo': 2, 'marcha': 3,
+      'relevos': 4, 'vallas': 5, 'saltos': 6, 'lanzamientos': 7, 'combinadas': 8
+    };
+    const SECTORES_CARRERA = new Set(['velocidad', 'vallas', 'medio fondo', 'fondo', 'marcha', 'relevos']);
+    const getDistP = (nombre: string) => parseInt(nombre.match(/(\d+)/)?.[1] ?? '0', 10);
+    const getSOrderP = (s: string) => SECTOR_ORDER[s.toLowerCase()] ?? 99;
+    const esCarreraP = (s: string) => SECTORES_CARRERA.has(s.toLowerCase());
+    const grupos = new Map<string, Prueba[]>();
+    for (const prueba of this.pruebas) {
+      const sector = (prueba as any).sector_id?.nombre_sector ?? 'Sin sector';
+      if (!grupos.has(sector)) grupos.set(sector, []);
+      grupos.get(sector)!.push(prueba);
+    }
+    return Array.from(grupos.entries())
+      .sort((a, b) => getSOrderP(a[0]) - getSOrderP(b[0]))
+      .map(([sector, pruebas]) => ({
+        sector,
+        pruebas: esCarreraP(sector)
+          ? pruebas.sort((a, b) => getDistP(a.nombre_prueba) - getDistP(b.nombre_prueba))
+          : pruebas.sort((a, b) => a.nombre_prueba.localeCompare(b.nombre_prueba, 'es'))
+      }))
+      .filter(g => g.pruebas.length > 0);
+  }
+
+  getMarcasAgrupadasPorSector(): { sector: string, marcas: Marca[] }[] {
+    const SECTOR_ORDER: Record<string, number> = {
+      'velocidad': 0,
+      'medio fondo': 1,
+      'fondo': 2,
+      'marcha': 3,
+      'relevos': 4,
+      'vallas': 5,
+      'saltos': 6,
+      'lanzamientos': 7,
+      'combinadas': 8,
+    };
+    const SECTORES_CARRERA = new Set(['velocidad', 'vallas', 'medio fondo', 'fondo', 'marcha', 'relevos']);
+    const getDistancia = (nombre: string) => parseInt(nombre.match(/(\d+)/)?.[1] ?? '0', 10);
+    const getSectorOrder = (s: string) => SECTOR_ORDER[s.toLowerCase()] ?? 99;
+    const esCarrera = (s: string) => SECTORES_CARRERA.has(s.toLowerCase());
+    const grupos = new Map<string, Marca[]>();
+    for (const marca of this.mejoresMarcas) {
+      const sector = (marca.nombre_prueba as any)?.sector_id?.nombre_sector ?? 'Sin sector';
+      if (!grupos.has(sector)) grupos.set(sector, []);
+      grupos.get(sector)!.push(marca);
+    }
+    return Array.from(grupos.entries())
+      .sort((a, b) => getSectorOrder(a[0]) - getSectorOrder(b[0]))
+      .map(([sector, marcas]) => ({
+        sector,
+        marcas: esCarrera(sector)
+          ? marcas.sort((a, b) =>
+              getDistancia((a.nombre_prueba as any).nombre_prueba) -
+              getDistancia((b.nombre_prueba as any).nombre_prueba)
+            )
+          : marcas.sort((a, b) =>
+              (a.nombre_prueba as any).nombre_prueba.localeCompare(
+                (b.nombre_prueba as any).nombre_prueba, 'es'
+              )
+            )
+      }));
   }
 }

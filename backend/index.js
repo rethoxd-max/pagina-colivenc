@@ -36,15 +36,23 @@ const express = require("express");
 const mongoose = require("mongoose");
 const bodyParser = require("body-parser");
 const cors = require("cors");
+const helmet = require('helmet');
+const rateLimit = require('express-rate-limit');
 const instagramRoutes = require('./routes/instagram');
 const tiendaRoutes = require('./routes/tienda');
 
-// Verificar variables de entorno críticas
-console.log('Verificando variables de entorno...');
-console.log('PORT:', process.env.PORT);
+if (!isProduction) {
+    console.log('Verificando variables de entorno...');
+    console.log('PORT:', process.env.PORT);
+}
 
 // Inicializar la aplicación de Express
 const app = express();
+
+// Cabeceras de seguridad HTTP (helmet)
+app.use(helmet({
+    contentSecurityPolicy: false // Se activará cuando se configure el CSP completo
+}));
 
 // Configuración de CORS
 const allowedOrigins = process.env.NODE_ENV === 'production'
@@ -67,44 +75,31 @@ app.use(cors(corsOptions));
 // Middleware para manejar preflight requests
 app.options('*', cors(corsOptions));
 
-// Configuración de límites para subida de archivos
-app.use(bodyParser.json({ limit: "50mb" }));
-app.use(bodyParser.urlencoded({ limit: "50mb", extended: true }));
+// Webhook de Stripe ANTES del bodyParser (necesita el body crudo sin parsear)
+app.post('/tienda/webhook', express.raw({ type: 'application/json' }), tiendaRoutes);
 
-// Middleware para logging de requests
-app.use((req, res, next) => {
-    console.log(`${new Date().toISOString()} - ${req.method} ${req.url}`);
-    next();
-});
+// Configuración de límites para peticiones
+app.use(bodyParser.json({ limit: "5mb" }));
+app.use(bodyParser.urlencoded({ limit: "5mb", extended: true }));
+
+// Middleware para logging de requests (solo en desarrollo)
+if (!isProduction) {
+    app.use((req, res, next) => {
+        console.log(`${new Date().toISOString()} - ${req.method} ${req.url}`);
+        next();
+    });
+}
 
 // Configuración de archivos estáticos
 const staticOptions = {
-    setHeaders: (res, path) => {
+    setHeaders: (res, filePath) => {
         res.set('Access-Control-Allow-Origin', '*');
         res.set('Access-Control-Allow-Methods', 'GET, OPTIONS');
         res.set('Access-Control-Allow-Headers', 'Content-Type');
         res.set('Cross-Origin-Resource-Policy', 'cross-origin');
         res.set('Cache-Control', 'public, max-age=31536000');
-        console.log(`Sirviendo archivo estático: ${path}`);
     }
 };
-
-// Middleware para logging de archivos estáticos
-app.use((req, res, next) => {
-    if (req.path.startsWith('/uploads/')) {
-        const filePath = path.join(__dirname, req.path);
-        console.log('=== ACCESO A ARCHIVO ESTÁTICO ===');
-        console.log('Ruta solicitada:', req.path);
-        console.log('Ruta completa:', filePath);
-        console.log('¿Existe el archivo?:', fs.existsSync(filePath));
-        if (fs.existsSync(filePath)) {
-            const stats = fs.statSync(filePath);
-            console.log('Tamaño del archivo:', stats.size);
-            console.log('Permisos del archivo:', stats.mode);
-        }
-    }
-    next();
-});
 
 // Ruta única para archivos estáticos
 app.use('/uploads', express.static(path.join(__dirname, 'uploads'), staticOptions));
@@ -135,8 +130,7 @@ const competicionesRoutes = require("./routes/calendario/competiciones");
 const pruebaCompeticionRoutes = require("./routes/calendario/competiciones/pruebasCompeticiones");
 const categoriaCompeticionRoutes = require("./routes/calendario/competiciones/categoriasCompeticiones");
 const sectorCompeticionRoutes = require("./routes/calendario/competiciones/sectoresCompeticiones");
-const inscripcionesRoutes = require("./routes/calendario/inscripciones");
-const perfilAtletaRoutes = require("./routes/perfil-atleta");
+const inscripcionesRoutes = require("./routes/calendario/inscripciones");const inscripcionesPublicasRoutes = require('./routes/calendario/inscripciones-publicas');const perfilAtletaRoutes = require("./routes/perfil-atleta");
 
 // Rutas de entrenamiento
 const calendarioEntrenamientoRoutes = require("./routes/entrenamientos/calendariosEntrenamiento");
@@ -144,14 +138,21 @@ const diasEntrenamientoRoutes = require("./routes/entrenamientos/diasEntrenamien
 const entrenamientosRoutes = require("./routes/entrenamientos/entrenamientos");
 const gruposEntrenamientoRoutes = require("./routes/entrenamientos/gruposEntrenamiento");
 
+// Rate limiting: máximo 10 intentos de login/registro cada 15 minutos por IP
+const authLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000,
+    max: 10,
+    message: { mensaje: 'Demasiados intentos. Inténtalo de nuevo en 15 minutos.' },
+    standardHeaders: true,
+    legacyHeaders: false
+});
+app.use('/auth/login', authLimiter);
+app.use('/auth/register', authLimiter);
+
 // Rutas de Instagram
 app.use('/instagram', instagramRoutes);
 
 // Rutas de la tienda
-// Ruta especial para el webhook de Stripe (debe estar antes de las otras rutas)
-app.post('/tienda/webhook', express.raw({ type: 'application/json' }), tiendaRoutes);
-
-// Rutas normales de la tienda
 app.use("/tienda", tiendaRoutes);
 
 // Montar rutas
@@ -169,6 +170,7 @@ app.use("/pruebasCompeticion", pruebaCompeticionRoutes);
 app.use("/categoriasCompeticion", categoriaCompeticionRoutes);
 app.use("/sectoresCompeticion", sectorCompeticionRoutes);
 app.use("/inscripciones", inscripcionesRoutes);
+app.use("/inscripciones-publicas", inscripcionesPublicasRoutes);
 app.use("/perfil-atleta", perfilAtletaRoutes);
 app.use("/calendarios-entrenamiento", calendarioEntrenamientoRoutes);
 app.use("/dias-entrenamiento", diasEntrenamientoRoutes);
@@ -181,6 +183,16 @@ mongoose
   .connect(mongoUri)
   .then(() => console.log("Conectado a MongoDB Atlas"))
   .catch((err) => console.log("Error al conectar a MongoDB:", err));
+
+// Manejador de errores global — evita exponer stack traces al cliente
+app.use((err, req, res, next) => {
+    if (!isProduction) {
+        console.error(err.stack);
+    } else {
+        console.error(`Error: ${err.message}`);
+    }
+    res.status(err.status || 500).json({ mensaje: 'Error interno del servidor' });
+});
 
 // Iniciar el servidor
 const PORT = process.env["PORT"] || 3000;
