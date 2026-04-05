@@ -1,8 +1,19 @@
 import { Component, OnInit } from '@angular/core';
-import { AuthService, Usuario } from '../../services/auth.service';
+import { AuthService } from '../../services/auth.service';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { Router, RouterLink } from '@angular/router';
+
+interface RegisterForm {
+  id: string;
+  name: string;
+  email: string;
+  password: string;
+  userTypes: string[];
+  fechaNacimiento?: string;
+  numeroLicencia?: string;
+  activo?: boolean;
+}
 
 @Component({
   selector: 'app-register',
@@ -11,8 +22,7 @@ import { Router, RouterLink } from '@angular/router';
   templateUrl: 'register.component.html',
 })
 export class RegisterComponent implements OnInit {
-  // Ajustar el modelo para incluir el campo userTypes
-  user: Usuario = {
+  user: RegisterForm = {
     id: '',
     name: '',
     email: '',
