@@ -28,6 +28,9 @@ const InscripcionSchema = new Schema({
     }
 });
 
+// Índice para queries por competición y usuario
+InscripcionSchema.index({ competicion: 1, usuario: 1 });
+
 // Crear el modelo a partir del esquema
 const Inscripcion = mongoose.model('Inscripcion', InscripcionSchema);
 

@@ -911,7 +911,14 @@ router.get('/lugares', async (req, res) => {
 // GET all marcas
 router.get('/', async (req, res) => {
     try {
-        const marcas = await Marca.find().populate('nombre_atleta nombre_prueba categoria');
+        const page  = Math.max(1, parseInt(req.query.page)  || 1);
+        const limit = Math.min(1000, parseInt(req.query.limit) || 1000);
+        const skip  = (page - 1) * limit;
+
+        const marcas = await Marca.find()
+            .populate('nombre_atleta nombre_prueba categoria')
+            .skip(skip)
+            .limit(limit);
         res.json(marcas);
     } catch (err) {
         res.status(500).json({ message: err.message });

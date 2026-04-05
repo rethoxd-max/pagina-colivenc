@@ -289,8 +289,15 @@ router.post('/webhook', async (req, res) => {
                 totalOrden = precio;
             }
 
+            // Idempotencia: evitar doble procesamiento si Stripe reintenta el webhook
+            const ordenExistente = await Orden.findOne({ stripeSessionId: session.id });
+            if (ordenExistente) {
+                return res.json({ received: true });
+            }
+
+            const usuarioId = session.metadata.usuarioId || null;
             const orden = new Orden({
-                usuario: session.metadata.usuarioId,
+                usuario: usuarioId,
                 stripeSessionId: session.id,
                 stripePaymentIntentId: session.payment_intent,
                 estado: 'completada',

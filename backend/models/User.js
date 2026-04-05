@@ -38,8 +38,11 @@ const UserSchema = new Schema({
   },
   stripeCustomerId: {
     type: String,
-    default: ''
+    default: null
   }
 });
+
+// Índice en name para búsquedas por nombre de atleta
+UserSchema.index({ name: 1 });
 
 module.exports = mongoose.model('User', UserSchema);

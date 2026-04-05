@@ -44,4 +44,11 @@ const marcaSchema = new mongoose.Schema({
     fecha_realizacion: { type: String },
 });
 
+// Índice para las queries del ranking principal (prueba + año + categoría)
+marcaSchema.index({ nombre_prueba: 1, anyo: 1, categoria: 1 });
+// Índice para el perfil del atleta
+marcaSchema.index({ nombre_atleta: 1, anyo: 1 });
+// Índice para filtros PC/AL
+marcaSchema.index({ PcAL: 1 });
+
 module.exports = mongoose.model('Marca', marcaSchema);

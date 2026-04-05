@@ -5,6 +5,7 @@ const GrupoEntrenamiento = require('../../models/entrenamientos/GrupoEntrenamien
 const Atleta = require('../../models/ranking/Atleta');
 const Usuario = require('../../models/User');
 const CalendarioEntrenamiento = require('../../models/entrenamientos/CalendarioEntrenamiento');
+const DiaEntrenamiento = require('../../models/entrenamientos/DiaEntrenamiento');
 const auth = require('../../middleware/auth');
 
 
@@ -92,9 +93,24 @@ router.put('/:id', auth, async (req, res) => {
 // Eliminar un grupo de entrenamiento por ID
 router.delete('/:id', auth, async (req, res) => {
     try {
-        const grupo = await GrupoEntrenamiento.findByIdAndDelete(req.params.id);
+        const grupo = await GrupoEntrenamiento.findById(req.params.id);
         if (!grupo) return res.status(404).json({ message: 'Grupo no encontrado' });
-        res.json({ message: 'Grupo eliminado' });
+
+        // Cascade: borrar calendario → días → entrenamientos
+        const calendario = await CalendarioEntrenamiento.findOne({ grupo_entrenamiento: grupo._id });
+        if (calendario) {
+            const dias = await DiaEntrenamiento.find({ _id: { $in: calendario.diasEntrenamiento } });
+            const entrenamientoIds = dias.flatMap(d => d.entrenamientos);
+            if (entrenamientoIds.length > 0) {
+                const Entrenamiento = mongoose.model('Entrenamiento');
+                await Entrenamiento.deleteMany({ _id: { $in: entrenamientoIds } });
+            }
+            await DiaEntrenamiento.deleteMany({ _id: { $in: calendario.diasEntrenamiento } });
+            await CalendarioEntrenamiento.deleteOne({ _id: calendario._id });
+        }
+
+        await GrupoEntrenamiento.deleteOne({ _id: grupo._id });
+        res.json({ message: 'Grupo, calendario, días y entrenamientos eliminados' });
     } catch (err) {
         res.status(500).json({ message: err.message });
     }

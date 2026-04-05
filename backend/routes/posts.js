@@ -39,12 +39,18 @@ const upload = multer({
     }
 }).single('image');
 
-// Obtener todos los posts
+// Obtener todos los posts (con paginación opcional)
 router.get('/', async (req, res) => {
     try {
+        const page  = Math.max(1, parseInt(req.query.page)  || 1);
+        const limit = Math.min(100, parseInt(req.query.limit) || 50);
+        const skip  = (page - 1) * limit;
+
         const posts = await Post.find()
             .populate('author', 'username')
-            .sort({ date: -1 }); // Ordenar por fecha de más reciente a más antigua
+            .sort({ date: -1 })
+            .skip(skip)
+            .limit(limit);
         res.json(posts);
     } catch (error) {
         console.error('Error al obtener posts:', error);
@@ -188,6 +194,13 @@ router.delete('/:id', auth, async (req, res) => {
 
         if (post.author.toString() !== req.user.id) {
             return res.status(401).json({ msg: 'No autorizado' });
+        }
+
+        // Borrar imagen del disco si existe
+        if (post.imageUrl) {
+            const filename = post.imageUrl.split('/').pop();
+            const filePath = path.join(UPLOAD_DIR, filename);
+            if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
         }
 
         await post.deleteOne();

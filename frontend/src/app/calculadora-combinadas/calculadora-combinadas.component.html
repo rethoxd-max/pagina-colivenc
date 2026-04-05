@@ -82,14 +82,33 @@
 
   <!-- Calculadora -->
   <div class="calculadora-section" *ngIf="combinadaSeleccionada">
-    <!-- Puntuación total -->
-    <div class="total-card">
-      <div class="total-label">Puntuación Total</div>
-      <div class="total-puntos" [class.has-points]="puntuacionTotal > 0">
-        {{ puntuacionTotal | number }}
+
+    <!-- Barra de atletas -->
+    <div class="atletas-bar">
+      <div class="atleta-badge" *ngFor="let atleta of atletas; let i = index">
+        <div class="atleta-color-strip" [style.background]="atleta.color"></div>
+        <div class="atleta-badge-content">
+          <input type="text"
+                 class="atleta-nombre-input"
+                 [(ngModel)]="atleta.nombre"
+                 [placeholder]="'Atleta ' + (i + 1)"
+                 [style.caret-color]="atleta.color"
+                 maxlength="20">
+          <div class="atleta-total" [style.color]="atleta.color">
+            {{ atleta.puntuacionTotal | number }} pts
+          </div>
+          <button class="btn-remove-atleta"
+                  *ngIf="atletas.length > 1"
+                  (click)="removeAtleta(i)"
+                  title="Eliminar atleta">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
       </div>
-      <button class="btn-limpiar" (click)="limpiarTodo()" *ngIf="puntuacionTotal > 0">
-        <i class="fas fa-eraser"></i> Limpiar todo
+
+      <button class="btn-add-atleta" *ngIf="atletas.length < 4" (click)="addAtleta()">
+        <i class="fas fa-user-plus"></i>
+        <span>Añadir atleta</span>
       </button>
     </div>
 
@@ -105,42 +124,80 @@
             <span class="prueba-nombre">{{ prueba.nombreDisplay }}</span>
           </div>
         </div>
-        
-        <div class="prueba-input-group">
-          <div class="input-wrapper">
-            <label class="input-label">{{ getInputLabel(prueba.tipoPrueba) }}</label>
-            <input type="text" 
-                   class="form-control marca-input"
-                   [(ngModel)]="marcas[i].valor"
-                   (input)="calcularPuntos(i)"
-                   (blur)="calcularPuntos(i)"
+
+        <div class="atletas-inputs-row">
+          <div class="atleta-input-cell" *ngFor="let atleta of atletas; let j = index">
+            <div class="atleta-cell-header">
+              <span class="atleta-dot" [style.background]="atleta.color"></span>
+              <span class="atleta-cell-nombre" [style.color]="atleta.color">
+                {{ atleta.nombre || 'Atleta ' + (j + 1) }}
+              </span>
+            </div>
+            <input type="text"
+                   class="marca-input-multi"
+                   [(ngModel)]="atleta.marcas[i].valor"
+                   (input)="calcularPuntosAtleta(j, i)"
+                   (blur)="calcularPuntosAtleta(j, i)"
                    [placeholder]="prueba.placeholder"
-                   autocomplete="off">
-          </div>
-          
-          <div class="puntos-display" [class.has-points]="marcas[i].puntos > 0">
-            <span class="puntos-value">{{ marcas[i].puntos }}</span>
-            <span class="puntos-label">pts</span>
+                   autocomplete="off"
+                   [style.border-color]="atleta.marcas[i].puntos > 0 ? atleta.color : 'rgba(255,255,255,0.12)'">
+            <div class="pts-badge" [style.color]="atleta.color" *ngIf="atleta.marcas[i].puntos > 0">
+              {{ atleta.marcas[i].puntos }} <span class="pts-label">pts</span>
+            </div>
+            <div class="pts-badge pts-empty" *ngIf="atleta.marcas[i].puntos === 0">—</div>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- Resumen final -->
-    <div class="resumen-card" *ngIf="puntuacionTotal > 0">
-      <h3><i class="fas fa-chart-bar"></i> Resumen</h3>
-      <div class="resumen-grid">
-        <div class="resumen-item" *ngFor="let prueba of combinadaSeleccionada.pruebas; let i = index">
-          <span class="resumen-prueba">{{ prueba.nombreDisplay }}</span>
-          <span class="resumen-marca">{{ marcas[i].valor || '-' }}</span>
-          <span class="resumen-puntos">{{ marcas[i].puntos }} pts</span>
+    <!-- Acciones -->
+    <div class="actions-row" *ngIf="hayAlgunPunto()">
+      <button class="btn-limpiar" (click)="limpiarTodo()">
+        <i class="fas fa-eraser"></i> Limpiar todo
+      </button>
+    </div>
+
+    <!-- Sección de gráficos -->
+    <div class="charts-section" *ngIf="chartsVisible">
+      <h3 class="charts-title">
+        <i class="fas fa-chart-area"></i> Análisis gráfico
+      </h3>
+
+      <!-- Gráficos radiales -->
+      <div class="radares-header">
+        <i class="fas fa-crosshairs"></i> Fortalezas y debilidades por prueba
+      </div>
+      <div class="radares-grid"
+           [class.grid-1]="atletas.length === 1"
+           [class.grid-2]="atletas.length === 2"
+           [class.grid-3]="atletas.length === 3"
+           [class.grid-4]="atletas.length === 4">
+        <div class="radar-card" *ngFor="let atleta of atletas; let i = index"
+             [style.border-color]="atleta.color + '55'">
+          <div class="radar-card-header" [style.border-bottom-color]="atleta.color + '55'">
+            <span class="radar-dot" [style.background]="atleta.color"></span>
+            <span class="radar-nombre" [style.color]="atleta.color">
+              {{ atleta.nombre || 'Atleta ' + (i + 1) }}
+            </span>
+            <span class="radar-total-pts">{{ atleta.puntuacionTotal | number }} pts</span>
+          </div>
+          <div class="radar-canvas-wrapper">
+            <canvas [id]="'radar' + i"></canvas>
+          </div>
         </div>
       </div>
-      <div class="resumen-total">
-        <span>TOTAL</span>
-        <span class="resumen-total-puntos">{{ puntuacionTotal | number }} puntos</span>
+
+      <!-- Gráfico de líneas -->
+      <div class="linechart-card">
+        <div class="linechart-header">
+          <i class="fas fa-chart-line"></i> Evolución de puntuación acumulada
+        </div>
+        <div class="linechart-wrapper">
+          <canvas id="lineChart"></canvas>
+        </div>
       </div>
     </div>
+
   </div>
 
   <!-- Info footer -->

@@ -119,6 +119,16 @@ router.delete('/:id', auth, async (req, res) => {
             return res.status(404).json({ message: 'Calendario no encontrado' });
         }
 
+        // Obtener todos los días para extraer los IDs de sus entrenamientos
+        const dias = await DiaEntrenamiento.find({ _id: { $in: calendario.diasEntrenamiento } });
+        const entrenamientoIds = dias.flatMap(d => d.entrenamientos);
+
+        // Eliminar todos los entrenamientos
+        if (entrenamientoIds.length > 0) {
+            const Entrenamiento = mongoose.model('Entrenamiento');
+            await Entrenamiento.deleteMany({ _id: { $in: entrenamientoIds } });
+        }
+
         // Eliminar todos los días de entrenamiento asociados
         await DiaEntrenamiento.deleteMany({ 
             _id: { $in: calendario.diasEntrenamiento } 
@@ -127,7 +137,7 @@ router.delete('/:id', auth, async (req, res) => {
         // Eliminar el calendario
         await CalendarioEntrenamiento.deleteOne({ _id: calendario._id });
         
-        res.json({ message: 'Calendario y días de entrenamiento eliminados' });
+        res.json({ message: 'Calendario, días y entrenamientos eliminados' });
     } catch (err) {
         res.status(500).json({ message: err.message });
     }

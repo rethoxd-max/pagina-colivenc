@@ -19,4 +19,7 @@ const diaEntrenamientoSchema = new Schema({
     ],
 });
 
+// Índice para queries por calendario y fecha
+diaEntrenamientoSchema.index({ calendario_entrenamiento: 1, fecha: 1 });
+
 module.exports = mongoose.model('DiaEntrenamiento', diaEntrenamientoSchema);

@@ -4,7 +4,8 @@ const ordenSchema = new mongoose.Schema({
     usuario: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User',
-        required: true
+        required: false,
+        default: null
     },
     productos: [{
         producto: {
@@ -37,7 +38,8 @@ const ordenSchema = new mongoose.Schema({
     },
     stripeSessionId: {
         type: String,
-        required: true
+        required: true,
+        unique: true
     },
     stripePaymentIntentId: {
         type: String
@@ -46,4 +48,12 @@ const ordenSchema = new mongoose.Schema({
     timestamps: true
 });
 
-module.exports = mongoose.model('Orden', ordenSchema); 
+// Índice para consultar órdenes de un usuario
+ordenSchema.index({ usuario: 1 });
+// TTL: borrar órdenes canceladas 30 días después de su última actualización
+ordenSchema.index({ updatedAt: 1 }, {
+    expireAfterSeconds: 30 * 24 * 3600,
+    partialFilterExpression: { estado: 'cancelada' }
+});
+
+module.exports = mongoose.model('Orden', ordenSchema);

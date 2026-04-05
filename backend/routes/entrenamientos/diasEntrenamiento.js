@@ -30,40 +30,53 @@ router.get('/:id', async (req, res) => {
     }
 });
 
-// Obtener o crear un día de entrenamiento por fecha y calendarioId
+// Obtener un día de entrenamiento por fecha y calendarioId (solo lectura, no crea)
 router.get('/:calendarioId/:fecha', async (req, res) => {
     const { calendarioId, fecha } = req.params;
     try {
-        let diaEntrenamiento = await DiaEntrenamiento.findOne({ 
+        const diaEntrenamiento = await DiaEntrenamiento.findOne({ 
             calendario_entrenamiento: calendarioId, 
             fecha: new Date(fecha) 
         }).populate('entrenamientos');
 
-        if (diaEntrenamiento) {
-            res.json(diaEntrenamiento);
-        } else {
-            // Verificar que el calendario existe
-            const calendario = await CalendarioEntrenamiento.findById(calendarioId);
-            if (!calendario) {
-                return res.status(404).json({ message: 'Calendario no encontrado' });
-            }
-
-            // Crear nuevo día de entrenamiento
-            const nuevoDia = new DiaEntrenamiento({ 
-                calendario_entrenamiento: calendarioId, 
-                fecha: new Date(fecha), 
-                entrenamientos: [] 
-            });
-            await nuevoDia.save();
-
-            // Actualizar el calendario con el nuevo día
-            await CalendarioEntrenamiento.findByIdAndUpdate(
-                calendarioId,
-                { $push: { diasEntrenamiento: nuevoDia._id } }
-            );
-
-            res.status(201).json(nuevoDia);
+        if (!diaEntrenamiento) {
+            return res.status(404).json({ message: 'Día no encontrado' });
         }
+
+        res.json(diaEntrenamiento);
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+});
+
+// Crear un día de entrenamiento para una fecha concreta
+router.post('/:calendarioId/:fecha', auth, async (req, res) => {
+    const { calendarioId, fecha } = req.params;
+    try {
+        const calendario = await CalendarioEntrenamiento.findById(calendarioId);
+        if (!calendario) {
+            return res.status(404).json({ message: 'Calendario no encontrado' });
+        }
+
+        const existente = await DiaEntrenamiento.findOne({
+            calendario_entrenamiento: calendarioId,
+            fecha: new Date(fecha)
+        });
+        if (existente) return res.status(200).json(existente);
+
+        const nuevoDia = new DiaEntrenamiento({ 
+            calendario_entrenamiento: calendarioId, 
+            fecha: new Date(fecha), 
+            entrenamientos: [] 
+        });
+        await nuevoDia.save();
+
+        await CalendarioEntrenamiento.findByIdAndUpdate(
+            calendarioId,
+            { $push: { diasEntrenamiento: nuevoDia._id } }
+        );
+
+        res.status(201).json(nuevoDia);
     } catch (error) {
         res.status(500).json({ message: error.message });
     }

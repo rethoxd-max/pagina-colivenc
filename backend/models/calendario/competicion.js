@@ -11,7 +11,7 @@ const competicionSchema = new mongoose.Schema({
     imageUrl: { type: String },
     pruebas: [{ type: mongoose.Schema.Types.ObjectId, ref: 'PruebaCompeticion' }],
     sectores: [{ type: mongoose.Schema.Types.ObjectId, ref: 'SectorCompeticion' }],
-    categorias: [{ type: mongoose.Schema.Types.ObjectId, red: 'CategoriasCompeticion'}],
+    categorias: [{ type: mongoose.Schema.Types.ObjectId, ref: 'CategoriaCompeticion'}],
     tokenPublico: { type: String, unique: true, default: () => crypto.randomBytes(8).toString('hex') },
 });
 

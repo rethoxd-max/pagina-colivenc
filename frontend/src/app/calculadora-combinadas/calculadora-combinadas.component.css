@@ -260,50 +260,272 @@
 
 /* Calculadora Section */
 .calculadora-section {
-  max-width: 700px;
+  max-width: 900px;
   margin: 0 auto;
 }
 
-/* Total Card */
-.total-card {
-  background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
-  border-radius: 20px;
-  padding: 30px;
-  text-align: center;
-  margin-bottom: 30px;
-  position: sticky;
-  top: 70px;
-  z-index: 10;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+/* ── Barra de atletas ─────────────────────────────────── */
+.atletas-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  align-items: stretch;
+  margin-bottom: 28px;
 }
 
-.total-label {
-  color: rgba(255, 255, 255, 0.7);
-  font-size: 0.9rem;
-  text-transform: uppercase;
-  letter-spacing: 2px;
-  margin-bottom: 8px;
+.atleta-badge {
+  display: flex;
+  border-radius: 14px;
+  overflow: hidden;
+  background: rgba(255,255,255,0.07);
+  border: 1px solid rgba(255,255,255,0.1);
+  min-width: 180px;
+  flex: 1;
+  max-width: 240px;
 }
 
-.total-puntos {
-  font-size: 4rem;
+.atleta-color-strip {
+  width: 5px;
+  flex-shrink: 0;
+}
+
+.atleta-badge-content {
+  flex: 1;
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  position: relative;
+}
+
+.atleta-nombre-input {
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid rgba(255,255,255,0.2);
+  color: white;
+  font-size: 0.95rem;
+  font-weight: 600;
+  padding: 2px 0;
+  outline: none;
+  width: 100%;
+  transition: border-color 0.2s;
+}
+
+.atleta-nombre-input::placeholder {
+  color: rgba(255,255,255,0.35);
+  font-weight: 400;
+}
+
+.atleta-nombre-input:focus {
+  border-bottom-width: 2px;
+}
+
+.atleta-total {
+  font-size: 1.25rem;
   font-weight: 800;
-  color: rgba(255, 255, 255, 0.3);
-  line-height: 1;
-  transition: all 0.3s ease;
+  letter-spacing: -0.5px;
 }
 
-.total-puntos.has-points {
+.btn-remove-atleta {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(255,255,255,0.1);
+  color: rgba(255,255,255,0.5);
+  cursor: pointer;
+  font-size: 0.7rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+}
+
+.btn-remove-atleta:hover {
+  background: rgba(231, 76, 60, 0.4);
+  color: white;
+}
+
+.btn-add-atleta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 14px 20px;
+  border: 2px dashed rgba(255, 255, 255, 0.2);
+  background: transparent;
+  color: rgba(255,255,255,0.5);
+  border-radius: 14px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  min-width: 150px;
+}
+
+.btn-add-atleta:hover {
+  border-color: rgba(243, 156, 18, 0.5);
   color: #f5b041;
-  text-shadow: 0 0 30px rgba(243, 156, 18, 0.5);
+  background: rgba(243, 156, 18, 0.05);
+}
+
+/* ── Pruebas list ─────────────────────────────────────── */
+.pruebas-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.prueba-item {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  border-radius: 16px;
+  padding: 18px 20px;
+  transition: background 0.2s;
+}
+
+.prueba-item:hover {
+  background: rgba(255, 255, 255, 0.09);
+}
+
+.prueba-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.prueba-numero {
+  width: 30px;
+  height: 30px;
+  background: linear-gradient(135deg, #f39c12, #e67e22);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-weight: 700;
+  font-size: 0.85rem;
+  flex-shrink: 0;
+}
+
+.prueba-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.prueba-icon {
+  width: 32px;
+  height: 32px;
+  background: rgba(255,255,255,0.1);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(255,255,255,0.6);
+  font-size: 0.9rem;
+}
+
+.prueba-nombre {
+  color: white;
+  font-weight: 600;
+  font-size: 0.97rem;
+}
+
+/* ── Fila de inputs por atleta ───────────────────────── */
+.atletas-inputs-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 12px;
+}
+
+.atleta-input-cell {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.atleta-cell-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 2px;
+}
+
+.atleta-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.atleta-cell-nombre {
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  truncate: true;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.marca-input-multi {
+  width: 100%;
+  padding: 10px 12px;
+  background: rgba(0,0,0,0.25);
+  border: 2px solid rgba(255,255,255,0.12);
+  border-radius: 10px;
+  color: white;
+  font-size: 1rem;
+  font-weight: 600;
+  transition: border-color 0.25s, box-shadow 0.25s;
+  box-sizing: border-box;
+}
+
+.marca-input-multi::placeholder {
+  color: rgba(255,255,255,0.25);
+  font-weight: 400;
+}
+
+.marca-input-multi:focus {
+  outline: none;
+  background: rgba(0,0,0,0.35);
+  box-shadow: 0 0 0 3px rgba(243, 156, 18, 0.15);
+}
+
+.pts-badge {
+  font-size: 0.85rem;
+  font-weight: 700;
+  padding: 2px 0;
+  min-height: 20px;
+}
+
+.pts-badge .pts-label {
+  font-size: 0.72rem;
+  font-weight: 400;
+  opacity: 0.8;
+}
+
+.pts-empty {
+  color: rgba(255,255,255,0.2);
+  font-size: 1rem;
+}
+
+/* ── Acciones ─────────────────────────────────────────── */
+.actions-row {
+  display: flex;
+  justify-content: center;
+  margin-top: 20px;
 }
 
 .btn-limpiar {
-  margin-top: 16px;
-  padding: 10px 24px;
-  background: rgba(255, 255, 255, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  color: white;
+  padding: 11px 28px;
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.15);
+  color: rgba(255,255,255,0.75);
   border-radius: 25px;
   cursor: pointer;
   font-size: 0.9rem;
@@ -314,221 +536,131 @@
 }
 
 .btn-limpiar:hover {
-  background: rgba(231, 76, 60, 0.3);
-  border-color: rgba(231, 76, 60, 0.5);
+  background: rgba(231, 76, 60, 0.25);
+  border-color: rgba(231, 76, 60, 0.4);
+  color: #ff6b6b;
 }
 
-/* Pruebas List */
-.pruebas-list {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
+/* ── Sección de gráficos ──────────────────────────────── */
+.charts-section {
+  margin-top: 44px;
 }
 
-.prueba-item {
-  background: rgba(255, 255, 255, 0.08);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 16px;
-  padding: 20px;
-  transition: all 0.3s ease;
-}
-
-.prueba-item:hover {
-  background: rgba(255, 255, 255, 0.1);
-}
-
-.prueba-header {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin-bottom: 16px;
-}
-
-.prueba-numero {
-  width: 32px;
-  height: 32px;
-  background: linear-gradient(135deg, #f39c12, #e67e22);
-  border-radius: 8px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+.charts-title {
   color: white;
-  font-weight: 700;
-  font-size: 0.9rem;
-}
-
-.prueba-info {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.prueba-icon {
-  width: 36px;
-  height: 36px;
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 8px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: rgba(255, 255, 255, 0.7);
-}
-
-.prueba-nombre {
-  color: white;
-  font-weight: 600;
-  font-size: 1rem;
-}
-
-.prueba-input-group {
-  display: flex;
-  align-items: flex-end;
-  gap: 16px;
-}
-
-.input-wrapper {
-  flex: 1;
-}
-
-.input-label {
-  display: block;
-  color: rgba(255, 255, 255, 0.6);
-  font-size: 0.8rem;
-  margin-bottom: 6px;
-}
-
-.marca-input {
-  width: 100%;
-  padding: 14px 16px;
-  background: rgba(0, 0, 0, 0.3);
-  border: 2px solid rgba(255, 255, 255, 0.1);
-  border-radius: 12px;
-  color: white;
-  font-size: 1.1rem;
-  font-weight: 600;
-  transition: all 0.3s ease;
-}
-
-.marca-input::placeholder {
-  color: rgba(255, 255, 255, 0.3);
-}
-
-.marca-input:focus {
-  outline: none;
-  border-color: #f39c12;
-  background: rgba(0, 0, 0, 0.4);
-  box-shadow: 0 0 0 4px rgba(243, 156, 18, 0.1);
-}
-
-.puntos-display {
-  min-width: 100px;
-  padding: 14px 16px;
-  background: rgba(255, 255, 255, 0.05);
-  border-radius: 12px;
-  text-align: center;
-  transition: all 0.3s ease;
-}
-
-.puntos-display.has-points {
-  background: linear-gradient(135deg, rgba(46, 204, 113, 0.2), rgba(39, 174, 96, 0.2));
-  border: 1px solid rgba(46, 204, 113, 0.3);
-}
-
-.puntos-value {
-  display: block;
   font-size: 1.3rem;
   font-weight: 700;
-  color: rgba(255, 255, 255, 0.4);
-}
-
-.puntos-display.has-points .puntos-value {
-  color: #2ecc71;
-}
-
-.puntos-label {
-  font-size: 0.75rem;
-  color: rgba(255, 255, 255, 0.5);
-  text-transform: uppercase;
-  letter-spacing: 1px;
-}
-
-/* Resumen Card */
-.resumen-card {
-  background: rgba(255, 255, 255, 0.08);
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  border-radius: 20px;
-  padding: 24px;
-  margin-top: 30px;
-}
-
-.resumen-card h3 {
-  color: white;
-  font-size: 1.2rem;
-  margin: 0 0 20px;
+  margin: 0 0 28px;
   display: flex;
   align-items: center;
   gap: 10px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid rgba(255,255,255,0.1);
 }
 
-.resumen-card h3 i {
+.charts-title i {
   color: #f39c12;
 }
 
-.resumen-grid {
+.radares-header {
+  color: rgba(255,255,255,0.65);
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  margin-bottom: 16px;
   display: flex;
-  flex-direction: column;
-  gap: 12px;
+  align-items: center;
+  gap: 8px;
+}
+
+.radares-header i {
+  color: #f39c12;
+}
+
+/* Grid radares */
+.radares-grid {
+  display: grid;
+  gap: 16px;
+  margin-bottom: 28px;
+}
+
+.radares-grid.grid-1 { grid-template-columns: 1fr; max-width: 480px; margin-left: auto; margin-right: auto; }
+.radares-grid.grid-2 { grid-template-columns: repeat(2, 1fr); }
+.radares-grid.grid-3 { grid-template-columns: repeat(3, 1fr); }
+.radares-grid.grid-4 { grid-template-columns: repeat(2, 1fr); }
+
+.radar-card {
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 16px;
+  overflow: hidden;
+}
+
+.radar-card-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 16px;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+}
+
+.radar-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.radar-nombre {
+  font-weight: 700;
+  font-size: 0.9rem;
+  flex: 1;
+}
+
+.radar-total-pts {
+  color: rgba(255,255,255,0.5);
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.radar-canvas-wrapper {
+  padding: 12px;
+}
+
+/* Gráfico de líneas */
+.linechart-card {
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 16px;
+  overflow: hidden;
   margin-bottom: 20px;
 }
 
-.resumen-item {
-  display: grid;
-  grid-template-columns: 1fr auto auto;
-  gap: 16px;
+.linechart-header {
+  display: flex;
   align-items: center;
-  padding: 12px 16px;
-  background: rgba(255, 255, 255, 0.05);
-  border-radius: 10px;
-}
-
-.resumen-prueba {
-  color: rgba(255, 255, 255, 0.8);
-  font-size: 0.9rem;
-}
-
-.resumen-marca {
-  color: white;
+  gap: 10px;
+  padding: 14px 20px;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+  color: rgba(255,255,255,0.8);
   font-weight: 600;
   font-size: 0.95rem;
-  text-align: right;
 }
 
-.resumen-puntos {
-  color: #2ecc71;
-  font-weight: 700;
-  min-width: 70px;
-  text-align: right;
+.linechart-header i {
+  color: #f39c12;
 }
 
-.resumen-total {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 20px;
-  background: linear-gradient(135deg, #f39c12, #e67e22);
-  border-radius: 12px;
-  color: white;
-  font-weight: 700;
+.linechart-wrapper {
+  padding: 16px;
+  height: 320px;
+  position: relative;
 }
 
-.resumen-total span:first-child {
-  font-size: 1rem;
-  text-transform: uppercase;
-  letter-spacing: 2px;
-}
-
-.resumen-total-puntos {
-  font-size: 1.4rem;
+.linechart-wrapper canvas {
+  width: 100% !important;
+  height: 100% !important;
 }
 
 /* Info Footer */
@@ -569,41 +701,40 @@
     grid-template-columns: 1fr;
   }
 
-  .total-card {
-    padding: 24px 20px;
-    position: relative;
-    top: 0;
-  }
-
-  .total-puntos {
-    font-size: 3rem;
-  }
-
-  .prueba-input-group {
+  .atletas-bar {
     flex-direction: column;
-    align-items: stretch;
   }
 
-  .puntos-display {
-    min-width: unset;
-    display: flex;
-    justify-content: center;
-    gap: 8px;
-    align-items: baseline;
+  .atleta-badge {
+    max-width: 100%;
   }
 
-  .puntos-value {
-    display: inline;
+  .atletas-inputs-row {
+    grid-template-columns: repeat(2, 1fr);
   }
 
-  .resumen-item {
+  .radares-grid.grid-3,
+  .radares-grid.grid-4 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .radares-grid.grid-1 {
+    max-width: 100%;
+  }
+
+  .linechart-wrapper {
+    height: 260px;
+  }
+}
+
+@media (max-width: 480px) {
+  .atletas-inputs-row {
     grid-template-columns: 1fr;
-    gap: 6px;
-    text-align: left;
   }
 
-  .resumen-marca,
-  .resumen-puntos {
-    text-align: left;
+  .radares-grid.grid-2,
+  .radares-grid.grid-3,
+  .radares-grid.grid-4 {
+    grid-template-columns: 1fr;
   }
 }

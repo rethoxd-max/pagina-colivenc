@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const Atleta = require('../../models/ranking/Atleta');
+const Marca = require('../../models/ranking/Marca');
 const User = require('../../models/User');
 const { generarSlugUnico } = require('../../utils/slugUtils');
 const mongoose = require('mongoose');
@@ -9,7 +10,7 @@ const auth = require('../../middleware/auth');
 // GET all atletas
 router.get('/', async (req, res) => {
   try {
-    const atletas = await Atleta.find().populate('usuario').sort({ nombre: 1 }); // Ordenar por nombre del atleta (alfabéticamente)
+    const atletas = await Atleta.find().populate('usuario').sort({ nombre: 1 }).limit(500);
     res.json(atletas);
   } catch (err) {
     res.status(500).json({ message: err.message });
@@ -173,8 +174,9 @@ router.put('/:identificador', auth, async (req, res) => {
 // DELETE all atletas
 router.delete('/', auth, async (req, res) => {
   try {
+    await Marca.deleteMany({});
     await Atleta.deleteMany({});
-    res.json({ message: 'Todos los atletas eliminados' });
+    res.json({ message: 'Todos los atletas y sus marcas eliminados' });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
@@ -196,8 +198,10 @@ router.delete('/:identificador', auth, async (req, res) => {
       return res.status(404).json({ message: 'Atleta no encontrado' });
     }
     
+    // Borrar todas las marcas del atleta antes de borrarlo
+    await Marca.deleteMany({ nombre_atleta: atleta._id });
     await Atleta.deleteOne({ _id: atleta._id });
-    res.json({ message: 'Atleta eliminado' });
+    res.json({ message: 'Atleta y sus marcas eliminados' });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
