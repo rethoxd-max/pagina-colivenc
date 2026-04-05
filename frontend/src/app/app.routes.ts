@@ -89,11 +89,13 @@ export const routes: Routes = [
             },
             {
                 path: 'crear-producto',
-                component: CrearProductoComponent
+                component: CrearProductoComponent,
+                canActivate: [AuthGuard, adminGuard]
             },
             {
                 path: 'editar-producto/:id',
-                component: CrearProductoComponent
+                component: CrearProductoComponent,
+                canActivate: [AuthGuard, adminGuard]
             },
             {
                 path: 'success',

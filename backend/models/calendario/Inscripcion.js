@@ -31,6 +31,9 @@ const InscripcionSchema = new Schema({
 // Índice para queries por competición y usuario
 InscripcionSchema.index({ competicion: 1, usuario: 1 });
 
+// TTL: eliminar inscripciones de competiciones con más de 2 años de antigüedad
+InscripcionSchema.index({ fechaInscripcion: 1 }, { expireAfterSeconds: 2 * 365 * 24 * 3600 });
+
 // Crear el modelo a partir del esquema
 const Inscripcion = mongoose.model('Inscripcion', InscripcionSchema);
 

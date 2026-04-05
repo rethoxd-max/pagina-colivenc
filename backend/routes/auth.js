@@ -29,12 +29,12 @@ router.post(
             return res.status(400).json({ msg: 'El usuario ya existe' });
         }
 
-        // Crear nuevo usuario
+        // Crear nuevo usuario — userTypes siempre forzado a ['Viewer'] en registro público
         user = new User({
             name,
             email,
             password: await bcrypt.hash(password, 10),
-            userTypes: userTypes || ['Viewer'],
+            userTypes: ['Viewer'],
             fechaNacimiento: fechaNacimiento || null,
             numeroLicencia: numeroLicencia || '',
             activo: activo !== undefined ? activo : true
@@ -128,6 +128,11 @@ router.post('/change-password', auth, async (req, res) => {
         const isMatch = await bcrypt.compare(currentPassword, user.password);
         if (!isMatch) {
             return res.status(400).json({ message: 'La contraseña actual es incorrecta' });
+        }
+
+        // Validar la nueva contraseña
+        if (!newPassword || newPassword.length < 6) {
+            return res.status(400).json({ message: 'La nueva contraseña debe tener al menos 6 caracteres' });
         }
 
         // Encriptar la nueva contraseña

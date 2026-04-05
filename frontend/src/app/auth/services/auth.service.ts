@@ -8,7 +8,6 @@ export interface Usuario {
   id: string;
   name: string;
   email: string;
-  password: string;
   userTypes: string[];
   fechaNacimiento?: string;
   numeroLicencia?: string;

@@ -17,7 +17,6 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
 
     // Verificar si el token está expirado antes de hacer la petición (excepto rutas de auth y checkout)
     if (!isAuthRoute && !isCheckoutRoute && authService.getToken() && authService.isTokenExpired()) {
-        console.log('Interceptor - Token expirado localmente, limpiando sesión');
         authService.handleExpiredToken();
         router.navigate(['/login'], { 
             queryParams: { 
@@ -29,7 +28,6 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
     }
 
     const authToken = authService.getToken();
-    console.log('Interceptor - Token presente:', !!authToken);
 
     let authReq = req;
     if (authToken) {
@@ -42,7 +40,6 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
 
     return next(authReq).pipe(
         catchError(err => {
-            console.log('Interceptor - Error:', err.status, err.error?.code);
             
             if (err.status === 401) {
                 const errorCode = err.error?.code;
@@ -53,7 +50,6 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
                 }
                 
                 if (errorCode === 'TOKEN_EXPIRED') {
-                    console.log('Interceptor - Token expirado en servidor');
                     authService.handleExpiredToken();
                     router.navigate(['/login'], { 
                         queryParams: { 
@@ -62,7 +58,6 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
                         } 
                     });
                 } else {
-                    console.log('Interceptor - Error de autenticación, redirigiendo a login');
                     authService.logout();
                     router.navigate(['/login'], { queryParams: { returnUrl: router.url } });
                 }

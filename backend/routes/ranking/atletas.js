@@ -74,11 +74,7 @@ router.get('/usuario/:userId', async (req, res) => {
       return res.status(404).json({ message: 'Atleta no encontrado para este usuario.' });
     }
 
-    // Si encontramos el atleta, actualizamos su referencia al usuario
-    if (!atleta.usuario) {
-      atleta.usuario = userId;
-      await atleta.save();
-    }
+    // Si encontramos el atleta, devolvemos sin modificar en un GET
 
     res.json(atleta);
   } catch (err) {
@@ -172,7 +168,11 @@ router.put('/:identificador', auth, async (req, res) => {
 });
 
 // DELETE all atletas
-router.delete('/', auth, async (req, res) => {
+router.delete('/', auth, (req, res, next) => {
+  if (!req.user.userTypes.includes('Admin'))
+    return res.status(403).json({ message: 'Se requiere rol Admin' });
+  next();
+}, async (req, res) => {
   try {
     await Marca.deleteMany({});
     await Atleta.deleteMany({});

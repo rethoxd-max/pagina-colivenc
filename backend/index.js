@@ -6,8 +6,8 @@ require('dotenv').config({ path: path.resolve(__dirname, '.env') });
 // Verificar variables críticas (en desarrollo Stripe es opcional)
 const isProduction = process.env.NODE_ENV === 'production';
 const requiredEnvVars = isProduction 
-    ? ['STRIPE_SECRET_KEY', 'STRIPE_WEBHOOK_SECRET', 'FRONTEND_URL']
-    : ['FRONTEND_URL'];
+    ? ['STRIPE_SECRET_KEY', 'STRIPE_WEBHOOK_SECRET', 'FRONTEND_URL', 'JWT_SECRET', 'MONGODB_URI', 'BASE_URL']
+    : ['FRONTEND_URL', 'JWT_SECRET'];
 const missingEnvVars = requiredEnvVars.filter(envVar => !process.env[envVar]);
 
 if (missingEnvVars.length > 0) {

@@ -45,13 +45,9 @@ router.get('/:grupoId', async (req, res) => {
                 }
             });
 
-        // 3. Si no existe el calendario, crear uno nuevo
+        // 3. Si no existe el calendario, devolver 404
         if (!calendario) {
-            calendario = await CalendarioEntrenamiento.create({
-                nombre_calendario: `Calendario de ${grupo.nombre_grupo}`,
-                grupo_entrenamiento: grupoId,
-                diasEntrenamiento: []
-            });
+            return res.status(404).json({ message: 'No existe calendario para este grupo. Créalo primero.' });
         }
 
         // 4. Devolver el grupo y el calendario

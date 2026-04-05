@@ -240,6 +240,12 @@ router.post('/webhook', async (req, res) => {
         }
         
         try {
+            // Idempotencia: evitar doble procesamiento si Stripe reintenta el webhook
+            const ordenExistente = await Orden.findOne({ stripeSessionId: session.id });
+            if (ordenExistente) {
+                return res.json({ received: true });
+            }
+
             // Verificar si es una compra de carrito o de un solo producto
             const items = session.metadata.items ? JSON.parse(session.metadata.items) : null;
             
@@ -287,12 +293,6 @@ router.post('/webhook', async (req, res) => {
                     precio
                 });
                 totalOrden = precio;
-            }
-
-            // Idempotencia: evitar doble procesamiento si Stripe reintenta el webhook
-            const ordenExistente = await Orden.findOne({ stripeSessionId: session.id });
-            if (ordenExistente) {
-                return res.json({ received: true });
             }
 
             const usuarioId = session.metadata.usuarioId || null;
@@ -373,7 +373,13 @@ router.get('/mis-ordenes', auth, async (req, res) => {
 });
 
 // Crear nuevo producto
-router.post('/productos', auth, upload.single('imagen'), async (req, res) => {
+const requireAdmin = (req, res, next) => {
+  if (!req.user.userTypes.includes('Admin'))
+    return res.status(403).json({ mensaje: 'Se requiere rol Admin' });
+  next();
+};
+
+router.post('/productos', auth, requireAdmin, upload.single('imagen'), async (req, res) => {
   try {
     if (!req.file) {
       return res.status(400).json({ mensaje: 'La imagen es requerida' });
@@ -416,7 +422,7 @@ router.post('/productos', auth, upload.single('imagen'), async (req, res) => {
 });
 
 // Actualizar un producto
-router.put('/productos/:id', auth, upload.single('imagen'), async (req, res) => {
+router.put('/productos/:id', auth, requireAdmin, upload.single('imagen'), async (req, res) => {
   try {
     const { nombre, descripcion, precio, tallas } = req.body;
     const productoId = req.params.id;
@@ -462,7 +468,7 @@ router.put('/productos/:id', auth, upload.single('imagen'), async (req, res) => 
 });
 
 // Eliminar un producto
-router.delete('/productos/:id', auth, async (req, res) => {
+router.delete('/productos/:id', auth, requireAdmin, async (req, res) => {
     try {
         const producto = await Producto.findById(req.params.id);
         
