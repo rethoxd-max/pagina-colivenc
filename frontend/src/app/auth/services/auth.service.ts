@@ -23,9 +23,16 @@ export class AuthService {
   private isLoggedInSubject = new BehaviorSubject<boolean>(this.isAuthenticated());
   private userDataSubject = new BehaviorSubject<any>(this.getUser());
 
-  constructor(private http: HttpClient) { }
+  constructor(private http: HttpClient) {
+    // Limpiar token expirado al arrancar la aplicación
+    if (this.getToken() && this.isTokenExpired()) {
+      localStorage.removeItem('authToken');
+      localStorage.removeItem('userData');
+      this.userDataSubject.next(null);
+    }
+  }
 
-  register(user: { name: string, email: string, password: string, userTypes: string[] }): Observable<any> {
+  register(user: { name: string, email: string, password: string, codigoInvitacion: string, fechaNacimiento?: string, numeroLicencia?: string, dni?: string }): Observable<any> {
     return this.http.post(`${this.apiUrl}/register`, user);
   }
 
@@ -71,8 +78,9 @@ export class AuthService {
   }
 
   isAuthenticated(): boolean {
-    const token = this.getToken();  // Verifica si el token existe
-    return !!token;
+    const token = this.getToken();
+    if (!token) return false;
+    return !this.isTokenExpired();
   }
 
   getIsLoggedIn(): Observable<boolean> {

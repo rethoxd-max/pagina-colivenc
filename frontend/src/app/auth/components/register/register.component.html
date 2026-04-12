@@ -1,80 +1,155 @@
-<div class="container main-content">
-    <div class="container register-container">
-        <div class="row justify-content-center">
-            <div class="col-lg-6 col-md-8 col-sm-12">
-                <div class="card shadow-sm p-4 mb-5 bg-body rounded">
-                    <div class="card-body">
-                        <h3 class="text-center mb-4">Crea tu cuenta</h3>
-                        <form (ngSubmit)="onSubmit()" #registerForm="ngForm">
-                            <div class="mb-3">
-                                <input [(ngModel)]="user.name" type="text" class="form-control"
-                                    placeholder="Nombre completo" name="name" required #name="ngModel" />
-                                <div *ngIf="name.invalid && name.touched" class="text-danger">
-                                    <div *ngIf="name.errors?.['required']">El nombre es obligatorio</div>
-                                </div>
-                            </div>
-                            <div class="mb-3">
-                                <input [(ngModel)]="user.email" type="email" class="form-control"
-                                    placeholder="Correo electrónico" name="email" required email #email="ngModel" />
-                                <div *ngIf="email.invalid && email.touched" class="text-danger">
-                                    <div *ngIf="email.errors?.['required']">El correo es obligatorio</div>
-                                    <div *ngIf="email.errors?.['email']">El formato del correo no es válido</div>
-                                </div>
-                            </div>
-                            <div class="mb-3">
-                                <input [(ngModel)]="user.password" type="password" class="form-control"
-                                    placeholder="Contraseña" name="password" required minlength="6"
-                                    #password="ngModel" />
-                                <div *ngIf="password.invalid && password.touched" class="text-danger">
-                                    <div *ngIf="password.errors?.['required']">La contraseña es obligatoria</div>
-                                    <div *ngIf="password.errors?.['minlength']">La contraseña debe tener al menos 6
-                                        caracteres</div>
-                                </div>
-                            </div>
+﻿<div class="auth-page">
+  <div class="auth-card register-card">
 
-                            <!-- Selección de tipos de usuario -->
-                            <div class="mb-3">
-                                <label class="form-label">Tipos de Usuario</label>
-                                <div *ngFor="let type of userTypeOptions" class="form-check">
-                                    <input class="form-check-input" type="checkbox" [value]="type"
-                                        (change)="toggleUserType(type)">
-                                    <label class="form-check-label">{{ type }}</label>
-                                </div>
-                            </div>
-
-                            <!-- Fecha de nacimiento -->
-                            <div class="mb-3">
-                                <label class="form-label">Fecha de nacimiento</label>
-                                <input [(ngModel)]="user.fechaNacimiento" type="date" class="form-control"
-                                    name="fechaNacimiento" />
-                            </div>
-
-                            <!-- Número de licencia -->
-                            <div class="mb-3">
-                                <input [(ngModel)]="user.numeroLicencia" type="text" class="form-control"
-                                    placeholder="Nº de licencia (opcional)" name="numeroLicencia" />
-                            </div>
-
-                            <!-- Activo -->
-                            <div class="mb-3 form-check">
-                                <input [(ngModel)]="user.activo" type="checkbox" class="form-check-input"
-                                    id="activoCheck" name="activo" />
-                                <label class="form-check-label" for="activoCheck">Usuario activo</label>
-                            </div>
-
-                            <button type="submit" class="btn btn-primary w-100"
-                                [disabled]="registerForm.invalid">Registrarse</button>
-
-                            <!-- Mostrar error del backend -->
-                            <div *ngIf="errorMessage" class="alert alert-danger mt-3">{{ errorMessage }}</div>
-                        </form>
-                        <div class="text-center mt-3">
-                            <a routerLink="/login" class="text-decoration-none">¿Ya tienes cuenta? Inicia sesión
-                                aquí</a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
+    <!-- Panel izquierdo: branding -->
+    <div class="auth-brand">
+      <img src="./assets/logo-colivenc.jpg" alt="Logo Colivenc" class="brand-logo">
+      <h1 class="brand-title">Centre Esportiu Colivenc</h1>
+      <div class="brand-divider"></div>
+      <p class="brand-info">
+        Para registrarte necesitas un <strong>código de invitación</strong> proporcionado por el club.
+      </p>
     </div>
+
+    <!-- Panel derecho: formulario -->
+    <div class="auth-form-panel">
+      <div class="auth-form-inner">
+
+        <h2 class="form-title">Crear cuenta</h2>
+        <p class="form-subtitle">Rellena todos los datos para completar tu registro</p>
+
+        <div *ngIf="registroExitoso" class="form-success">
+          <i class="fas fa-check-circle me-2"></i>¡Registro completado! Redirigiendo al login...
+        </div>
+
+        <form *ngIf="!registroExitoso" (ngSubmit)="onSubmit()" #registerForm="ngForm" autocomplete="off">
+
+          <!-- Fila: nombre -->
+          <div class="field-group">
+            <label class="field-label">Nombre y apellidos *</label>
+            <div class="input-icon-wrap">
+              <i class="fas fa-user input-icon"></i>
+              <input [(ngModel)]="user.name" type="text" class="field-input"
+                placeholder="Nombre completo" name="name" required #name="ngModel" />
+            </div>
+            <span *ngIf="name.invalid && name.touched" class="field-error">El nombre es obligatorio</span>
+          </div>
+
+          <!-- Fila: email -->
+          <div class="field-group">
+            <label class="field-label">Correo electrónico *</label>
+            <div class="input-icon-wrap">
+              <i class="fas fa-envelope input-icon"></i>
+              <input [(ngModel)]="user.email" type="email" class="field-input"
+                placeholder="correo@ejemplo.com" name="email" required email #email="ngModel" />
+            </div>
+            <span *ngIf="email.invalid && email.touched" class="field-error">
+              <span *ngIf="email.errors?.['required']">El correo es obligatorio</span>
+              <span *ngIf="email.errors?.['email']">Formato de correo no válido</span>
+            </span>
+          </div>
+
+          <!-- Fila: DNI + Fecha nacimiento -->
+          <div class="fields-row">
+            <div class="field-group">
+              <label class="field-label">DNI *</label>
+              <div class="input-icon-wrap">
+                <i class="fas fa-id-card input-icon"></i>
+                <input [(ngModel)]="user.dni" type="text" class="field-input"
+                  placeholder="12345678A" name="dni" required #dni="ngModel" />
+              </div>
+              <span *ngIf="dni.invalid && dni.touched" class="field-error">Obligatorio</span>
+            </div>
+
+            <div class="field-group">
+              <label class="field-label">Fecha de nacimiento *</label>
+              <div class="input-icon-wrap">
+                <i class="fas fa-calendar input-icon"></i>
+                <input [(ngModel)]="user.fechaNacimiento" type="date" class="field-input"
+                  name="fechaNacimiento" required #fechaNacimiento="ngModel" />
+              </div>
+              <span *ngIf="fechaNacimiento.invalid && fechaNacimiento.touched" class="field-error">Obligatoria</span>
+            </div>
+          </div>
+
+          <!-- Fila: licencia + teléfono -->
+          <div class="fields-row">
+            <div class="field-group">
+              <label class="field-label">Nº licencia <span class="optional-tag">opcional</span></label>
+              <div class="input-icon-wrap">
+                <i class="fas fa-hashtag input-icon"></i>
+                <input [(ngModel)]="user.numeroLicencia" type="text" class="field-input"
+                  placeholder="Licencia federativa" name="numeroLicencia" />
+              </div>
+            </div>
+
+            <div class="field-group">
+              <label class="field-label">Teléfono <span class="optional-tag">opcional</span></label>
+              <div class="input-icon-wrap">
+                <i class="fas fa-phone input-icon"></i>
+                <input [(ngModel)]="user.telefono" type="tel" class="field-input"
+                  placeholder="612 345 678" name="telefono" />
+              </div>
+            </div>
+          </div>
+
+          <!-- Fila: contraseñas -->
+          <div class="fields-row">
+            <div class="field-group">
+              <label class="field-label">Contraseña *</label>
+              <div class="input-icon-wrap">
+                <i class="fas fa-lock input-icon"></i>
+                <input [(ngModel)]="user.password" type="password" class="field-input"
+                  placeholder="Mínimo 6 caracteres" name="password" required minlength="6" #password="ngModel" />
+              </div>
+              <span *ngIf="password.invalid && password.touched" class="field-error">
+                <span *ngIf="password.errors?.['required']">Obligatoria</span>
+                <span *ngIf="password.errors?.['minlength']">Mínimo 6 caracteres</span>
+              </span>
+            </div>
+
+            <div class="field-group">
+              <label class="field-label">Confirmar contraseña *</label>
+              <div class="input-icon-wrap">
+                <i class="fas fa-lock input-icon"></i>
+                <input [(ngModel)]="user.confirmarPassword" type="password" class="field-input"
+                  placeholder="Repite la contraseña" name="confirmarPassword" required #confirmarPassword="ngModel" />
+              </div>
+              <span *ngIf="confirmarPassword.invalid && confirmarPassword.touched" class="field-error">Obligatoria</span>
+            </div>
+          </div>
+
+          <!-- Código de invitación -->
+          <div class="field-group">
+            <label class="field-label">Código de invitación *</label>
+            <div class="input-icon-wrap">
+              <i class="fas fa-key input-icon"></i>
+              <input [(ngModel)]="user.codigoInvitacion" type="text" class="field-input codigo-input"
+                placeholder="XXXXXX" name="codigoInvitacion" required #codigoInvitacion="ngModel" />
+            </div>
+            <span class="field-hint">Código de un solo uso proporcionado por el club</span>
+            <span *ngIf="codigoInvitacion.invalid && codigoInvitacion.touched" class="field-error">El código es obligatorio</span>
+          </div>
+
+          <div *ngIf="errorMessage" class="form-alert">
+            <i class="fas fa-exclamation-circle me-2"></i>{{ errorMessage }}
+          </div>
+
+          <button type="submit" class="btn-submit" [disabled]="registerForm.invalid">
+            Crear mi cuenta
+          </button>
+
+        </form>
+
+        <div class="form-links">
+          <a routerLink="/login">¿Ya tienes cuenta? <strong>Inicia sesión</strong></a>
+        </div>
+
+        <app-solicitud-cuenta></app-solicitud-cuenta>
+
+      </div>
+    </div>
+
+  </div>
 </div>
+

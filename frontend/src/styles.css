@@ -40,6 +40,16 @@ body {
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     padding-top: 80px;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+app-root {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-height: calc(100vh - 80px);
 }
 
 /* ========================================

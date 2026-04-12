@@ -1,49 +1,42 @@
-<div class="social-sidebar">
-    <!-- Instagram Feed -->
-    <div class="social-feed instagram-feed">
-        <div class="feed-header">
-            <i class="fab fa-instagram"></i>
-            <h3>Instagram</h3>
-        </div>
-        <div class="feed-content">
-            <div class="post" *ngFor="let post of instagramPosts">
-                <img [src]="post.media_url" [alt]="post.caption">
-                <div class="post-info">
-                    <p class="post-caption">{{ post.caption }}</p>
-                    <div class="post-meta">
-                        <span class="post-date">{{ post.timestamp | date:'dd/MM/yyyy' }}</span>
-                        <a [href]="post.permalink" target="_blank" class="post-link">
-                            <i class="fas fa-external-link-alt"></i>
-                        </a>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
+<div class="ig-section">
 
-    <!-- Facebook Feed -->
-    <div class="social-feed facebook-feed">
-        <div class="feed-header">
-            <i class="fab fa-facebook"></i>
-            <h3>Facebook</h3>
+  <div *ngIf="cargando" class="ig-loading">
+    <i class="fas fa-spinner fa-spin"></i> Cargando...
+  </div>
+
+  <div *ngIf="!cargando && posts.length === 0" class="ig-empty">
+    <i class="fab fa-instagram"></i>
+    <p>Pronto publicaremos nuestros posts aquí.</p>
+    <a href="https://www.instagram.com/c.e.colivenc" target="_blank" rel="noopener">
+      Ver perfil en Instagram
+    </a>
+  </div>
+
+  <div class="ig-grid" *ngIf="!cargando && posts.length > 0">
+    <a
+      *ngFor="let post of posts"
+      [href]="post.url"
+      target="_blank"
+      rel="noopener noreferrer"
+      class="ig-card">
+
+      <div class="ig-card-img-wrap">
+        <img *ngIf="post.imagenUrl" [src]="getImagenUrl(post.imagenUrl)" alt="Instagram" class="ig-card-img" />
+        <div *ngIf="!post.imagenUrl" class="ig-card-img-placeholder">
+          <i class="fab fa-instagram"></i>
         </div>
-        <div class="feed-content">
-            <div class="post" *ngFor="let post of facebookPosts">
-                <img [src]="post.full_picture" [alt]="post.message">
-                <div class="post-info">
-                    <p class="post-message">{{ post.message }}</p>
-                    <div class="post-meta">
-                        <span class="post-date">{{ post.created_time | date:'dd/MM/yyyy' }}</span>
-                        <span class="post-likes">
-                            <i class="fas fa-thumbs-up"></i>
-                            {{ post.likes.summary.total_count }}
-                        </span>
-                        <a [href]="post.permalink_url" target="_blank" class="post-link">
-                            <i class="fas fa-external-link-alt"></i>
-                        </a>
-                    </div>
-                </div>
-            </div>
+        <span class="ig-card-badge"><i class="fab fa-instagram"></i></span>
+      </div>
+
+      <div class="ig-card-body">
+        <p class="ig-card-desc" *ngIf="post.descripcion">{{ post.descripcion }}</p>
+        <div class="ig-card-stats">
+          <span><i class="fas fa-heart"></i> {{ post.likes }}</span>
+          <span><i class="fas fa-comment"></i> {{ post.comentarios }}</span>
         </div>
-    </div>
-</div> 
+      </div>
+
+    </a>
+  </div>
+
+</div>

@@ -40,6 +40,19 @@
                         placeholder="Ej: News, Atletismo, Club..." />
                 </div>
 
+                <!-- Disciplina -->
+                <div class="nf-field">
+                    <label class="nf-label" for="disciplina">
+                        <i class="fas fa-layer-group"></i> Disciplina
+                    </label>
+                    <select id="disciplina" class="nf-input" formControlName="disciplina">
+                        <option [ngValue]="null">— Sin disciplina —</option>
+                        <option *ngFor="let d of disciplinas" [value]="d._id">
+                            {{ d.nombre }}
+                        </option>
+                    </select>
+                </div>
+
                 <!-- Contenido -->
                 <div class="nf-field">
                     <label class="nf-label" for="content">

@@ -1,0 +1,46 @@
+<div class="solicitud-wrapper mt-4">
+    <hr class="my-3">
+
+    <div class="text-center">
+        <button type="button" class="btn btn-outline-secondary btn-sm" (click)="toggle()">
+            <i class="fas" [class.fa-envelope]="!abierto" [class.fa-times]="abierto"></i>
+            {{ abierto ? 'Cancelar' : '¿No tienes cuenta? Solicitar acceso al club' }}
+        </button>
+    </div>
+
+    <div *ngIf="abierto" class="solicitud-form mt-3">
+
+        <div *ngIf="exito" class="alert alert-success text-center">
+            <i class="fas fa-check-circle me-2"></i>
+            ¡Solicitud enviada! El administrador se pondrá en contacto contigo.
+        </div>
+
+        <ng-container *ngIf="!exito">
+            <p class="text-muted small text-center mb-3">
+                Rellena el formulario y el administrador del club te enviará un código de invitación para registrarte.
+            </p>
+
+            <div class="mb-3">
+                <label class="form-label small fw-bold">Nombre y apellidos</label>
+                <input [(ngModel)]="nombre" type="text" class="form-control form-control-sm"
+                    placeholder="Tu nombre completo" name="solicitud_nombre" [ngModelOptions]="{standalone: true}" />
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label small fw-bold">Correo electrónico</label>
+                <input [(ngModel)]="email" type="email" class="form-control form-control-sm"
+                    placeholder="correo@ejemplo.com" name="solicitud_email" [ngModelOptions]="{standalone: true}" />
+            </div>
+
+            <div *ngIf="error" class="alert alert-danger small py-2">{{ error }}</div>
+
+            <button type="button" class="btn btn-primary w-100 btn-sm"
+                [disabled]="enviando || !nombre.trim() || !email.trim()"
+                (click)="enviar()">
+                <span *ngIf="enviando"><i class="fas fa-spinner fa-spin me-1"></i>Enviando...</span>
+                <span *ngIf="!enviando"><i class="fas fa-paper-plane me-1"></i>Enviar solicitud</span>
+            </button>
+        </ng-container>
+
+    </div>
+</div>

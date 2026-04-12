@@ -39,7 +39,9 @@ const upload = multer({
 // Obtener todas las competiciones
 router.get('/', async (req, res) => {
     try {
-        const competiciones = await Competicion.find().sort({ fecha: -1 }); // Ordenar por fecha descendente
+        const competiciones = await Competicion.find()
+            .populate('disciplina', 'nombre slug color icono')
+            .sort({ fecha: -1 }); // Ordenar por fecha descendente
         res.json(competiciones);
     } catch (err) {
         res.status(500).json({ message: err.message });
@@ -93,6 +95,17 @@ router.post('/', auth, (req, res, next) => {
         pruebas = Array.isArray(pruebas) ? pruebas : [];
         categorias = Array.isArray(categorias) ? categorias : [];
 
+        // Parsear enlaces
+        let enlaces = [];
+        if (req.body.enlaces) {
+            try {
+                enlaces = JSON.parse(req.body.enlaces);
+                if (!Array.isArray(enlaces)) enlaces = [];
+            } catch (e) {
+                enlaces = [];
+            }
+        }
+
         // Convertir las pruebas a un array de ObjectId
         let pruebaIds;
         try {
@@ -128,6 +141,8 @@ router.post('/', auth, (req, res, next) => {
             imageUrl,
             pruebas: pruebaIds,
             categorias: categoriaIds,
+            enlaces,
+            disciplina: req.body.disciplina || null,
         });
 
         const nuevaCompeticion = await competicion.save();
@@ -186,9 +201,21 @@ router.put('/:id', auth, (req, res, next) => {
             }
         }
 
+        // Actualizar enlaces
+        if (req.body.enlaces !== undefined) {
+            try {
+                const parsed = JSON.parse(req.body.enlaces);
+                competicion.enlaces = Array.isArray(parsed) ? parsed : [];
+            } catch (e) {
+                competicion.enlaces = [];
+            }
+        }
+
+        // Actualizar disciplina
+        competicion.disciplina = req.body.disciplina || null;
+
         // Manejar la imagen
         if (req.file) {
-            // Eliminar la imagen anterior si existe
             if (competicion.imageUrl) {
                 const oldFilename = competicion.imageUrl.split('/').pop();
                 const oldImagePath = path.join(UPLOAD_DIR, oldFilename);

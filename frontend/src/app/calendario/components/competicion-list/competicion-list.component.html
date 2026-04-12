@@ -104,6 +104,18 @@
                                     </div>
                                 </div>
 
+                                <!-- Enlaces / documentos -->
+                                <div class="card-enlaces" *ngIf="competicion.enlaces && competicion.enlaces.length > 0">
+                                    <span class="tag-label"><i class="fas fa-paperclip me-1"></i>Documentos:</span>
+                                    <div class="enlaces-container">
+                                        <a *ngFor="let enlace of competicion.enlaces"
+                                            [href]="enlace.url" target="_blank" rel="noopener noreferrer"
+                                            class="enlace-chip">
+                                            <i class="fas fa-file-alt me-1"></i>{{ enlace.nombre }}
+                                        </a>
+                                    </div>
+                                </div>
+
                                 <div class="card-actions">
                                     <button *ngIf="(isAdmin() || isEditor())" (click)="deleteCompeticion(competicion._id)" 
                                         class="btn-action btn-delete">
@@ -227,6 +239,16 @@
                         <span *ngFor="let prueba of pruebas[competicion._id]; let last = last" class="lista-prueba-item">
                             {{ prueba.nombre_prueba }}<ng-container *ngIf="!last"> · </ng-container>
                         </span>
+                    </div>
+
+                    <!-- Sub-fila de enlaces -->
+                    <div class="lista-row-enlaces" *ngIf="competicion.enlaces && competicion.enlaces.length > 0">
+                        <i class="fas fa-paperclip lista-pruebas-icon"></i>
+                        <a *ngFor="let enlace of competicion.enlaces; let last = last"
+                            [href]="enlace.url" target="_blank" rel="noopener noreferrer"
+                            class="lista-enlace-item">
+                            {{ enlace.nombre }}<ng-container *ngIf="!last"> · </ng-container>
+                        </a>
                     </div>
                 </div>
             </ng-container>

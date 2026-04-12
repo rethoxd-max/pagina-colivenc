@@ -1,10 +1,12 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { PostService } from '../../services/posts.service';
 import { CommonModule, NgIf } from '@angular/common';
 import { ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../../auth/services/auth.service';
 import { environment } from '../../../../environments/environment';
+import { DisciplinaFilterService } from '../../../services/disciplina-filter.service';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-post-list',
@@ -14,7 +16,7 @@ import { environment } from '../../../../environments/environment';
   styleUrls: ['./post-list.component.css'],
   providers: [PostService]
 })
-export class PostListComponent implements OnInit {
+export class PostListComponent implements OnInit, OnDestroy {
   posts: any[] = [];
   filteredPosts: any[] = [];
   pagedPosts: any[] = [];
@@ -26,16 +28,23 @@ export class PostListComponent implements OnInit {
   currentPage: number = 1;
   copiedPostId: string | null = null;
   baseURL: string = environment.apiUrl;
+  private filterSub?: Subscription;
 
   constructor(
     private postService: PostService,
     private authService: AuthService,
-    private router: Router
+    private router: Router,
+    private disciplinaFilterService: DisciplinaFilterService
   ) { }
 
   ngOnInit(): void {
     this.pinnedPostId = localStorage.getItem('colivenc_pinned_post');
     this.loadPosts();
+    this.filterSub = this.disciplinaFilterService.disciplina$.subscribe(() => this.applyFilters());
+  }
+
+  ngOnDestroy(): void {
+    this.filterSub?.unsubscribe();
   }
 
   loadPosts(): void {
@@ -52,6 +61,7 @@ export class PostListComponent implements OnInit {
 
   applyFilters(): void {
     const term = this.searchTerm.toLowerCase().trim();
+    const discId = this.disciplinaFilterService.disciplinaActual;
     let result = [...this.posts];
     if (term) result = result.filter(p => p.title?.toLowerCase().includes(term));
     if (this.fechaDesde) {
@@ -64,6 +74,7 @@ export class PostListComponent implements OnInit {
       hasta.setHours(23, 59, 59, 999);
       result = result.filter(p => new Date(p.createdAt ?? p.date) <= hasta);
     }
+    if (discId) result = result.filter(p => !p.disciplina || (p.disciplina?._id || p.disciplina) === discId);
     this.filteredPosts = result;
     this.currentPage = 1;
     this.updatePagedPosts();

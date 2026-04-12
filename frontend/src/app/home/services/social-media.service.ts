@@ -1,54 +1,51 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { Observable, throwError } from 'rxjs';
-import { catchError, map } from 'rxjs/operators';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { Observable } from 'rxjs';
+import { inject } from '@angular/core';
+import { AuthService } from '../../auth/services/auth.service';
 import { environment } from '../../../environments/environment';
 
-export interface InstagramPost {
-  id: string;
-  media_url: string;
-  caption: string;
-  timestamp: string;
-  permalink: string;
-  media_type: string;
+export interface PostInstagram {
+  _id: string;
+  url: string;
+  imagenUrl: string;
+  descripcion: string;
+  likes: number;
+  comentarios: number;
+  orden: number;
+  createdAt: string;
 }
 
-export interface FacebookPost {
-  id: string;
-  message: string;
-  created_time: string;
-  full_picture?: string;
-  permalink_url: string;
-  likes: {
-    summary: {
-      total_count: number;
-    };
-  };
-}
-
-@Injectable({
-  providedIn: 'root'
-})
+@Injectable({ providedIn: 'root' })
 export class SocialMediaService {
-  private readonly apiUrl = environment.apiUrl;
+  private http = inject(HttpClient);
+  private authService = inject(AuthService);
+  private apiUrl = `${environment.apiUrl}/instagram`;
 
-  constructor(private http: HttpClient) { }
-
-  getInstagramPosts(): Observable<{ data: InstagramPost[] }> {
-    return this.http.get<{ data: InstagramPost[] }>(`${this.apiUrl}/api/instagram/posts`).pipe(
-      catchError(error => {
-        console.error('Error al obtener posts de Instagram:', error);
-        return throwError(() => new Error('No se pudieron cargar los posts de Instagram'));
-      })
+  fetchMetadata(url: string): Observable<{ imagenUrl: string; descripcion: string }> {
+    const headers = new HttpHeaders().set('x-auth-token', this.authService.getToken() || '');
+    return this.http.get<{ imagenUrl: string; descripcion: string }>(
+      `${this.apiUrl}/fetch-metadata`,
+      { headers, params: { url } }
     );
   }
 
-  getFacebookPosts(): Observable<{ data: FacebookPost[] }> {
-    return this.http.get<{ data: FacebookPost[] }>(`${this.apiUrl}/api/facebook/posts`).pipe(
-      catchError(error => {
-        console.error('Error al obtener posts de Facebook:', error);
-        return throwError(() => new Error('No se pudieron cargar los posts de Facebook'));
-      })
-    );
+  getPosts(): Observable<PostInstagram[]> {
+    return this.http.get<PostInstagram[]>(this.apiUrl);
   }
-} 
+
+  addPost(url: string, orden: number = 0, imagenUrl = '', descripcion = '', likes = 0, comentarios = 0): Observable<PostInstagram> {
+    const headers = new HttpHeaders().set('x-auth-token', this.authService.getToken() || '');
+    return this.http.post<PostInstagram>(this.apiUrl, { url, orden, imagenUrl, descripcion, likes, comentarios }, { headers });
+  }
+
+  refreshPost(id: string): Observable<PostInstagram> {
+    const headers = new HttpHeaders().set('x-auth-token', this.authService.getToken() || '');
+    return this.http.post<PostInstagram>(`${this.apiUrl}/${id}/refresh`, {}, { headers });
+  }
+
+  deletePost(id: string): Observable<any> {
+    const headers = new HttpHeaders().set('x-auth-token', this.authService.getToken() || '');
+    return this.http.delete(`${this.apiUrl}/${id}`, { headers });
+  }
+}

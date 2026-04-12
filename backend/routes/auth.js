@@ -2,9 +2,33 @@ const express = require('express');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
-const { check, validationResult } = require('express-validator'); // Importar express-validator
+const InvitacionCodigo = require('../models/InvitacionCodigo');
+const { check, validationResult } = require('express-validator');
 const router = express.Router();
 const auth = require('../middleware/auth');
+const { enviarSolicitudCuenta } = require('../services/emailService');
+
+// Solicitud de cuenta (formulario público → email al admin)
+router.post(
+    '/solicitar-cuenta',
+    [
+        check('nombre', 'El nombre es obligatorio').not().isEmpty(),
+        check('email', 'Introduce un correo electrónico válido').isEmail()
+    ],
+    async (req, res) => {
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+            return res.status(400).json({ errors: errors.array() });
+        }
+        try {
+            await enviarSolicitudCuenta({ nombre: req.body.nombre, email: req.body.email });
+            res.json({ msg: 'Solicitud enviada correctamente' });
+        } catch (err) {
+            console.error('Error al enviar solicitud de cuenta:', err);
+            res.status(500).json({ msg: 'Error al enviar la solicitud. Inténtalo de nuevo.' });
+        }
+    }
+);
 
 // Registro de usuario
 router.post(
@@ -13,7 +37,7 @@ router.post(
         check('name', 'El nombre es obligatorio').not().isEmpty(),
         check('email', 'Introduce un correo electrónico válido').isEmail(),
         check('password', 'La contraseña debe tener al menos 6 caracteres').isLength({ min: 6 }),
-        check('userTypes', 'Los tipos de usuario deben ser válidos').optional().isArray()
+        check('codigoInvitacion', 'El código de invitación es obligatorio').not().isEmpty()
     ],
     async (req, res) => {
         const errors = validationResult(req);
@@ -21,7 +45,13 @@ router.post(
             return res.status(400).json({ errors: errors.array() });
         }
 
-        const { name, email, password, userTypes, fechaNacimiento, numeroLicencia, activo } = req.body;
+        const { name, email, password, fechaNacimiento, numeroLicencia, dni, codigoInvitacion } = req.body;
+
+        // Verificar el código de invitación
+        const invitacion = await InvitacionCodigo.findOne({ codigo: codigoInvitacion.toUpperCase(), usado: false });
+        if (!invitacion) {
+            return res.status(400).json({ msg: 'Código de invitación inválido o ya utilizado' });
+        }
 
         // Verificar si el usuario ya existe
         let user = await User.findOne({ email });
@@ -37,10 +67,18 @@ router.post(
             userTypes: ['Viewer'],
             fechaNacimiento: fechaNacimiento || null,
             numeroLicencia: numeroLicencia || '',
-            activo: activo !== undefined ? activo : true
+            dni: dni || '',
+            activo: true
         });
 
         await user.save();
+
+        // Invalidar el código de invitación
+        invitacion.usado = true;
+        invitacion.usadoPor = user._id;
+        invitacion.usadoEn = new Date();
+        await invitacion.save();
+
         res.json({ msg: 'Usuario registrado con éxito' });
     }
 );
@@ -144,6 +182,55 @@ router.post('/change-password', auth, async (req, res) => {
     } catch (error) {
         console.error('Error al cambiar la contraseña:', error);
         res.status(500).json({ message: 'Error en el servidor' });
+    }
+});
+
+// PUT /auth/users/:id — editar usuario (solo Admin)
+router.put('/users/:id', auth, async (req, res) => {
+    if (!req.user.userTypes.includes('Admin')) {
+        return res.status(403).json({ msg: 'Acceso denegado: se requiere rol Admin' });
+    }
+    try {
+        const { name, email, userTypes, fechaNacimiento, numeroLicencia, dni, telefono, activo } = req.body;
+        const user = await User.findById(req.params.id);
+        if (!user) return res.status(404).json({ msg: 'Usuario no encontrado' });
+
+        if (name) user.name = name;
+        if (email) user.email = email;
+        if (userTypes) user.userTypes = userTypes;
+        if (fechaNacimiento !== undefined) user.fechaNacimiento = fechaNacimiento || null;
+        if (numeroLicencia !== undefined) user.numeroLicencia = numeroLicencia;
+        if (dni !== undefined) user.dni = dni;
+        if (telefono !== undefined) user.telefono = telefono;
+        if (activo !== undefined) user.activo = activo;
+
+        await user.save();
+        const updated = await User.findById(req.params.id).select('-password');
+        res.json(updated);
+    } catch (error) {
+        console.error(error.message);
+        res.status(500).json({ msg: 'Error en el servidor' });
+    }
+});
+
+// POST /auth/users/:id/reset-password — asignar nueva contraseña (solo Admin)
+router.post('/users/:id/reset-password', auth, async (req, res) => {
+    if (!req.user.userTypes.includes('Admin')) {
+        return res.status(403).json({ msg: 'Acceso denegado: se requiere rol Admin' });
+    }
+    try {
+        const { newPassword } = req.body;
+        if (!newPassword || newPassword.length < 6) {
+            return res.status(400).json({ msg: 'La contraseña debe tener al menos 6 caracteres' });
+        }
+        const user = await User.findById(req.params.id);
+        if (!user) return res.status(404).json({ msg: 'Usuario no encontrado' });
+
+        user.password = await bcrypt.hash(newPassword, 10);
+        await user.save();
+        res.json({ msg: 'Contraseña actualizada correctamente' });
+    } catch (error) {
+        res.status(500).json({ msg: 'Error en el servidor' });
     }
 });
 

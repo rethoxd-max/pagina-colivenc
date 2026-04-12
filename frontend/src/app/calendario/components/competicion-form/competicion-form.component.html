@@ -1,97 +1,207 @@
-<div class="container mt-4">
-    <h2>{{ isEditMode ? 'Editar Competición' : 'Crear Competición' }}</h2>
+<div class="nf-page">
+    <div class="nf-wrapper">
 
-    <form [formGroup]="competicionForm" (ngSubmit)="onSubmit()" enctype="multipart/form-data">
-        <!-- Campo Nombre -->
-        <div class="mb-3">
-            <label for="nombre" class="form-label">Nombre</label>
-            <input id="nombre" type="text" class="form-control" formControlName="nombre">
-        </div>
-
-        <!-- Campo Fecha -->
-        <div class="mb-3">
-            <label for="fecha" class="form-label">Fecha</label>
-            <input id="fecha" type="date" class="form-control" formControlName="fecha">
-        </div>
-
-        <!-- Campo Lugar con Google Places Autocomplete -->
-        <div class="mb-3">
-            <label for="lugar" class="form-label">Lugar</label>
-            <input id="lugar" #lugarInput type="text" class="form-control" formControlName="lugar">
-            <small class="form-text text-muted">Escribe para buscar un lugar</small>
-        </div>
-
-        <!-- Campo Tipo -->
-        <div class="mb-3">
-            <label for="tipo" class="form-label">Tipo</label>
-            <input id="tipo" type="text" class="form-control" formControlName="tipo">
-        </div>
-
-        <!-- Campo Categorías -->
-        <div class="mb-3">
-            <label for="categorias" class="form-label">Categorías</label>
-            <mat-select id="categorias" formControlName="categorias" multiple
-                (selectionChange)="onCategoriasChange($event)">
-                <mat-option *ngFor="let categoria of categoriasDisponibles" [value]="categoria._id">
-                    {{ categoria.nombre_categoria }}
-                </mat-option>
-            </mat-select>
-        </div>
-
-        <!-- Mostrar sector y pruebas solo si hay categorías seleccionadas -->
-        <div *ngIf="categoriasSeleccionadas!.length > 0">
-            <!-- Campo Sector -->
-            <div class="mb-3">
-                <label for="sector" class="form-label">Sector</label>
-                <mat-select id="sector" class="form-control" formControlName="sector" (selectionChange)="onSectorChange($event)">
-                    <mat-option *ngFor="let sector of sectoresDisponibles" [value]="sector._id">{{ sector.nombre_sector }}
-                    </mat-option>
-                </mat-select>
+        <!-- Cabecera -->
+        <div class="nf-header">
+            <div class="nf-header-icon">
+                <i class="fas fa-trophy"></i>
             </div>
-
-            <!-- Campo Pruebas -->
-            <div class="mb-3">
-                <label for="pruebas" class="form-label">Pruebas</label>
-                <mat-select id="pruebas" formControlName="pruebas" multiple>
-                    <mat-option *ngFor="let prueba of pruebasDisponibles" [value]="prueba">
-                        {{ prueba.nombre_prueba }} {{ prueba.categoria_id.nombre_categoria }}
-                    </mat-option>
-                </mat-select>
-                <p *ngIf="pruebasDisponibles.length === 0">No hay pruebas disponibles para las categorías y sector
-                    seleccionados</p>
-            </div>
+            <h1 class="nf-title">{{ isEditMode ? 'Editar competición' : 'Nueva competición' }}</h1>
+            <p class="nf-subtitle">
+                {{ isEditMode ? 'Modifica los datos de la competición y guarda los cambios.' : 'Rellena los campos para añadir una nueva competición al calendario.' }}
+            </p>
         </div>
 
-        <!-- Campo Descripción -->
-        <div class="mb-3">
-            <label for="descripcion" class="form-label">Descripción</label>
-            <textarea id="descripcion" class="form-control" formControlName="descripcion" rows="3"></textarea>
+        <!-- Tarjeta del formulario -->
+        <div class="nf-card">
+            <form [formGroup]="competicionForm" (ngSubmit)="onSubmit()" novalidate>
+
+                <!-- Nombre -->
+                <div class="nf-field">
+                    <label class="nf-label" for="nombre">
+                        <i class="fas fa-flag"></i> Nombre <span class="nf-required">*</span>
+                    </label>
+                    <input id="nombre" type="text" class="nf-input"
+                        formControlName="nombre"
+                        placeholder="Nombre de la competición"
+                        [class.nf-input--error]="competicionForm.get('nombre')?.invalid && competicionForm.get('nombre')?.touched" />
+                    <span class="nf-error" *ngIf="competicionForm.get('nombre')?.invalid && competicionForm.get('nombre')?.touched">
+                        El nombre es obligatorio.
+                    </span>
+                </div>
+
+                <!-- Fila: Fecha + Tipo -->
+                <div class="nf-row">
+                    <div class="nf-field">
+                        <label class="nf-label" for="fecha">
+                            <i class="fas fa-calendar-alt"></i> Fecha <span class="nf-required">*</span>
+                        </label>
+                        <input id="fecha" type="date" class="nf-input" formControlName="fecha" />
+                    </div>
+                    <div class="nf-field">
+                        <label class="nf-label" for="tipo">
+                            <i class="fas fa-tag"></i> Tipo
+                        </label>
+                        <input id="tipo" type="text" class="nf-input"
+                            formControlName="tipo"
+                            placeholder="Ej: Cross, Pista, Ruta..." />
+                    </div>
+                </div>
+
+                <!-- Lugar -->
+                <div class="nf-field">
+                    <label class="nf-label" for="lugar">
+                        <i class="fas fa-map-marker-alt"></i> Lugar
+                    </label>
+                    <input id="lugar" #lugarInput type="text" class="nf-input"
+                        formControlName="lugar"
+                        placeholder="Escribe para buscar un lugar..." />
+                </div>
+
+                <!-- Disciplina -->
+                <div class="nf-field">
+                    <label class="nf-label" for="disciplina">
+                        <i class="fas fa-layer-group"></i> Disciplina
+                    </label>
+                    <select id="disciplina" class="nf-input" formControlName="disciplina">
+                        <option [ngValue]="null">— Sin disciplina —</option>
+                        <option *ngFor="let d of disciplinas" [value]="d._id">
+                            {{ d.nombre }}
+                        </option>
+                    </select>
+                </div>
+
+                <!-- Categorías -->
+                <div class="nf-field">
+                    <label class="nf-label">
+                        <i class="fas fa-users"></i> Categorías
+                    </label>
+                    <div class="nf-mat-wrap">
+                        <mat-select formControlName="categorias" multiple
+                            (selectionChange)="onCategoriasChange($event)"
+                            placeholder="Selecciona categorías">
+                            <mat-option *ngFor="let cat of categoriasDisponibles" [value]="cat._id">
+                                {{ cat.nombre_categoria }}
+                            </mat-option>
+                        </mat-select>
+                    </div>
+                </div>
+
+                <!-- Sector y Pruebas (solo si hay categorías) -->
+                <div *ngIf="categoriasSeleccionadas!.length > 0">
+
+                    <div class="nf-field">
+                        <label class="nf-label">
+                            <i class="fas fa-map"></i> Sector
+                        </label>
+                        <div class="nf-mat-wrap">
+                            <mat-select formControlName="sector"
+                                (selectionChange)="onSectorChange($event)"
+                                placeholder="Selecciona un sector">
+                                <mat-option *ngFor="let sector of sectoresDisponibles" [value]="sector._id">
+                                    {{ sector.nombre_sector }}
+                                </mat-option>
+                            </mat-select>
+                        </div>
+                    </div>
+
+                    <div class="nf-field">
+                        <label class="nf-label">
+                            <i class="fas fa-running"></i> Pruebas
+                        </label>
+                        <div class="nf-mat-wrap">
+                            <mat-select formControlName="pruebas" multiple
+                                placeholder="Selecciona pruebas">
+                                <mat-option *ngFor="let prueba of pruebasDisponibles" [value]="prueba">
+                                    {{ prueba.nombre_prueba }} — {{ prueba.categoria_id.nombre_categoria }}
+                                </mat-option>
+                            </mat-select>
+                        </div>
+                        <span class="nf-hint" *ngIf="pruebasDisponibles.length === 0">
+                            No hay pruebas disponibles para las categorías y sector seleccionados.
+                        </span>
+                    </div>
+
+                </div>
+
+                <!-- Descripción -->
+                <div class="nf-field">
+                    <label class="nf-label" for="descripcion">
+                        <i class="fas fa-align-left"></i> Descripción
+                    </label>
+                    <textarea id="descripcion" class="nf-input nf-textarea"
+                        formControlName="descripcion"
+                        placeholder="Descripción, observaciones..."
+                        rows="4"></textarea>
+                </div>
+
+                <!-- Imagen -->
+                <div class="nf-field">
+                    <label class="nf-label">
+                        <i class="fas fa-image"></i> Imagen
+                    </label>
+                    <label class="nf-upload" for="imagen">
+                        <i class="fas fa-cloud-upload-alt nf-upload-icon"></i>
+                        <span class="nf-upload-text">Haz clic para seleccionar una imagen</span>
+                        <span class="nf-upload-hint">JPG, PNG o WEBP</span>
+                        <input type="file" id="imagen" class="nf-upload-input"
+                            (change)="onFileSelected($event)" accept="image/*" />
+                    </label>
+                    <div class="nf-img-actions" *ngIf="selectedFile && isEditMode && existingImage">
+                        <button type="button" class="nf-btn-link" (click)="clearFileSelection()">
+                            <i class="fas fa-undo"></i> Cancelar selección
+                        </button>
+                    </div>
+                    <span class="nf-hint" *ngIf="isEditMode && existingImage && !selectedFile">
+                        Si no seleccionas imagen nueva, se mantiene la actual.
+                    </span>
+                </div>
+
+                <!-- Vista previa -->
+                <div *ngIf="imageUrl" class="nf-preview">
+                    <span class="nf-preview-label"><i class="fas fa-eye"></i> Vista previa</span>
+                    <img [src]="imageUrl" alt="Vista previa" class="nf-preview-img" />
+                </div>
+
+                <!-- Documentos y enlaces -->
+                <div class="nf-field" formArrayName="enlaces">
+                    <label class="nf-label">
+                        <i class="fas fa-link"></i> Documentos y enlaces
+                        <span class="nf-badge">máx. 5</span>
+                    </label>
+
+                    <div class="nf-enlace-row"
+                        *ngFor="let enlace of enlaces.controls; let i = index"
+                        [formGroupName]="i">
+                        <input type="text" class="nf-input" formControlName="nombre"
+                            placeholder="Circular, Reglamento..." />
+                        <input type="url" class="nf-input" formControlName="url"
+                            placeholder="https://..." />
+                        <button type="button" class="nf-btn-remove" (click)="removeEnlace(i)" title="Eliminar">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+
+                    <button type="button" class="nf-btn-add"
+                        (click)="addEnlace()" [disabled]="enlaces.length >= 5">
+                        <i class="fas fa-plus"></i> Añadir enlace
+                    </button>
+                </div>
+
+                <!-- Acciones -->
+                <div class="nf-actions">
+                    <button type="button" class="nf-btn nf-btn--cancel" (click)="volver()">
+                        <i class="fas fa-arrow-left"></i> Cancelar
+                    </button>
+                    <button type="submit" class="nf-btn nf-btn--submit" [disabled]="competicionForm.invalid">
+                        <i class="fas fa-{{ isEditMode ? 'save' : 'calendar-plus' }}"></i>
+                        {{ isEditMode ? 'Guardar cambios' : 'Crear competición' }}
+                    </button>
+                </div>
+
+            </form>
         </div>
 
-        <!-- Campo Imagen -->
-        <div class="mb-3">
-            <label for="imagen" class="form-label">Imagen</label>
-            <div class="input-group">
-                <input id="imagen" type="file" class="form-control" (change)="onFileSelected($event)">
-                <button type="button" class="btn btn-outline-secondary" *ngIf="selectedFile && isEditMode && existingImage" 
-                        (click)="clearFileSelection()">
-                    Cancelar selección
-                </button>
-            </div>
-            <small class="form-text text-muted" *ngIf="isEditMode && existingImage && !selectedFile">
-                Si no seleccionas una nueva imagen, se mantendrá la actual.
-            </small>
-        </div>
-
-        <!-- Mostrar la imagen seleccionada (opcional) -->
-        <div *ngIf="imageUrl" class="mb-3">
-            <label class="form-label">Vista previa</label>
-            <div class="image-preview-container">
-                <img [src]="imageUrl" alt="Imagen seleccionada" class="img-thumbnail" style="max-width: 300px;">
-            </div>
-        </div>
-
-        <!-- Botón de envío -->
-        <button type="submit" class="btn btn-primary">{{ isEditMode ? 'Actualizar' : 'Crear' }}</button>
-    </form>
+    </div>
 </div>
+

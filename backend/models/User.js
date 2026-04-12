@@ -32,6 +32,10 @@ const UserSchema = new Schema({
     type: String,
     default: ''
   },
+  dni: {
+    type: String,
+    default: ''
+  },
   activo: {
     type: Boolean,
     default: true

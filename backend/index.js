@@ -24,8 +24,9 @@ if (!isProduction && (!process.env.STRIPE_SECRET_KEY || !process.env.STRIPE_WEBH
 const uploadsDir = path.join(__dirname, 'uploads');
 const postsDir = path.join(__dirname, 'uploads', 'posts');
 const competicionesDir = path.join(__dirname, 'uploads', 'competiciones');
+const instagramDir = path.join(__dirname, 'uploads', 'instagram');
 
-[uploadsDir, postsDir, competicionesDir].forEach(dir => {
+[uploadsDir, postsDir, competicionesDir, instagramDir].forEach(dir => {
     if (!fs.existsSync(dir)) {
         fs.mkdirSync(dir, { recursive: true });
         console.log(`Directorio creado: ${dir}`);
@@ -182,6 +183,14 @@ app.use("/calendarios-entrenamiento", calendarioEntrenamientoRoutes);
 app.use("/dias-entrenamiento", diasEntrenamientoRoutes);
 app.use("/entrenamientos", entrenamientosRoutes);
 app.use("/grupos-entrenamiento", gruposEntrenamientoRoutes);
+
+// Rutas de administración
+const codigosAdminRoutes = require('./routes/admin/codigos');
+app.use('/admin/codigos', codigosAdminRoutes);
+
+// Disciplinas
+const disciplinasRoutes = require('./routes/disciplinas');
+app.use('/disciplinas', disciplinasRoutes);
 
 // Conectar a MongoDB
 const mongoUri = process.env.MONGODB_URI || "mongodb://127.0.0.1:27017/colivenc";

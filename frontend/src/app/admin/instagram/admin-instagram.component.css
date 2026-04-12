@@ -1,0 +1,265 @@
+.ai-container {
+  max-width: 760px;
+  margin: 2rem auto;
+  padding: 0 1rem;
+}
+
+.ai-header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+}
+
+.ai-header i {
+  font-size: 2rem;
+  background: radial-gradient(circle at 30% 107%, #fdf497 0%, #fd5949 45%, #d6249f 60%, #285AEB 90%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.ai-header h2 {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+
+.ai-card {
+  background: #fff;
+  border-radius: 12px;
+  padding: 1.5rem;
+  margin-bottom: 1.25rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.ai-card h3 {
+  margin: 0 0 0.75rem;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #333;
+}
+
+.ai-hint {
+  font-size: 0.85rem;
+  color: #666;
+  margin-bottom: 0.75rem;
+  line-height: 1.5;
+}
+
+.ai-input {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 0.55rem 0.75rem;
+  border: 1.5px solid #ddd;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  transition: border-color 0.2s;
+}
+
+.ai-input:focus {
+  outline: none;
+  border-color: #d6249f;
+}
+
+.ai-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  margin-bottom: 0.75rem;
+}
+
+.ai-field label {
+  font-size: 0.83rem;
+  font-weight: 600;
+  color: #555;
+}
+
+.ai-field-row {
+  display: flex;
+  gap: 1rem;
+}
+
+.ai-field-row .ai-field {
+  flex: 1;
+}
+
+.ai-textarea {
+  resize: vertical;
+  min-height: 70px;
+  font-family: inherit;
+}
+
+.ai-btn-add {
+  padding: 0.55rem 1.1rem;
+  background: linear-gradient(135deg, #fd5949, #d6249f);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: opacity 0.2s;
+  margin-top: 0.25rem;
+}
+
+.ai-btn-add:hover { opacity: 0.88; }
+
+.ai-url-row {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.ai-url-row .ai-input {
+  flex: 1;
+}
+
+.ai-btn-fetch {
+  padding: 0.55rem 0.9rem;
+  background: #4f46e5;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: opacity 0.2s;
+  flex-shrink: 0;
+}
+
+.ai-btn-fetch:hover { opacity: 0.88; }
+.ai-btn-fetch:disabled { opacity: 0.55; cursor: not-allowed; }
+
+.ai-error-sm {
+  font-size: 0.8rem;
+  color: #c0392b;
+  margin: 0.25rem 0 0;
+}
+
+.ai-field {
+  margin-top: 0.6rem;
+  color: #c0392b;
+  font-size: 0.88rem;
+}
+
+.ai-exito {
+  margin-top: 0.6rem;
+  color: #27ae60;
+  font-size: 0.88rem;
+}
+
+.ai-loading,
+.ai-empty {
+  color: #999;
+  font-size: 0.9rem;
+  padding: 0.5rem 0;
+}
+
+.ai-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.ai-list-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.65rem 0.75rem;
+  border: 1.5px solid #eee;
+  border-radius: 8px;
+  background: #fafafa;
+}
+
+.ai-list-thumb {
+  width: 52px;
+  height: 52px;
+  object-fit: cover;
+  border-radius: 6px;
+  flex-shrink: 0;
+}
+
+.ai-list-thumb-empty {
+  background: #f3e5f5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.3rem;
+  color: #c13584;
+}
+
+.ai-list-meta-empty {
+  color: #bbb;
+  font-style: italic;
+}
+
+.ai-btn-refresh {
+  background: transparent;
+  border: 1.5px solid #4f46e5;
+  color: #4f46e5;
+  border-radius: 6px;
+  padding: 0.35rem 0.55rem;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background 0.2s, color 0.2s;
+}
+
+.ai-btn-refresh:hover { background: #4f46e5; color: #fff; }
+.ai-btn-refresh:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.ai-btn-del {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  min-width: 0;
+  flex: 1;
+}
+
+.ai-list-url-link {
+  font-size: 0.8rem;
+  color: #0070f3;
+  text-decoration: none;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ai-list-url-link:hover { text-decoration: underline; }
+
+.ai-list-meta {
+  font-size: 0.78rem;
+  color: #555;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ai-list-stats {
+  font-size: 0.75rem;
+  color: #888;
+}
+
+.ai-list-stats .fa-heart { color: #e74c3c; }
+.ai-list-stats .fa-comment { color: #3498db; }
+
+.ai-btn-del {
+  background: transparent;
+  border: 1.5px solid #e74c3c;
+  color: #e74c3c;
+  border-radius: 6px;
+  padding: 0.35rem 0.55rem;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background 0.2s, color 0.2s;
+}
+
+.ai-btn-del:hover {
+  background: #e74c3c;
+  color: #fff;
+}
+

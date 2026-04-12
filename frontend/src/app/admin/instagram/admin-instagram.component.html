@@ -1,0 +1,86 @@
+<div class="ai-container">
+  <div class="ai-header">
+    <i class="fab fa-instagram"></i>
+    <h2>Gestión de Posts de Instagram</h2>
+  </div>
+
+  <div class="ai-card">
+    <h3>Añadir publicación</h3>
+    <p class="ai-hint">
+      Pega la URL del post o reel y pulsa <strong>Obtener datos</strong> para rellenar automáticamente
+      la imagen y la descripción. Los likes y comentarios deberás introducirlos manualmente.
+    </p>
+
+    <div class="ai-field">
+      <label>URL del post *</label>
+      <div class="ai-url-row">
+        <input type="url" class="ai-input" [(ngModel)]="nuevaUrl"
+          placeholder="https://www.instagram.com/p/..." />
+        <button class="ai-btn-fetch" (click)="obtenerDatos()" [disabled]="buscando">
+          <i class="fas" [class.fa-search]="!buscando" [class.fa-spinner]="buscando" [class.fa-spin]="buscando"></i>
+          {{ buscando ? 'Buscando…' : 'Obtener datos' }}
+        </button>
+      </div>
+      <p class="ai-error-sm" *ngIf="errorBusqueda">{{ errorBusqueda }}</p>
+    </div>
+    <div class="ai-field">
+      <label>URL de la imagen</label>
+      <input type="url" class="ai-input" [(ngModel)]="nuevaImagenUrl"
+        placeholder="https://..." />
+    </div>
+    <div class="ai-field">
+      <label>Descripción</label>
+      <textarea class="ai-input ai-textarea" [(ngModel)]="nuevaDescripcion"
+        rows="3" placeholder="Descripción del post..."></textarea>
+    </div>
+    <div class="ai-field-row">
+      <div class="ai-field">
+        <label>Likes</label>
+        <input type="number" class="ai-input" [(ngModel)]="nuevosLikes" min="0" />
+      </div>
+      <div class="ai-field">
+        <label>Comentarios</label>
+        <input type="number" class="ai-input" [(ngModel)]="nuevosComentarios" min="0" />
+      </div>
+    </div>
+
+    <button class="ai-btn-add" (click)="anadir()">
+      <i class="fas fa-plus"></i> Añadir post
+    </button>
+
+    <p class="ai-error" *ngIf="error">{{ error }}</p>
+    <p class="ai-exito" *ngIf="exito">{{ exito }}</p>
+  </div>
+
+  <div class="ai-card">
+    <h3>Posts actuales</h3>
+
+    <div *ngIf="cargando" class="ai-loading">
+      <i class="fas fa-spinner fa-spin"></i> Cargando...
+    </div>
+
+    <div *ngIf="!cargando && posts.length === 0" class="ai-empty">
+      No hay posts añadidos todavía.
+    </div>
+
+    <ul *ngIf="!cargando && posts.length > 0" class="ai-list">
+      <li *ngFor="let post of posts" class="ai-list-item">
+        <img *ngIf="post.imagenUrl" [src]="getImagenUrl(post.imagenUrl)" alt="post" class="ai-list-thumb" />
+        <div *ngIf="!post.imagenUrl" class="ai-list-thumb ai-list-thumb-empty"><i class="fab fa-instagram"></i></div>
+        <div class="ai-list-info">
+          <a [href]="post.url" target="_blank" rel="noopener noreferrer" class="ai-list-url-link">{{ post.url }}</a>
+          <span class="ai-list-meta" *ngIf="post.descripcion">{{ post.descripcion | slice:0:70 }}{{ post.descripcion.length > 70 ? '…' : '' }}</span>
+          <span class="ai-list-meta ai-list-meta-empty" *ngIf="!post.descripcion">Sin descripción</span>
+          <span class="ai-list-stats"><i class="fas fa-heart"></i> {{ post.likes }} &nbsp; <i class="fas fa-comment"></i> {{ post.comentarios }}</span>
+        </div>
+        <button class="ai-btn-refresh" (click)="refrescar(post)"
+          [disabled]="refrescandoId === post._id" title="Obtener imagen y descripción de Instagram">
+          <i class="fas" [class.fa-sync-alt]="refrescandoId !== post._id" [class.fa-spinner]="refrescandoId === post._id" [class.fa-spin]="refrescandoId === post._id"></i>
+        </button>
+        <button class="ai-btn-del" (click)="eliminar(post._id)" title="Eliminar">
+          <i class="fas fa-trash"></i>
+        </button>
+      </li>
+    </ul>
+  </div>
+</div>

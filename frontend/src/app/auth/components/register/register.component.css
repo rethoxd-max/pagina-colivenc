@@ -1,29 +1,273 @@
-body {
-    padding-top: 160px;
+﻿/* ─── PÁGINA ─────────────────────────────────────────────── */
+.auth-page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f0f4f8;
+  padding: 2rem 1rem;
 }
 
-.card {
-    border: none;
+/* ─── TARJETA ──────────────────────────────────────────────── */
+.auth-card {
+  display: flex;
+  width: 100%;
+  max-width: 960px;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.12);
 }
 
-.btn-primary {
-    background-color: #00529b;
-    border-color: #00529b;
+/* ─── PANEL BRANDING ──────────────────────────────────────── */
+.auth-brand {
+  flex: 0 0 280px;
+  background: linear-gradient(160deg, #00317a 0%, #005cbf 100%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem 2rem;
+  text-align: center;
+  gap: 1rem;
 }
 
-.btn-primary:hover {
-    background-color: #004080;
-    border-color: #004080;
+.brand-logo {
+  width: 84px;
+  height: 84px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 3px solid rgba(255,255,255,0.3);
+  box-shadow: 0 4px 20px rgba(0,0,0,0.2);
 }
 
-h3 {
-    font-weight: 600;
+.brand-title {
+  font-size: 1.3rem;
+  font-weight: 800;
+  color: #fff;
+  letter-spacing: 2px;
+  margin: 0;
 }
 
-a.text-decoration-none {
-    color: #00529b;
+.brand-sub {
+  font-size: 0.75rem;
+  color: rgba(255,255,255,0.7);
+  line-height: 1.5;
+  margin: 0;
 }
 
-a.text-decoration-none:hover {
-    color: #003d7a;
+.brand-divider {
+  width: 40px;
+  height: 2px;
+  background: rgba(255,255,255,0.25);
+  border-radius: 1px;
+}
+
+.brand-info {
+  font-size: 0.75rem;
+  color: rgba(255,255,255,0.65);
+  line-height: 1.6;
+  margin: 0;
+}
+
+.brand-info strong {
+  color: rgba(255,255,255,0.95);
+}
+
+/* ─── PANEL FORMULARIO ────────────────────────────────────── */
+.auth-form-panel {
+  flex: 1;
+  background: #fff;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 2.5rem;
+  overflow-y: auto;
+}
+
+.auth-form-inner {
+  width: 100%;
+  max-width: 560px;
+  padding: 0.5rem 0;
+}
+
+.form-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0 0 0.25rem;
+}
+
+.form-subtitle {
+  font-size: 0.85rem;
+  color: #64748b;
+  margin: 0 0 1.75rem;
+}
+
+/* ─── FIELDS ──────────────────────────────────────────────── */
+.field-group {
+  margin-bottom: 1rem;
+  flex: 1;
+}
+
+.fields-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  margin-bottom: 0;
+}
+
+.field-label {
+  display: block;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #374151;
+  margin-bottom: 0.35rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.optional-tag {
+  font-weight: 400;
+  color: #94a3b8;
+  text-transform: none;
+  letter-spacing: 0;
+  font-size: 0.68rem;
+}
+
+.input-icon-wrap {
+  position: relative;
+}
+
+.input-icon {
+  position: absolute;
+  left: 0.85rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #94a3b8;
+  font-size: 0.8rem;
+  pointer-events: none;
+}
+
+.field-input {
+  width: 100%;
+  padding: 0.65rem 0.85rem 0.65rem 2.4rem;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  color: #0f172a;
+  background: #f8fafc;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  outline: none;
+  box-sizing: border-box;
+}
+
+.field-input:focus {
+  border-color: #005cbf;
+  background: #fff;
+  box-shadow: 0 0 0 3px rgba(0, 92, 191, 0.1);
+}
+
+.codigo-input {
+  text-transform: uppercase;
+  letter-spacing: 4px;
+  font-weight: 700;
+  font-size: 1rem;
+}
+
+.field-error {
+  display: block;
+  font-size: 0.75rem;
+  color: #dc2626;
+  margin-top: 0.25rem;
+}
+
+.field-hint {
+  display: block;
+  font-size: 0.75rem;
+  color: #94a3b8;
+  margin-top: 0.25rem;
+}
+
+/* ─── ALERTAS ─────────────────────────────────────────────── */
+.form-alert {
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  color: #dc2626;
+  border-radius: 8px;
+  padding: 0.65rem 1rem;
+  font-size: 0.85rem;
+  margin-bottom: 1rem;
+}
+
+.form-success {
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  color: #15803d;
+  border-radius: 8px;
+  padding: 1rem;
+  font-size: 0.9rem;
+  text-align: center;
+  margin-bottom: 1rem;
+}
+
+/* ─── BOTÓN ───────────────────────────────────────────────── */
+.btn-submit {
+  width: 100%;
+  padding: 0.8rem;
+  background: linear-gradient(135deg, #00317a, #005cbf);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.2s, transform 0.15s;
+  letter-spacing: 0.3px;
+  margin-top: 0.25rem;
+}
+
+.btn-submit:hover:not(:disabled) {
+  opacity: 0.92;
+  transform: translateY(-1px);
+}
+
+.btn-submit:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* ─── LINKS ───────────────────────────────────────────────── */
+.form-links {
+  text-align: center;
+  margin-top: 1.25rem;
+  font-size: 0.85rem;
+  color: #64748b;
+}
+
+.form-links a {
+  color: #64748b;
+  text-decoration: none;
+}
+
+.form-links a strong {
+  color: #005cbf;
+}
+
+.form-links a:hover strong {
+  text-decoration: underline;
+}
+
+/* ─── RESPONSIVE ──────────────────────────────────────────── */
+@media (max-width: 768px) {
+  .auth-brand {
+    display: none;
+  }
+
+  .fields-row {
+    grid-template-columns: 1fr;
+  }
+
+  .auth-form-panel {
+    padding: 2rem 1.5rem;
+  }
 }

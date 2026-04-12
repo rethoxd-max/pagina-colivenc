@@ -48,6 +48,7 @@ router.get('/', async (req, res) => {
 
         const posts = await Post.find()
             .populate('author', 'username')
+            .populate('disciplina', 'nombre slug color icono')
             .sort({ date: -1 })
             .skip(skip)
             .limit(limit);
@@ -63,8 +64,9 @@ router.get('/ultimos', async (req, res) => {
     try {
         const posts = await Post.find()
             .populate('author', ['name'])
-            .sort({ date: -1 }) // Ordena por el campo correcto
-            .limit(4); // Solo los 5 más recientes
+            .populate('disciplina', 'nombre slug color icono')
+            .sort({ date: -1 })
+            .limit(4);
 
         res.json(posts);
     } catch (error) {
@@ -77,7 +79,7 @@ router.get('/ultimos', async (req, res) => {
 // Obtener un post específico por ID
 router.get('/:id', async (req, res) => {
     try {
-        const post = await Post.findById(req.params.id).populate('author', ['name']);
+        const post = await Post.findById(req.params.id).populate('author', ['name']).populate('disciplina', 'nombre slug color icono');
         if (!post) {
             return res.status(404).json({ msg: 'Post no encontrado' });
         }
@@ -91,7 +93,7 @@ router.get('/:id', async (req, res) => {
 // Crear un post con imagen (ruta protegida)
 router.post('/', auth, upload, async (req, res) => {
     try {
-        const { title, content, category } = req.body;
+        const { title, content, category, disciplina } = req.body;
 
         // Validaciones
         if (!title || !content) {
@@ -108,6 +110,7 @@ router.post('/', auth, upload, async (req, res) => {
             title,
             content,
             category: category || '',
+            disciplina: disciplina || null,
             author: req.user.id,
             imageUrl,
         });
@@ -131,7 +134,7 @@ router.post('/', auth, upload, async (req, res) => {
 // Editar un post (ruta protegida)
 router.put('/:id', auth, upload, async (req, res) => {
     try {
-        const { title, content, category } = req.body;
+        const { title, content, category, disciplina } = req.body;
         const post = await Post.findById(req.params.id);
 
         if (!post) {
@@ -146,6 +149,7 @@ router.put('/:id', auth, upload, async (req, res) => {
         post.title = title;
         post.content = content;
         post.category = category || '';
+        post.disciplina = disciplina || null;
 
         // Si hay una nueva imagen, eliminar la antigua (si existe) y actualizar
         if (req.file) {

@@ -240,4 +240,70 @@ async function enviarConfirmacionCompra({ comprador, productos, total, numeroOrd
     console.log(`Email de confirmación enviado a ${comprador.email}`);
 }
 
-module.exports = { enviarConfirmacionCompra };
+async function enviarSolicitudCuenta({ nombre, email }) {
+    const transporter = getTransporter();
+
+    const html = `
+<!DOCTYPE html>
+<html lang="es">
+<head><meta charset="UTF-8"></head>
+<body style="margin:0;padding:0;background:#f5f5f5;font-family:Arial,sans-serif;">
+  <table width="100%" cellpadding="0" cellspacing="0">
+    <tr><td align="center" style="padding:30px 0;">
+      <table width="600" cellpadding="0" cellspacing="0" style="background:#fff;border-radius:8px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,.1);">
+
+        <!-- Cabecera -->
+        <tr>
+          <td bgcolor="#1a237e" style="padding:30px 40px;">
+            <h1 style="margin:0;color:#fff;font-size:22px;">${CLUB.nombre}</h1>
+            <p style="margin:6px 0 0;color:#c5cae9;font-size:14px;">Solicitud de cuenta nueva</p>
+          </td>
+        </tr>
+
+        <!-- Cuerpo -->
+        <tr>
+          <td style="padding:30px 40px;">
+            <p style="font-size:16px;color:#333;margin:0 0 20px;">
+              Un usuario ha solicitado que le crees una cuenta en la web del club.
+            </p>
+            <table width="100%" cellpadding="8" cellspacing="0" style="border:1px solid #e0e0e0;border-radius:6px;">
+              <tr style="background:#f5f7ff;">
+                <td style="font-weight:bold;color:#555;width:120px;">Nombre</td>
+                <td style="color:#1a1a1a;">${nombre}</td>
+              </tr>
+              <tr>
+                <td style="font-weight:bold;color:#555;">Email</td>
+                <td style="color:#1a1a1a;"><a href="mailto:${email}" style="color:#1a237e;">${email}</a></td>
+              </tr>
+            </table>
+            <p style="margin:24px 0 0;font-size:14px;color:#888;">
+              Genera un código de invitación en el panel de administración y envíaselo al usuario para que pueda registrarse.
+            </p>
+          </td>
+        </tr>
+
+        <!-- Pie -->
+        <tr>
+          <td bgcolor="#f5f5f5" style="padding:20px 40px;text-align:center;">
+            <p style="margin:0;font-size:12px;color:#999;">${CLUB.nombre} · ${CLUB.direccion}</p>
+          </td>
+        </tr>
+
+      </table>
+    </td></tr>
+  </table>
+</body>
+</html>`;
+
+    await transporter.sendMail({
+        from:    `"${CLUB.nombre}" <${process.env['EMAIL_USER']}>`,
+        to:      'admin.colivenc@gmail.com',
+        subject: `📋 Solicitud de cuenta — ${nombre}`,
+        html,
+        text: `Solicitud de cuenta nueva\n\nNombre: ${nombre}\nEmail: ${email}\n\nGenera un código de invitación y envíaselo al usuario.\n\n${CLUB.nombre}`
+    });
+
+    console.log(`Solicitud de cuenta enviada al administrador (solicitante: ${email})`);
+}
+
+module.exports = { enviarConfirmacionCompra, enviarSolicitudCuenta };

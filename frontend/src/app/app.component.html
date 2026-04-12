@@ -17,6 +17,35 @@
 
     <!-- Lado derecho: Botones de acción -->
     <div class="navbar-actions">
+
+      <!-- Filtro de disciplina -->
+      <div class="disc-filter">
+        <button class="disc-filter-btn" (click)="dropdownAbierto = !dropdownAbierto"
+                [class.active]="disciplinaSeleccionada">
+          <ng-container *ngIf="getDisciplinaActual() as disc; else iconoGenerico">
+            <i class="fas {{ disc.icono }}" [style.color]="disc.color"></i>
+          </ng-container>
+          <ng-template #iconoGenerico>
+            <i class="fas fa-layer-group"></i>
+          </ng-template>
+          <span class="disc-filter-label">{{ getNombreDisciplina() }}</span>
+          <i class="fas fa-chevron-down disc-filter-caret" [class.rotated]="dropdownAbierto"></i>
+        </button>
+        <div class="disc-dropdown" *ngIf="dropdownAbierto">
+          <button class="disc-dropdown-item" [class.selected]="!disciplinaSeleccionada"
+                  (click)="seleccionarDisciplina(null)">
+            <i class="fas fa-globe"></i> Todas las disciplinas
+          </button>
+          <button class="disc-dropdown-item" *ngFor="let d of disciplinas"
+                  [class.selected]="disciplinaSeleccionada === d._id"
+                  (click)="seleccionarDisciplina(d._id)">
+            <i class="fas {{ d.icono }}" [style.color]="d.color"></i>
+            {{ d.nombre }}
+          </button>
+        </div>
+        <!-- overlay para cerrar al hacer clic fuera -->
+        <div class="disc-overlay" *ngIf="dropdownAbierto" (click)="dropdownAbierto = false"></div>
+      </div>
       <button *ngIf="isLoggedIn && (atletaId || isAdmin())" class="btn-action" [routerLink]="['/entrenamientos']" title="Entrenamientos">
         <i class="fas fa-running"></i>
         <span class="action-text">Entrenamientos</span>
@@ -32,6 +61,10 @@
       <button *ngIf="!isLoggedIn" class="btn-action btn-primary-action" routerLink="/login">
         <i class="fas fa-sign-in-alt"></i>
         <span class="action-text">Iniciar sesión</span>
+      </button>
+      <button *ngIf="!isLoggedIn" class="btn-action btn-register-action" routerLink="/register">
+        <i class="fas fa-user-plus"></i>
+        <span class="action-text">Registrarse</span>
       </button>
       <button *ngIf="isLoggedIn" class="btn-action btn-logout" (click)="logout()" title="Cerrar sesión">
         <i class="fas fa-sign-out-alt"></i>
@@ -123,6 +156,27 @@
             <a class="nav-link admin-link" routerLink="/procesar-resultados" routerLinkActive="active" data-bs-dismiss="offcanvas">
               <div class="nav-icon"><i class="fas fa-file-import"></i></div>
               <span>Procesar Resultados</span>
+              <i class="fas fa-chevron-right nav-arrow"></i>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link admin-link" routerLink="/admin/usuarios" routerLinkActive="active" data-bs-dismiss="offcanvas">
+              <div class="nav-icon"><i class="fas fa-users-cog"></i></div>
+              <span>Panel de Usuarios</span>
+              <i class="fas fa-chevron-right nav-arrow"></i>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link admin-link" routerLink="/admin/disciplinas" routerLinkActive="active" data-bs-dismiss="offcanvas">
+              <div class="nav-icon"><i class="fas fa-layer-group"></i></div>
+              <span>Disciplinas</span>
+              <i class="fas fa-chevron-right nav-arrow"></i>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link admin-link" routerLink="/admin/instagram" routerLinkActive="active" data-bs-dismiss="offcanvas">
+              <div class="nav-icon"><i class="fab fa-instagram"></i></div>
+              <span>Posts Instagram</span>
               <i class="fas fa-chevron-right nav-arrow"></i>
             </a>
           </li>

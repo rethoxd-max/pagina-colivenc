@@ -17,6 +17,7 @@ const PostSchema = new Schema({
     },
     imageUrl: { type: String },
     category: { type: String, default: '' },
+    disciplina: { type: mongoose.Schema.Types.ObjectId, ref: 'Disciplina', default: null },
     date: {
         type: Date,
         default: Date.now

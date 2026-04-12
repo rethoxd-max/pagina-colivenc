@@ -1,0 +1,78 @@
+<div class="disc-page">
+
+  <div class="disc-header">
+    <h1 class="disc-title"><i class="fas fa-layer-group"></i> Disciplinas</h1>
+    <p class="disc-sub">Crea y gestiona las disciplinas que clasifican noticias y competiciones.</p>
+  </div>
+
+  <!-- Alertas -->
+  <div class="disc-alert disc-alert--error" *ngIf="error">{{ error }}</div>
+  <div class="disc-alert disc-alert--success" *ngIf="exito">{{ exito }}</div>
+
+  <!-- Formulario nuevo / editar -->
+  <div class="disc-form-card">
+    <h2 class="disc-form-title">{{ editandoId ? 'Editar disciplina' : 'Nueva disciplina' }}</h2>
+    <div class="disc-form-grid">
+      <div class="disc-field">
+        <label class="disc-label">Nombre *</label>
+        <input class="disc-input" [(ngModel)]="form.nombre" (input)="generarSlug()"
+               placeholder="Ej: Atletismo" />
+      </div>
+      <div class="disc-field">
+        <label class="disc-label">Slug *</label>
+        <input class="disc-input disc-input--mono" [(ngModel)]="form.slug"
+               placeholder="ej: atletismo" />
+      </div>
+      <div class="disc-field disc-field--small">
+        <label class="disc-label">Color</label>
+        <div class="disc-color-wrap">
+          <input type="color" class="disc-color-input" [(ngModel)]="form.color" />
+          <input class="disc-input" [(ngModel)]="form.color" placeholder="#005cbf" />
+        </div>
+      </div>
+      <div class="disc-field disc-field--small">
+        <label class="disc-label">Icono (Font Awesome)</label>
+        <div class="disc-icon-preview-wrap">
+          <i class="fas {{ form.icono }} disc-icon-preview" [style.color]="form.color"></i>
+          <input class="disc-input" [(ngModel)]="form.icono" placeholder="fa-running" />
+        </div>
+      </div>
+    </div>
+    <div class="disc-form-actions">
+      <button class="disc-btn disc-btn--cancel" *ngIf="editandoId" (click)="cancelar()">
+        <i class="fas fa-times"></i> Cancelar
+      </button>
+      <button class="disc-btn disc-btn--save" (click)="guardar()">
+        <i class="fas fa-save"></i> {{ editandoId ? 'Guardar cambios' : 'Crear disciplina' }}
+      </button>
+    </div>
+  </div>
+
+  <!-- Lista -->
+  <div class="disc-loading" *ngIf="cargando">Cargando...</div>
+
+  <div class="disc-empty" *ngIf="!cargando && disciplinas.length === 0">
+    <i class="fas fa-layer-group"></i>
+    <p>No hay disciplinas todavía. Crea la primera arriba.</p>
+  </div>
+
+  <div class="disc-list" *ngIf="!cargando && disciplinas.length > 0">
+    <div class="disc-item" *ngFor="let d of disciplinas">
+      <div class="disc-item-dot" [style.background]="d.color"></div>
+      <i class="fas {{ d.icono }} disc-item-icon" [style.color]="d.color"></i>
+      <div class="disc-item-info">
+        <span class="disc-item-nombre">{{ d.nombre }}</span>
+        <span class="disc-item-slug">{{ d.slug }}</span>
+      </div>
+      <div class="disc-item-actions">
+        <button class="disc-btn-sm disc-btn-sm--edit" (click)="iniciarEdicion(d)">
+          <i class="fas fa-edit"></i>
+        </button>
+        <button class="disc-btn-sm disc-btn-sm--del" (click)="eliminar(d._id)">
+          <i class="fas fa-trash"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+
+</div>

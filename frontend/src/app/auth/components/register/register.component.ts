@@ -3,23 +3,27 @@ import { AuthService } from '../../services/auth.service';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { Router, RouterLink } from '@angular/router';
+import { SolicitudCuentaComponent } from '../solicitud-cuenta/solicitud-cuenta.component';
 
 interface RegisterForm {
   id: string;
   name: string;
   email: string;
   password: string;
-  userTypes: string[];
+  confirmarPassword: string;
+  codigoInvitacion: string;
   fechaNacimiento?: string;
   numeroLicencia?: string;
-  activo?: boolean;
+  dni?: string;
+  telefono?: string;
 }
 
 @Component({
   selector: 'app-register',
   standalone: true,
-  imports: [FormsModule, CommonModule, RouterLink],
+  imports: [FormsModule, CommonModule, RouterLink, SolicitudCuentaComponent],
   templateUrl: 'register.component.html',
+  styleUrls: ['./register.component.css'],
 })
 export class RegisterComponent implements OnInit {
   user: RegisterForm = {
@@ -27,40 +31,34 @@ export class RegisterComponent implements OnInit {
     name: '',
     email: '',
     password: '',
-    userTypes: [],
+    confirmarPassword: '',
+    codigoInvitacion: '',
     fechaNacimiento: '',
     numeroLicencia: '',
-    activo: true
+    dni: '',
+    telefono: ''
   };
   errorMessage: string | null = null;
-
-  userTypeOptions = ['Admin', 'Atleta', 'Entrenador', 'Editor', 'Viewer']; // Tipos de usuario disponibles
+  registroExitoso = false;
 
   constructor(private authService: AuthService, private router: Router) { }
 
-  ngOnInit() {
-    // Registro abierto a cualquier persona
-  }
+  ngOnInit() {}
 
   onSubmit() {
-    this.authService.register(this.user).subscribe(
+    if (this.user.password !== this.user.confirmarPassword) {
+      this.errorMessage = 'Las contraseñas no coinciden';
+      return;
+    }
+    const { confirmarPassword, id, ...payload } = this.user;
+    this.authService.register(payload).subscribe(
       response => {
-        this.router.navigate(['login']);
+        this.registroExitoso = true;
+        setTimeout(() => this.router.navigate(['login']), 2000);
       },
       error => {
-        // Mostrar mensaje de error devuelto por el backend
-        this.errorMessage = error.error.msg || 'Error al registrar usuario';
+        this.errorMessage = error.error.msg || error.error.errors?.[0]?.msg || 'Error al registrar usuario';
       }
     );
-  }
-
-  // Método para gestionar la selección de tipos de usuario
-  toggleUserType(type: string) {
-    const index = this.user.userTypes.indexOf(type);
-    if (index === -1) {
-      this.user.userTypes.push(type); // Añadir tipo si no está seleccionado
-    } else {
-      this.user.userTypes.splice(index, 1); // Quitar tipo si está seleccionado
-    }
   }
 }

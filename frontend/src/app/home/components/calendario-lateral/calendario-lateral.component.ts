@@ -1,8 +1,10 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { CompeticionService, Competicion, PruebaCompeticion } from '../../../calendario/services/competicion.service';
 import { PerfilAtletaService, Atleta } from '../../../ranking/services/perfil-atleta.service';
+import { DisciplinaFilterService } from '../../../services/disciplina-filter.service';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-calendario-lateral',
@@ -14,7 +16,7 @@ import { PerfilAtletaService, Atleta } from '../../../ranking/services/perfil-at
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
   `
 })
-export class CalendarioLateralComponent implements OnInit {
+export class CalendarioLateralComponent implements OnInit, OnDestroy {
   currentDate: Date = new Date();
   currentMonth: number = this.currentDate.getMonth();
   currentYear: number = this.currentDate.getFullYear();
@@ -26,29 +28,45 @@ export class CalendarioLateralComponent implements OnInit {
   cumpleanerosHoy: Atleta[] = [];
   hoveredDate: Date | null = null;
   selectedDate: Date | null = null;
+  private todasCompeticiones: Competicion[] = [];
+  private filterSub?: Subscription;
 
   constructor(
     private competicionService: CompeticionService,
-    private perfilAtletaService: PerfilAtletaService
+    private perfilAtletaService: PerfilAtletaService,
+    private disciplinaFilterService: DisciplinaFilterService
   ) {}
 
   ngOnInit(): void {
     this.loadCompeticiones();
     this.loadAtletas();
     this.updateCalendar();
+    this.filterSub = this.disciplinaFilterService.disciplina$.subscribe(id => {
+      this.applyDiscFilter(id);
+    });
+  }
+
+  ngOnDestroy(): void {
+    this.filterSub?.unsubscribe();
   }
 
   loadCompeticiones(): void {
     this.competicionService.getCompeticiones().subscribe(
       (data: Competicion[]) => {
-        this.competiciones = data;
-        this.organizarCompeticionesPorDia();
+        this.todasCompeticiones = data;
+        this.applyDiscFilter(this.disciplinaFilterService.disciplinaActual);
         this.updateCalendar();
       },
-      (error) => {
-        console.error('Error al cargar las competiciones:', error);
-      }
+      (error) => { console.error('Error al cargar las competiciones:', error); }
     );
+  }
+
+  applyDiscFilter(discId: string | null): void {
+    this.competiciones = discId
+      ? this.todasCompeticiones.filter(c => ((c.disciplina as any)?._id || c.disciplina) === discId)
+      : this.todasCompeticiones;
+    this.organizarCompeticionesPorDia();
+    this.updateCalendar();
   }
 
   loadAtletas(): void {

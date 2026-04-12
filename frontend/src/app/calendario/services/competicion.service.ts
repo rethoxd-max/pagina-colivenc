@@ -5,6 +5,12 @@ import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { AuthService } from '../../auth/services/auth.service';
 import { Prueba } from '../../ranking/services/ranking.service';
+import { Disciplina } from '../../services/disciplina.service';
+
+export interface EnlaceCompeticion {
+  nombre: string;
+  url: string;
+}
 
 export interface Competicion {
   _id: string; // Mongoose agrega esta propiedad automáticamente
@@ -16,6 +22,8 @@ export interface Competicion {
   imageUrl?: string; // Opcional
   pruebas: PruebaCompeticion[]; // Array de strings
   sectores: SectorCompeticion[];
+  enlaces?: EnlaceCompeticion[];
+  disciplina?: Disciplina | null;
 }
 
 export interface PruebaCompeticion {

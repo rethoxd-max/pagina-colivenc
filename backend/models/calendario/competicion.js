@@ -13,6 +13,11 @@ const competicionSchema = new mongoose.Schema({
     sectores: [{ type: mongoose.Schema.Types.ObjectId, ref: 'SectorCompeticion' }],
     categorias: [{ type: mongoose.Schema.Types.ObjectId, ref: 'CategoriaCompeticion'}],
     tokenPublico: { type: String, unique: true, default: () => crypto.randomBytes(8).toString('hex') },
+    enlaces: [{
+        nombre: { type: String, required: true },
+        url: { type: String, required: true }
+    }],
+    disciplina: { type: mongoose.Schema.Types.ObjectId, ref: 'Disciplina', default: null },
 });
 
 module.exports = mongoose.model('Competicion', competicionSchema);

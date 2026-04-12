@@ -1,38 +1,66 @@
-<div class="login-container d-flex align-items-center justify-content-center">
-    <div class="login-box p-4 rounded shadow-lg">
-        <h2 class="text-center mb-4">Iniciar Sesión</h2>
+<div class="auth-page">
+  <div class="auth-card">
 
-        <form (ngSubmit)="onSubmit()" #loginForm="ngForm">
-            <!-- Email -->
-            <div class="form-group mb-3">
-                <label for="email" class="form-label">Correo electrónico</label>
-                <input type="email" id="email" [(ngModel)]="user.email" name="email" placeholder="Introduce tu email"
-                    class="form-control" required email #email="ngModel" />
-                <div *ngIf="email.invalid && email.touched" class="text-danger">
-                    <div *ngIf="email.errors?.['required']">El correo es obligatorio</div>
-                    <div *ngIf="email.errors?.['email']">El formato del correo no es válido</div>
-                </div>
+    <!-- Panel izquierdo: branding -->
+    <div class="auth-brand">
+      <img src="./assets/logo-colivenc.jpg" alt="Logo Colivenc" class="brand-logo">
+      <h1 class="brand-title">Centre Esportiu Colivenc</h1>
+    </div>
+
+    <!-- Panel derecho: formulario -->
+    <div class="auth-form-panel">
+      <div class="auth-form-inner">
+
+        <h2 class="form-title">Bienvenido</h2>
+        <p class="form-subtitle">Inicia sesión para acceder a tu cuenta</p>
+
+        <form (ngSubmit)="onSubmit()" #loginForm="ngForm" autocomplete="off">
+
+          <div class="field-group">
+            <label class="field-label">Correo electrónico</label>
+            <div class="input-icon-wrap">
+              <i class="fas fa-envelope input-icon"></i>
+              <input type="email" [(ngModel)]="user.email" name="email"
+                class="field-input" placeholder="correo@ejemplo.com"
+                required email #email="ngModel" />
             </div>
+            <span *ngIf="email.invalid && email.touched" class="field-error">
+              <span *ngIf="email.errors?.['required']">El correo es obligatorio</span>
+              <span *ngIf="email.errors?.['email']">Formato de correo no válido</span>
+            </span>
+          </div>
 
-            <!-- Contraseña -->
-            <div class="form-group mb-3">
-                <label for="password" class="form-label">Contraseña</label>
-                <input type="password" id="password" [(ngModel)]="user.password" name="password"
-                    placeholder="Introduce tu contraseña" class="form-control" required #password="ngModel" />
-                <div *ngIf="password.invalid && password.touched" class="text-danger">
-                    <div *ngIf="password.errors?.['required']">La contraseña es obligatoria</div>
-                </div>
+          <div class="field-group">
+            <label class="field-label">Contraseña</label>
+            <div class="input-icon-wrap">
+              <i class="fas fa-lock input-icon"></i>
+              <input type="password" [(ngModel)]="user.password" name="password"
+                class="field-input" placeholder="Tu contraseña"
+                required #password="ngModel" />
             </div>
+            <span *ngIf="password.invalid && password.touched" class="field-error">
+              La contraseña es obligatoria
+            </span>
+          </div>
 
-            <!-- Botón de Login -->
-            <div class="text-center">
-                <button type="submit" class="btn btn-primary w-100" [disabled]="loginForm.invalid">Iniciar
-                    Sesión</button>
-            </div>
+          <div *ngIf="errorMessage" class="form-alert">
+            <i class="fas fa-exclamation-circle me-2"></i>{{ errorMessage }}
+          </div>
 
-            <!-- Mostrar error del backend -->
-            <div *ngIf="errorMessage" class="alert alert-danger mt-3">{{ errorMessage }}</div>
+          <button type="submit" class="btn-submit" [disabled]="loginForm.invalid">
+            Iniciar sesión
+          </button>
+
         </form>
 
+        <div class="form-links">
+          <a routerLink="/register">¿Aún no tienes cuenta? <strong>Regístrate</strong></a>
+        </div>
+
+        <app-solicitud-cuenta></app-solicitud-cuenta>
+
+      </div>
     </div>
+
+  </div>
 </div>

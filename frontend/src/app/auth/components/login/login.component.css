@@ -1,38 +1,208 @@
-
-.login-container {
-    height: 100vh;
-    background: url('/assets/background-image.jpg') no-repeat center center;
-    background-size: cover;
+﻿/* ─── PÁGINA ─────────────────────────────────────────────── */
+.auth-page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f0f4f8;
+  padding: 1rem;
 }
 
-.login-box {
-    background-color: white;
-    max-width: 400px;
-    width: 100%;
-    border-radius: 10px;
+/* ─── TARJETA DIVIDIDA ─────────────────────────────────────── */
+.auth-card {
+  display: flex;
+  width: 100%;
+  max-width: 860px;
+  min-height: 520px;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.12);
 }
 
-h2 {
-    font-size: 1.8rem;
-    font-weight: bold;
-    color: #000;
+/* ─── PANEL BRANDING (izquierdo) ───────────────────────────── */
+.auth-brand {
+  flex: 0 0 300px;
+  background: linear-gradient(160deg, #00317a 0%, #005cbf 100%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem 2rem;
+  text-align: center;
+  gap: 1rem;
 }
 
-.form-control {
-    border-radius: 5px;
+.brand-logo {
+  width: 90px;
+  height: 90px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 3px solid rgba(255,255,255,0.3);
+  box-shadow: 0 4px 20px rgba(0,0,0,0.2);
 }
 
-.btn-primary {
-    background-color: #004274;
-    /* Color inspirado en la paleta de Real Madrid */
-    border: none;
-    padding: 10px 0;
+.brand-title {
+  font-size: 1.4rem;
+  font-weight: 800;
+  color: #fff;
+  letter-spacing: 2px;
+  margin: 0;
 }
 
-.btn-primary:hover {
-    background-color: #0064b1;
+.brand-sub {
+  font-size: 0.78rem;
+  color: rgba(255,255,255,0.7);
+  line-height: 1.5;
+  margin: 0;
 }
 
-.text-muted {
-    color: #6c757d;
+/* ─── PANEL FORMULARIO (derecho) ───────────────────────────── */
+.auth-form-panel {
+  flex: 1;
+  background: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2.5rem;
+}
+
+.auth-form-inner {
+  width: 100%;
+  max-width: 360px;
+}
+
+.form-title {
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0 0 0.3rem;
+}
+
+.form-subtitle {
+  font-size: 0.875rem;
+  color: #64748b;
+  margin: 0 0 2rem;
+}
+
+/* ─── FIELDS ──────────────────────────────────────────────── */
+.field-group {
+  margin-bottom: 1.25rem;
+}
+
+.field-label {
+  display: block;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #374151;
+  margin-bottom: 0.4rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.input-icon-wrap {
+  position: relative;
+}
+
+.input-icon {
+  position: absolute;
+  left: 0.9rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #94a3b8;
+  font-size: 0.85rem;
+  pointer-events: none;
+}
+
+.field-input {
+  width: 100%;
+  padding: 0.7rem 0.9rem 0.7rem 2.5rem;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  color: #0f172a;
+  background: #f8fafc;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  outline: none;
+  box-sizing: border-box;
+}
+
+.field-input:focus {
+  border-color: #005cbf;
+  background: #fff;
+  box-shadow: 0 0 0 3px rgba(0, 92, 191, 0.1);
+}
+
+.field-error {
+  display: block;
+  font-size: 0.78rem;
+  color: #dc2626;
+  margin-top: 0.3rem;
+}
+
+/* ─── ALERTA DE ERROR ─────────────────────────────────────── */
+.form-alert {
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  color: #dc2626;
+  border-radius: 8px;
+  padding: 0.65rem 1rem;
+  font-size: 0.85rem;
+  margin-bottom: 1.25rem;
+}
+
+/* ─── BOTÓN ───────────────────────────────────────────────── */
+.btn-submit {
+  width: 100%;
+  padding: 0.8rem;
+  background: linear-gradient(135deg, #00317a, #005cbf);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.2s, transform 0.15s;
+  letter-spacing: 0.3px;
+}
+
+.btn-submit:hover:not(:disabled) {
+  opacity: 0.92;
+  transform: translateY(-1px);
+}
+
+.btn-submit:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* ─── LINKS ───────────────────────────────────────────────── */
+.form-links {
+  text-align: center;
+  margin-top: 1.25rem;
+  font-size: 0.85rem;
+  color: #64748b;
+}
+
+.form-links a {
+  color: #64748b;
+  text-decoration: none;
+}
+
+.form-links a strong {
+  color: #005cbf;
+}
+
+.form-links a:hover strong {
+  text-decoration: underline;
+}
+
+/* ─── RESPONSIVE ──────────────────────────────────────────── */
+@media (max-width: 640px) {
+  .auth-brand {
+    display: none;
+  }
+
+  .auth-form-panel {
+    padding: 2rem 1.5rem;
+  }
 }

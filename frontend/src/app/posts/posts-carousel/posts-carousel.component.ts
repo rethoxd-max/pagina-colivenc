@@ -6,6 +6,7 @@ import { ReactiveFormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { PostService } from '../services/posts.service';
 import { environment } from '../../../environments/environment';
+import { DisciplinaFilterService } from '../../services/disciplina-filter.service';
 
 interface Post {
   _id: string;
@@ -23,12 +24,17 @@ interface Post {
 })
 
 export class PostsCarouselComponent implements OnInit, OnDestroy {
+  allPosts: Post[] = [];
   posts: Post[] = [];
   currentIndex: number = 0;
   autoSlideSub?: Subscription;
+  private filterSub?: Subscription;
   baseURL: string = environment.apiUrl;
 
-  constructor(private postService: PostService) { }
+  constructor(
+    private postService: PostService,
+    private disciplinaFilterService: DisciplinaFilterService
+  ) { }
 
   ngOnInit() {
     this.fetchLatestPosts();
@@ -37,11 +43,21 @@ export class PostsCarouselComponent implements OnInit, OnDestroy {
   fetchLatestPosts() {
     this.postService.getUltimosPosts().subscribe({
       next: (data) => {
-        this.posts = data;
-        this.startAutoSlide();
+        this.allPosts = data;
+        this.applyFilter(this.disciplinaFilterService.disciplinaActual);
+        this.filterSub = this.disciplinaFilterService.disciplina$.subscribe(id => this.applyFilter(id));
       },
       error: (err) => console.error('Error al obtener posts', err)
     });
+  }
+
+  applyFilter(discId: string | null): void {
+    this.posts = discId
+      ? this.allPosts.filter(p => !(p as any).disciplina || ((p as any).disciplina?._id || (p as any).disciplina) === discId)
+      : this.allPosts;
+    this.currentIndex = 0;
+    this.stopAutoSlide();
+    if (this.posts.length > 0) this.startAutoSlide();
   }
 
   startAutoSlide() {
@@ -70,5 +86,6 @@ export class PostsCarouselComponent implements OnInit, OnDestroy {
 
   ngOnDestroy() {
     this.stopAutoSlide();
+    this.filterSub?.unsubscribe();
   }
 }

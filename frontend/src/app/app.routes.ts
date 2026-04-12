@@ -31,7 +31,11 @@ import { ProcesarResultadosComponent } from './competiciones/procesar-resultados
 import { TiendaComponent } from './tienda/tienda.component';
 import { CrearProductoComponent } from './tienda/components/crear-producto/crear-producto.component';
 import { InscripcionPublicaComponent } from './calendario/components/inscripcion-publica/inscripcion-publica.component';
+import { CodigosInvitacionComponent } from './admin/codigos-invitacion/codigos-invitacion.component';
+import { AdminUsuariosComponent } from './admin/admin-usuarios/admin-usuarios.component';
 import { CalculadoraCombinadasComponent } from './calculadora-combinadas/calculadora-combinadas.component';
+import { AdminDisciplinasComponent } from './admin/disciplinas/admin-disciplinas.component';
+import { AdminInstagramComponent } from './admin/instagram/admin-instagram.component';
 
 
 export const routes: Routes = [
@@ -114,6 +118,12 @@ export const routes: Routes = [
         loadComponent: () => import('./auth/components/cambiar-password/cambiar-password.component').then(m => m.CambiarPasswordComponent),
         canActivate: [AuthGuard]
     },
+
+    // Rutas admin
+    { path: 'admin/codigos-invitacion', component: CodigosInvitacionComponent, canActivate: [AuthGuard, adminGuard] },
+    { path: 'admin/usuarios', component: AdminUsuariosComponent, canActivate: [AuthGuard, adminGuard] },
+    { path: 'admin/disciplinas', component: AdminDisciplinasComponent, canActivate: [AuthGuard, adminGuard] },
+    { path: 'admin/instagram', component: AdminInstagramComponent, canActivate: [AuthGuard, adminGuard] },
     
     // Ruta por defecto
     { path: '', redirectTo: '/home', pathMatch: 'full' },

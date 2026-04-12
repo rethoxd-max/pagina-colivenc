@@ -1,10 +1,12 @@
-import { Component, NgModule, OnInit } from '@angular/core';
+import { Component, NgModule, OnInit, OnDestroy } from '@angular/core';
 import { CategoriaCompeticion, CompeticionService, PruebaCompeticion } from '../../services/competicion.service';
 import { CommonModule, NgIf } from '@angular/common';
 import { FormsModule, NgModel, NgModelGroup, ReactiveFormsModule } from '@angular/forms';
-import { RouterLink, ActivatedRoute } from '@angular/router'; // Añadido ActivatedRoute
+import { RouterLink, ActivatedRoute } from '@angular/router';
 import { AuthService } from '../../../auth/services/auth.service';
 import { environment } from '../../../../environments/environment';
+import { DisciplinaFilterService } from '../../../services/disciplina-filter.service';
+import { Subscription } from 'rxjs';
 
 interface CompeticionAgrupada {
   year: number;
@@ -23,7 +25,7 @@ interface CompeticionAgrupada {
   styleUrls: ['./competicion-list.component.css'],
   providers: [CompeticionService]
 })
-export class CompeticionListComponent implements OnInit {
+export class CompeticionListComponent implements OnInit, OnDestroy {
   competiciones: any[] = [];
   competicionesAgrupadas: CompeticionAgrupada[] = [];
   pruebas: { [competicionId: string]: PruebaCompeticion[] } = {};
@@ -54,14 +56,22 @@ export class CompeticionListComponent implements OnInit {
   constructor(
     private competicionService: CompeticionService,
     private authService: AuthService,
-    private route: ActivatedRoute // Añadido para obtener parámetros de la URL
+    private route: ActivatedRoute,
+    private disciplinaFilterService: DisciplinaFilterService
   ) { }
+
+  private filterSub?: Subscription;
 
   ngOnInit(): void {
     this.userId = this.authService.getUserId();
     this.competicionId = this.route.snapshot.paramMap.get('competicionId') || '';
     this.loadCompeticiones();
     this.loadCategorias();
+    this.filterSub = this.disciplinaFilterService.disciplina$.subscribe(() => this.filterCompeticiones());
+  }
+
+  ngOnDestroy(): void {
+    this.filterSub?.unsubscribe();
   }
 
   loadCategorias() {
@@ -178,21 +188,22 @@ export class CompeticionListComponent implements OnInit {
   }
 
   filterCompeticiones() {
+    const discId = this.disciplinaFilterService.disciplinaActual;
     this.filteredCompeticiones = this.competiciones
       .filter(competicion => {
         const matchesName = competicion.nombre.toLowerCase().includes(this.searchName.toLowerCase());
         const matchesDate = this.startDate && this.endDate
           ? new Date(competicion.fecha) >= new Date(this.startDate) && new Date(competicion.fecha) <= new Date(this.endDate)
           : true;
-
         const matchesCategoria = this.searchCategoria
           ? this.pruebas[competicion._id]?.some(prueba => prueba.categoria_id.nombre_categoria === this.searchCategoria)
           : true;
-
-        return matchesName && matchesDate && matchesCategoria;
+        const matchesDisciplina = discId
+          ? (competicion.disciplina?._id || competicion.disciplina) === discId
+          : true;
+        return matchesName && matchesDate && matchesCategoria && matchesDisciplina;
       })
       .sort((a, b) => new Date(b.fecha).getTime() - new Date(a.fecha).getTime());
-
     this.competicionesAgrupadas = this.agruparCompeticiones(this.filteredCompeticiones);
   }
 

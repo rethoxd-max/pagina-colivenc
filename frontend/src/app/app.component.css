@@ -11,6 +11,14 @@
     --bg-color: #f8fafc;
     --border-radius: 12px;
     --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-height: calc(100vh - 80px);
+}
+
+router-outlet + * {
+    flex: 1;
 }
 
 /* ========================================
@@ -425,6 +433,105 @@
 /* ========================================
    Footer
 ======================================== */
+/* ========================================
+   Footer
+======================================== */
+
+/* ─── Filtro de disciplina ─────────────────────────────── */
+.disc-filter {
+  position: relative;
+}
+
+.disc-filter-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: .45rem;
+  padding: .45rem .85rem;
+  background: #f0f4f8;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 20px;
+  font-size: .8rem;
+  font-weight: 600;
+  color: #374151;
+  cursor: pointer;
+  transition: background .2s, border-color .2s;
+  white-space: nowrap;
+}
+
+.disc-filter-btn.active {
+  background: #eff6ff;
+  border-color: #93c5fd;
+  color: #1d4ed8;
+}
+
+.disc-filter-btn:hover {
+  background: #e2e8f0;
+}
+
+.disc-filter-label {
+  max-width: 90px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.disc-filter-caret {
+  font-size: .65rem;
+  transition: transform .2s;
+}
+
+.disc-filter-caret.rotated {
+  transform: rotate(180deg);
+}
+
+.disc-dropdown {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  min-width: 200px;
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(0,0,0,.12);
+  padding: .4rem;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  gap: .15rem;
+}
+
+.disc-dropdown-item {
+  width: 100%;
+  text-align: left;
+  padding: .55rem .8rem;
+  border: none;
+  background: transparent;
+  border-radius: 8px;
+  font-size: .85rem;
+  color: #374151;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: .6rem;
+  transition: background .15s;
+}
+
+.disc-dropdown-item:hover {
+  background: #f0f4f8;
+}
+
+.disc-dropdown-item.selected {
+  background: #eff6ff;
+  color: #1d4ed8;
+  font-weight: 600;
+}
+
+.disc-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9998;
+}
+
 .site-footer {
     background: linear-gradient(135deg, #1e3c72 0%, #2563eb 100%);
     color: #ffffff;

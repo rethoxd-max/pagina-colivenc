@@ -1,6 +1,6 @@
 import { Component, OnInit, NgZone, ElementRef, ViewChild } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormBuilder, FormGroup, FormArray, ReactiveFormsModule, Validators } from '@angular/forms';
 import { CompeticionService, PruebaCompeticion, SectorCompeticion, CategoriaCompeticion } from '../../services/competicion.service';
 import { NgFor, NgIf } from '@angular/common';
 import { environment } from '../../../../environments/environment';
@@ -8,6 +8,7 @@ import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatSelectModule } from '@angular/material/select';
 import { MatSelectChange } from '@angular/material/select';
+import { DisciplinaService, Disciplina } from '../../../services/disciplina.service';
 /// <reference types="@types/googlemaps" />
 
 declare var google: any;
@@ -35,6 +36,7 @@ export class CompeticionFormComponent implements OnInit {
   pruebasDisponibles: PruebaCompeticion[] = [];
   pruebasSeleccionadas: PruebaCompeticion[] = [];
   categoriasSeleccionadas: string[] = [];
+  disciplinas: Disciplina[] = [];
 
   // Variable para Google Maps Places Autocomplete
   autocomplete: any;
@@ -46,7 +48,8 @@ export class CompeticionFormComponent implements OnInit {
     private route: ActivatedRoute,
     private router: Router,
     private fb: FormBuilder,
-    private ngZone: NgZone
+    private ngZone: NgZone,
+    private disciplinaService: DisciplinaService
   ) {
     this.competicionForm = this.fb.group({
       nombre: ['', Validators.required],
@@ -55,15 +58,22 @@ export class CompeticionFormComponent implements OnInit {
       descripcion: [''],
       imagen: [''],
       tipo: [''],
+      disciplina: [null],
       categorias: [[]], // Ahora permite múltiples categorías
       sector: [''],
       pruebas: [[]],
+      enlaces: this.fb.array([]),
     });
+  }
+
+  volver(): void {
+    this.router.navigate(['/competiciones']);
   }
 
   ngOnInit(): void {
     this.competicionId = this.route.snapshot.paramMap.get('id');
     this.categoriasSeleccionadas = [];
+    this.disciplinaService.getDisciplinas().subscribe(d => { this.disciplinas = d; });
     // Cargar categorías y sectores al iniciar
     this.competicionService.getCategorias().subscribe(
       categorias => {
@@ -90,12 +100,12 @@ export class CompeticionFormComponent implements OnInit {
             lugar: competicion.lugar,
             descripcion: competicion.descripcion,
             tipo: competicion.tipo,
+            disciplina: competicion.disciplina?._id || competicion.disciplina || null,
             categorias: competicion.categorias,
             pruebas: [],
             sector: ''
           });
           
-          // Guardar referencia a la imagen existente
           if (competicion.imageUrl) {
             // Extraer el nombre del archivo de la URL completa
             const urlParts = competicion.imageUrl.split('/');
@@ -108,6 +118,16 @@ export class CompeticionFormComponent implements OnInit {
           }
 
           this.categoriasSeleccionadas = competicion.categorias;
+
+          // Cargar enlaces existentes
+          if (competicion.enlaces && competicion.enlaces.length > 0) {
+            competicion.enlaces.forEach((enlace: any) => {
+              this.enlaces.push(this.fb.group({
+                nombre: [enlace.nombre, Validators.required],
+                url: [enlace.url, Validators.required],
+              }));
+            });
+          }
 
           if (competicion.pruebas && competicion.pruebas.length > 0) {
             this.competicionService.getPruebasByIds(competicion.pruebas).subscribe(
@@ -324,6 +344,24 @@ export class CompeticionFormComponent implements OnInit {
     }
   }
 
+  // Getters y helpers para el FormArray de enlaces
+  get enlaces(): FormArray {
+    return this.competicionForm.get('enlaces') as FormArray;
+  }
+
+  addEnlace(): void {
+    if (this.enlaces.length < 5) {
+      this.enlaces.push(this.fb.group({
+        nombre: ['', Validators.required],
+        url: ['', Validators.required],
+      }));
+    }
+  }
+
+  removeEnlace(index: number): void {
+    this.enlaces.removeAt(index);
+  }
+
   // Método para limpiar la selección de archivo y volver a mostrar la imagen existente
   clearFileSelection(): void {
     this.selectedFile = null;
@@ -364,6 +402,9 @@ export class CompeticionFormComponent implements OnInit {
     formData.append('descripcion', this.competicionForm.get('descripcion')?.value);
     formData.append('tipo', this.competicionForm.get('tipo')?.value);
 
+    const disciplinaId = this.competicionForm.get('disciplina')?.value;
+    if (disciplinaId) formData.append('disciplina', disciplinaId);
+
     const categoriasIds = this.competicionForm.get('categorias')?.value;
     categoriasIds.forEach((id: string, index: number) => {
       formData.append(`categorias[${index}]`, id);
@@ -381,6 +422,10 @@ export class CompeticionFormComponent implements OnInit {
       // enviar el nombre de la imagen existente para mantenerla
       formData.append('existingImage', this.existingImage);
     }
+
+    // Enviar enlaces como JSON
+    const enlaces = this.enlaces.value;
+    formData.append('enlaces', JSON.stringify(enlaces));
 
     if (this.categoriasSeleccionadas!.length < 1) {
       this.categoriasSeleccionadas = [];
