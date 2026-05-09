@@ -91,6 +91,10 @@ router.get('/productos/imagen/:filename', async (req, res) => {
             return res.status(404).json({ mensaje: 'Imagen no encontrada' });
         }
 
+        // Cabeceras para permitir carga cross-origin desde cecolivenc.es
+        res.set('Cross-Origin-Resource-Policy', 'cross-origin');
+        res.set('Access-Control-Allow-Origin', '*');
+
         // Servir el archivo
         res.sendFile(imagePath);
     } catch (error) {
@@ -391,7 +395,6 @@ router.post('/productos', auth, requireAdmin, upload.single('imagen'), async (re
     const stripeProduct = await stripeInstance.products.create({
       name: nombre,
       description: descripcion,
-      images: [`${req.protocol}://${req.get('host')}/tienda/productos/imagen/${req.file.filename}`]
     });
 
     const stripePrice = await stripeInstance.prices.create({
@@ -408,7 +411,7 @@ router.post('/productos', auth, requireAdmin, upload.single('imagen'), async (re
       imagen: req.file.filename,
       categoria,
       stock: parseInt(stock),
-      tallas: Array.isArray(tallas) ? tallas : tallas.split(',').map(t => t.trim()),
+      tallas: Array.isArray(tallas) ? tallas : JSON.parse(tallas),
       stripeProductId: stripeProduct.id,
       stripePriceId: stripePrice.id
     });

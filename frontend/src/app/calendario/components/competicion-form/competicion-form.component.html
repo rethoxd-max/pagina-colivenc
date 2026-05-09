@@ -72,7 +72,7 @@
                 </div>
 
                 <!-- Categorías -->
-                <div class="nf-field">
+                <div *ngIf="isAdmin()" class="nf-field">
                     <label class="nf-label">
                         <i class="fas fa-users"></i> Categorías
                     </label>
@@ -88,7 +88,7 @@
                 </div>
 
                 <!-- Sector y Pruebas (solo si hay categorías) -->
-                <div *ngIf="categoriasSeleccionadas!.length > 0">
+                <div *ngIf="categoriasSeleccionadas!.length > 0 && isAdmin()">
 
                     <div class="nf-field">
                         <label class="nf-label">
@@ -105,7 +105,7 @@
                         </div>
                     </div>
 
-                    <div class="nf-field">
+                    <div *ngIf="isAdmin() && sectorSeleccionado" class="nf-field">
                         <label class="nf-label">
                             <i class="fas fa-running"></i> Pruebas
                         </label>

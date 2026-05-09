@@ -37,12 +37,23 @@ function limpiarDescripcion(raw) {
     return raw;
 }
 
+function decodeHTMLEntities(str) {
+    return str
+        .replace(/&amp;/g, '&')
+        .replace(/&quot;/g, '"')
+        .replace(/&#39;/g, "'")
+        .replace(/&lt;/g, '<')
+        .replace(/&gt;/g, '>')
+        .replace(/&#x([0-9a-fA-F]+);/g, (_, hex) => String.fromCodePoint(parseInt(hex, 16)))
+        .replace(/&#(\d+);/g, (_, dec) => String.fromCodePoint(parseInt(dec, 10)));
+}
+
 function extractOG(html) {
     const getOG = (prop) => {
         const re1 = new RegExp(`<meta[^>]+property=["']${prop}["'][^>]+content=["']([^"']+)["']`, 'i');
         const re2 = new RegExp(`<meta[^>]+content=["']([^"']+)["'][^>]+property=["']${prop}["']`, 'i');
         const m = html.match(re1) || html.match(re2);
-        return m ? m[1].replace(/&amp;/g, '&') : '';
+        return m ? decodeHTMLEntities(m[1]) : '';
     };
     return {
         imagenUrl: getOG('og:image'),
@@ -51,7 +62,7 @@ function extractOG(html) {
 }
 
 // ── Helper: descargar imagen y guardarla localmente ───────────────────────────
-async function descargarImagen(remoteUrl, baseUrl) {
+async function descargarImagen(remoteUrl) {
     if (!remoteUrl) return '';
     try {
         const res = await axios.get(remoteUrl, {
@@ -64,18 +75,15 @@ async function descargarImagen(remoteUrl, baseUrl) {
         const dir = path.join(__dirname, '../uploads/instagram');
         fs.mkdirSync(dir, { recursive: true });
         fs.writeFileSync(path.join(dir, filename), res.data);
-        // devolver la URL completa para que el frontend pueda cargarla
-        return `${baseUrl}/uploads/instagram/${filename}`;
+        // devolver ruta relativa; el frontend añade la base via environment.apiUrl
+        return `/uploads/instagram/${filename}`;
     } catch {
         return remoteUrl; // si falla la descarga, devolver la URL remota como fallback
     }
 }
 
 // ── Helper: scraping de metadatos ────────────────────────────────────────────
-async function scrapeInstagram(url, req) {
-    const protocol = req.headers['x-forwarded-proto'] || 'https';
-    const host = req.headers['host'] || 'api.cecolivenc.es';
-    const baseUrl = `${protocol}://${host}`;
+async function scrapeInstagram(url) {
     const shortcode = extractShortcode(url);
     const urlsToTry = [
         shortcode ? `https://www.instagram.com/p/${shortcode}/embed/captioned/` : null,
@@ -87,7 +95,7 @@ async function scrapeInstagram(url, req) {
             const res = await axios.get(targetUrl, { headers: BROWSER_HEADERS, timeout: 10000, maxRedirects: 5 });
             const { imagenUrl, descripcion } = extractOG(res.data);
             if (imagenUrl) {
-                const localImg = await descargarImagen(imagenUrl, baseUrl);
+                const localImg = await descargarImagen(imagenUrl);
                 return { imagenUrl: localImg, descripcion };
             }
         } catch { /* intentar siguiente URL */ }
@@ -103,7 +111,7 @@ router.get('/fetch-metadata', auth, async (req, res) => {
     const { url } = req.query;
     if (!url || !url.includes('instagram.com')) return res.status(400).json({ mensaje: 'URL de Instagram no válida' });
     try {
-        const data = await scrapeInstagram(url, req);
+        const data = await scrapeInstagram(url);
         res.json(data);
     } catch (err) {
         res.status(502).json({ mensaje: 'No se pudieron obtener los datos automáticamente.', detalle: err.message });
@@ -116,7 +124,7 @@ router.post('/:id/refresh', auth, async (req, res) => {
     try {
         const post = await PostInstagram.findById(req.params.id);
         if (!post) return res.status(404).json({ mensaje: 'Post no encontrado' });
-        const { imagenUrl, descripcion } = await scrapeInstagram(post.url, req);
+        const { imagenUrl, descripcion } = await scrapeInstagram(post.url);
         const updated = await PostInstagram.findByIdAndUpdate(
             req.params.id,
             { imagenUrl, descripcion },
@@ -148,7 +156,7 @@ router.post('/', auth, async (req, res) => {
         let imagenUrl = imgManual || '';
         let descripcion = descManual || '';
         if (!imagenUrl) {
-            const scraped = await scrapeInstagram(url, req);
+            const scraped = await scrapeInstagram(url);
             imagenUrl = scraped.imagenUrl;
             if (!descripcion) descripcion = scraped.descripcion;
         }

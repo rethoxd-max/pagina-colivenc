@@ -6,6 +6,7 @@ import { TiendaService } from './services/tienda.service';
 import { Producto } from './models/producto.model';
 import { Router } from '@angular/router';
 import { CarritoComponent } from './components/carrito/carrito.component';
+import { AuthService } from '../auth/services/auth.service';
 import { Subscription } from 'rxjs';
 
 @Component({
@@ -28,7 +29,8 @@ export class TiendaComponent implements OnInit, OnDestroy {
 
   constructor(
     private tiendaService: TiendaService,
-    private router: Router
+    private router: Router,
+    private authService: AuthService
   ) {
     this.subscription = this.tiendaService.carrito$.subscribe(carrito => {
       this.cantidadItems = carrito?.items?.length || 0;
@@ -115,5 +117,9 @@ export class TiendaComponent implements OnInit, OnDestroy {
     if (this.carritoComponent) {
       this.carritoComponent.toggleCarrito();
     }
+  }
+
+  isAdmin(): boolean {
+    return this.authService.isAdmin();
   }
 }

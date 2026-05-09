@@ -69,12 +69,12 @@ export const routes: Routes = [
     { path: 'buscador-atletas', component: BuscadorAtletasComponent },
     { path: 'perfil-atleta/:slug', component: PerfilAtletaComponent },
     
-    // Rutas de inscripciones
-    { path: 'inscripcion/:id', component: InscripcionComponent, canActivate: [AuthGuard, atletaGuard] },
-    { path: 'inscripcion-publica/:token', component: InscripcionPublicaComponent },
-    { path: 'editar-inscripcion/:inscripcionId/:competicionId', component: InscripcionComponent, canActivate: [AuthGuard] },
-    { path: 'mis-inscripciones/:entrenadorId/:competicionId', component: MisInscripcionesComponent, canActivate: [AuthGuard] },
-    { path: 'inscripciones/:competicionId', component: InscripcionListComponent, canActivate: [AuthGuard, entrenadorGuard] },
+    // Rutas de inscripciones (solo para administradores)
+    { path: 'inscripcion/:id', component: InscripcionComponent, canActivate: [AuthGuard, adminGuard] },
+    { path: 'inscripcion-publica/:token', component: InscripcionPublicaComponent, canActivate: [AuthGuard, adminGuard] },
+    { path: 'editar-inscripcion/:inscripcionId/:competicionId', component: InscripcionComponent, canActivate: [AuthGuard, adminGuard] },
+    { path: 'mis-inscripciones/:entrenadorId/:competicionId', component: MisInscripcionesComponent, canActivate: [AuthGuard, adminGuard] },
+    { path: 'inscripciones/:competicionId', component: InscripcionListComponent, canActivate: [AuthGuard, adminGuard] },
     
     // Rutas de entrenamientos
     { path: 'entrenamientos', component: EntrenamientosComponent, canActivate: [AuthGuard] },

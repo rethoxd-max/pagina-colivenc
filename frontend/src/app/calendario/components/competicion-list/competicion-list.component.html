@@ -105,7 +105,7 @@
                                 </div>
 
                                 <!-- Enlaces / documentos -->
-                                <div class="card-enlaces" *ngIf="competicion.enlaces && competicion.enlaces.length > 0">
+                                <div class="card-enlaces" *ngIf="competicion.enlaces && competicion.enlaces.length > 0 && isAdmin()">
                                     <span class="tag-label"><i class="fas fa-paperclip me-1"></i>Documentos:</span>
                                     <div class="enlaces-container">
                                         <a *ngFor="let enlace of competicion.enlaces"
@@ -125,24 +125,24 @@
                                         class="btn-action btn-edit">
                                         <i class="fas fa-edit"></i> Editar
                                     </button>
-                                    <button *ngIf="!isPasada(competicion.fecha) && (isAdmin() || isEntrenador() || (isAtleta() && !tieneInscripcionEnCompeticion(competicion._id)))"
+                                    <button *ngIf="!isPasada(competicion.fecha) && isAdmin()"
                                         [routerLink]="['/inscripcion', competicion._id]" class="btn-action btn-inscribir">
                                         <i class="fas fa-user-plus"></i> Inscribirse
                                     </button>
-                                    <button *ngIf="!isPasada(competicion.fecha) && (isAdmin() || isEntrenador())" (click)="copiarLinkPublico(competicion)"
+                                    <button *ngIf="!isPasada(competicion.fecha) && isAdmin()" (click)="copiarLinkPublico(competicion)"
                                         class="btn-action btn-copiar-link" [title]="'Copiar enlace público'">
                                         <i class="fas" [ngClass]="copiadoId === competicion._id ? 'fa-check' : 'fa-link'"></i>
                                         {{ copiadoId === competicion._id ? 'Copiado' : 'Link público' }}
                                     </button>
                                 </div>
 
-                                <div class="card-inscripciones" *ngIf="!isPasada(competicion.fecha) && isEntrenador() && (inscripcionesPorCompeticion[competicion._id]?.length || 0) > 0">
+                                <div class="card-inscripciones" *ngIf="!isPasada(competicion.fecha) && isAdmin() && (inscripcionesPorCompeticion[competicion._id]?.length || 0) > 0">
                                     <button [routerLink]="['/inscripciones', competicion._id]" class="btn-inscripciones">
                                         <i class="fas fa-list"></i> Ver Inscripciones
                                     </button>
                                 </div>
 
-                                <div class="card-mis-inscripciones" *ngIf="!isPasada(competicion.fecha) && (inscripcionesPorCompeticionYEntrenador[competicion._id]?.length || 0) > 0">
+                                <div class="card-mis-inscripciones" *ngIf="!isPasada(competicion.fecha) && isAdmin() && (inscripcionesPorCompeticionYEntrenador[competicion._id]?.length || 0) > 0">
                                     <button [routerLink]="['/mis-inscripciones', userId, competicion._id]" class="btn-mis-inscripciones">
                                         <i class="fas fa-user-check"></i> Mis Inscripciones
                                     </button>
@@ -211,21 +211,21 @@
                                 <i class="fas fa-edit"></i>
                             </button>
                             <!-- Acciones inscripción -->
-                            <button *ngIf="!isPasada(competicion.fecha) && (isAdmin() || isEntrenador() || (isAtleta() && !tieneInscripcionEnCompeticion(competicion._id)))"
+                            <button *ngIf="!isPasada(competicion.fecha) && isAdmin()"
                                 [routerLink]="['/inscripcion', competicion._id]"
                                 class="lista-btn lista-btn-inscribir" title="Inscribirse">
                                 <i class="fas fa-user-plus"></i>
                             </button>
-                            <button *ngIf="!isPasada(competicion.fecha) && (isAdmin() || isEntrenador())" (click)="copiarLinkPublico(competicion)"
+                            <button *ngIf="!isPasada(competicion.fecha) && isAdmin()" (click)="copiarLinkPublico(competicion)"
                                 class="lista-btn lista-btn-copiar" [title]="copiadoId === competicion._id ? 'Copiado' : 'Copiar enlace público'">
                                 <i class="fas" [ngClass]="copiadoId === competicion._id ? 'fa-check' : 'fa-link'"></i>
                             </button>
-                            <button *ngIf="!isPasada(competicion.fecha) && isEntrenador() && (inscripcionesPorCompeticion[competicion._id]?.length || 0) > 0"
+                            <button *ngIf="!isPasada(competicion.fecha) && isAdmin() && (inscripcionesPorCompeticion[competicion._id]?.length || 0) > 0"
                                 [routerLink]="['/inscripciones', competicion._id]"
                                 class="lista-btn lista-btn-ver-inscrip" title="Ver inscripciones">
                                 <i class="fas fa-list"></i>
                             </button>
-                            <button *ngIf="!isPasada(competicion.fecha) && (inscripcionesPorCompeticionYEntrenador[competicion._id]?.length || 0) > 0"
+                            <button *ngIf="!isPasada(competicion.fecha) && isAdmin() && (inscripcionesPorCompeticionYEntrenador[competicion._id]?.length || 0) > 0"
                                 [routerLink]="['/mis-inscripciones', userId, competicion._id]"
                                 class="lista-btn lista-btn-mis-inscrip" title="Mis inscripciones">
                                 <i class="fas fa-user-check"></i>
@@ -242,7 +242,7 @@
                     </div>
 
                     <!-- Sub-fila de enlaces -->
-                    <div class="lista-row-enlaces" *ngIf="competicion.enlaces && competicion.enlaces.length > 0">
+                    <div class="lista-row-enlaces" *ngIf="competicion.enlaces && competicion.enlaces.length > 0 && isAdmin()">
                         <i class="fas fa-paperclip lista-pruebas-icon"></i>
                         <a *ngFor="let enlace of competicion.enlaces; let last = last"
                             [href]="enlace.url" target="_blank" rel="noopener noreferrer"

@@ -9,6 +9,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatSelectModule } from '@angular/material/select';
 import { MatSelectChange } from '@angular/material/select';
 import { DisciplinaService, Disciplina } from '../../../services/disciplina.service';
+import { AuthService } from '../../../auth/services/auth.service';
 /// <reference types="@types/googlemaps" />
 
 declare var google: any;
@@ -36,6 +37,7 @@ export class CompeticionFormComponent implements OnInit {
   pruebasDisponibles: PruebaCompeticion[] = [];
   pruebasSeleccionadas: PruebaCompeticion[] = [];
   categoriasSeleccionadas: string[] = [];
+  sectorSeleccionado: string[] = [];
   disciplinas: Disciplina[] = [];
 
   // Variable para Google Maps Places Autocomplete
@@ -49,7 +51,8 @@ export class CompeticionFormComponent implements OnInit {
     private router: Router,
     private fb: FormBuilder,
     private ngZone: NgZone,
-    private disciplinaService: DisciplinaService
+    private disciplinaService: DisciplinaService,
+    private authService: AuthService // Inyecta AuthService aquí
   ) {
     this.competicionForm = this.fb.group({
       nombre: ['', Validators.required],
@@ -73,6 +76,7 @@ export class CompeticionFormComponent implements OnInit {
   ngOnInit(): void {
     this.competicionId = this.route.snapshot.paramMap.get('id');
     this.categoriasSeleccionadas = [];
+    this.sectorSeleccionado = [];
     this.disciplinaService.getDisciplinas().subscribe(d => { this.disciplinas = d; });
     // Cargar categorías y sectores al iniciar
     this.competicionService.getCategorias().subscribe(
@@ -118,6 +122,7 @@ export class CompeticionFormComponent implements OnInit {
           }
 
           this.categoriasSeleccionadas = competicion.categorias;
+          this.sectorSeleccionado = competicion.sector;
 
           // Cargar enlaces existentes
           if (competicion.enlaces && competicion.enlaces.length > 0) {
@@ -315,6 +320,7 @@ export class CompeticionFormComponent implements OnInit {
 
   // Manejador de cambio de sector
   onSectorChange(event: MatSelectChange): void {
+    this.sectorSeleccionado = event.value; // Actualizamos el sector seleccionado
     const sectorId = event.value; // Obtener el valor directamente del evento
     const sectorSeleccionado = this.sectoresDisponibles.find(s => s._id === sectorId);
     console.log('Sector seleccionado:', sectorSeleccionado);
@@ -322,9 +328,13 @@ export class CompeticionFormComponent implements OnInit {
     const categoriasIds = this.competicionForm.get('categorias')?.value;
     console.log('Categorías seleccionadas:', categoriasIds);
 
-    if (sectorId && categoriasIds && categoriasIds.length > 0) {
+    if (sectorId && categoriasIds && categoriasIds.length > 0 && this.sectorSeleccionado.length > 0) {
       this.cargarPruebas(sectorId, categoriasIds);
-    } else {
+    } else if (this.sectorSeleccionado.length < 1) {
+      this.sectorSeleccionado = [];
+    }
+    else {
+      this.sectorSeleccionado = [];
       this.pruebasDisponibles = [];
     }
   }
@@ -444,5 +454,9 @@ export class CompeticionFormComponent implements OnInit {
         }
       );
     }
+  }
+
+  isAdmin(): boolean {
+    return this.authService.isAdmin();
   }
 }

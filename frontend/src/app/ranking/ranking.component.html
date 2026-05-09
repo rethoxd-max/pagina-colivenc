@@ -13,9 +13,10 @@
 
     <!-- Contenido principal - 3 columnas -->
     <div class="ranking-container">
-        <div class="ranking-layout">
-            
-            <!-- Panel de filtros - IZQUIERDA -->
+        <ng-container *ngIf="isAdmin(); else servicioNoDisponible">
+            <div class="ranking-layout">
+                
+                <!-- Panel de filtros - IZQUIERDA -->
             <aside class="filters-panel">
                 <div class="panel-header">
                     <i class="fas fa-sliders-h"></i>
@@ -237,5 +238,19 @@
                 </div>
             </aside>
         </div>
-    </div>
+    </ng-container>
+
+    <ng-template #servicioNoDisponible>
+        <div class="empty-state service-down-message">
+            <div class="empty-icon service-down-icon">
+                <i class="fas fa-tools"></i>
+            </div>
+            <h2>Actualizando resultados</h2>
+            <p>Estamos realizando tareas de mantenimiento. El ranking no está disponible en este momento.</p>
+            <div class="maintenance-badge" style="margin-top: 1.5rem; display: inline-flex; align-items: center; gap: 0.5rem; background: rgba(255, 152, 0, 0.1); color: #e65100; padding: 0.6rem 1.2rem; border-radius: 20px; font-weight: 500; font-size: 0.9rem;">
+                <i class="fas fa-cog fa-spin"></i>
+                <span>Vuelve a intentarlo más tarde</span>
+            </div>
+        </div>
+    </ng-template>
 </div>
