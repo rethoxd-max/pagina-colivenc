@@ -167,7 +167,6 @@ router.put('/:identificador', auth, async (req, res) => {
   }
 });
 
-dame lo// POST fusionar atletas duplicados
 // POST fusionar atletas duplicados
 router.post('/fusionar-duplicados', auth, (req, res, next) => {
   if (!req.user.userTypes.includes('Admin'))
