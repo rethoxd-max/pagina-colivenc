@@ -678,9 +678,9 @@ Ana García,22/09/2008,F,25.30`;
     const lineaActual = texto.substring(inicioLinea, finReal);
     const partes = lineaActual.split(',');
     
-    // Formatear fecha de nacimiento
+    // Formatear fecha de nacimiento usando métodos UTC para evitar desfases de zona horaria
     const fechaNac = new Date(atleta.fecha_nacimiento);
-    const fechaFormateada = `${fechaNac.getDate().toString().padStart(2, '0')}/${(fechaNac.getMonth() + 1).toString().padStart(2, '0')}/${fechaNac.getFullYear()}`;
+    const fechaFormateada = `${fechaNac.getUTCDate().toString().padStart(2, '0')}/${(fechaNac.getUTCMonth() + 1).toString().padStart(2, '0')}/${fechaNac.getUTCFullYear()}`;
     
     // Género (M/F)
     const genero = atleta.genero === 'Masculino' ? 'M' : 'F';

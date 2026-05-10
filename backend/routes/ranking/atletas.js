@@ -167,6 +167,56 @@ router.put('/:identificador', auth, async (req, res) => {
   }
 });
 
+dame lo// POST fusionar atletas duplicados
+// POST fusionar atletas duplicados
+router.post('/fusionar-duplicados', auth, (req, res, next) => {
+  if (!req.user.userTypes.includes('Admin'))
+    return res.status(403).json({ message: 'Se requiere rol Admin' });
+  next();
+}, async (req, res) => {
+  try {
+    const atletas = await Atleta.find().sort({ _id: 1 });
+    const atletasPorNombre = {};
+    let atletasBorrados = 0;
+    let marcasActualizadas = 0;
+
+    for (const atleta of atletas) {
+      const nombreKey = atleta.nombre.toLowerCase().trim();
+      
+      if (!atletasPorNombre[nombreKey]) {
+        atletasPorNombre[nombreKey] = atleta;
+      } else {
+        const atletaPrincipal = atletasPorNombre[nombreKey];
+        
+        // Si el duplicado tiene usuario pero el principal no, lo trasladamos
+        if (atleta.usuario && !atletaPrincipal.usuario) {
+          atletaPrincipal.usuario = atleta.usuario;
+          await atletaPrincipal.save();
+        }
+
+        // Mover todas las marcas del duplicado al atleta principal
+        const result = await Marca.updateMany(
+          { nombre_atleta: atleta._id },
+          { $set: { nombre_atleta: atletaPrincipal._id } }
+        );
+        marcasActualizadas += result.modifiedCount;
+
+        // Borrar el atleta duplicado
+        await Atleta.findByIdAndDelete(atleta._id);
+        atletasBorrados++;
+      }
+    }
+
+    res.json({
+      message: 'Fusión completada con éxito',
+      atletasBorrados,
+      marcasActualizadas
+    });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
 // DELETE all atletas
 router.delete('/', auth, (req, res, next) => {
   if (!req.user.userTypes.includes('Admin'))

@@ -394,10 +394,18 @@ async function procesarCompeticion(lineas, numeroCompeticion, soloPreview = fals
                     continue;
                 }
 
-                // Buscar atleta existente
+                // Buscar atleta existente (margen de +/- 1 día para tolerar diferencias de zona horaria)
+                const startOfDay = new Date(fechaNacimiento);
+                startOfDay.setUTCDate(startOfDay.getUTCDate() - 1);
+                startOfDay.setUTCHours(0, 0, 0, 0);
+
+                const endOfDay = new Date(fechaNacimiento);
+                endOfDay.setUTCDate(endOfDay.getUTCDate() + 1);
+                endOfDay.setUTCHours(23, 59, 59, 999);
+
                 const atleta = await Atleta.findOne({ 
                     nombre: { $regex: new RegExp(`^${escapeRegex(nombreAtleta)}$`, 'i') },
-                    fecha_nacimiento: fechaNacimiento
+                    fecha_nacimiento: { $gte: startOfDay, $lte: endOfDay }
                 });
 
                 // Calcular categoría
@@ -534,10 +542,18 @@ router.post('/importar-csv', auth, async (req, res) => {
         
         for (const [clave, datosAtleta] of atletasNuevosMap) {
             try {
+                const startOfDay = new Date(datosAtleta.fecha_nacimiento);
+                startOfDay.setUTCDate(startOfDay.getUTCDate() - 1);
+                startOfDay.setUTCHours(0, 0, 0, 0);
+
+                const endOfDay = new Date(datosAtleta.fecha_nacimiento);
+                endOfDay.setUTCDate(endOfDay.getUTCDate() + 1);
+                endOfDay.setUTCHours(23, 59, 59, 999);
+
                 // Verificar una vez más que no exista (por si acaso)
                 let atleta = await Atleta.findOne({
                     nombre: { $regex: new RegExp(`^${escapeRegex(datosAtleta.nombre)}$`, 'i') },
-                    fecha_nacimiento: datosAtleta.fecha_nacimiento
+                    fecha_nacimiento: { $gte: startOfDay, $lte: endOfDay }
                 });
                 
                 if (!atleta) {
