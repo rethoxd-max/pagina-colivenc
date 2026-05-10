@@ -28,6 +28,21 @@ git checkout develop
 git merge main
 git push origin develop
 git checkout main
+    
+    $CURRENT_BRANCH = git branch --show-current
+    
+    if ($CURRENT_BRANCH -eq "develop") {
+        git push origin develop
+        git checkout main
+        git merge develop
+        git push origin main
+    } else {
+        git push origin main
+        git checkout develop
+        git merge main
+        git push origin develop
+        git checkout main
+    }
 Write-Host "      Git OK" -ForegroundColor Green
 
 # ── Backend ───────────────────────────────────────────────────
