@@ -58,11 +58,7 @@ if ($Solo -eq "todo" -or $Solo -eq "frontend") {
 
     Write-Host "`n[4/4] Subiendo frontend y corrigiendo permisos..." -ForegroundColor Cyan
     scp -i $SSH_KEY -r "$FRONT_DIST\." "${SERVER}:${FRONT_REMOTE}/"
-    ssh -i $SSH_KEY $SERVER @"
-find $FRONT_REMOTE -type d -exec chmod 755 {} +
-find $FRONT_REMOTE -type f -exec chmod 644 {} +
-systemctl reload nginx
-"@
+    ssh -i $SSH_KEY $SERVER "chmod 755 /var/www/cecolivenc && find $FRONT_REMOTE -type d -exec chmod 755 {} + && find $FRONT_REMOTE -type f -exec chmod 644 {} + && systemctl reload nginx"
     Write-Host "      Frontend OK" -ForegroundColor Green
 }
 
