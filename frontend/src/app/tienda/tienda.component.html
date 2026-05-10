@@ -62,7 +62,7 @@
         <div class="producto-info">
           <div class="producto-header">
             <h2>{{ producto.nombre }}</h2>
-            <span class="precio">{{ producto.precio | currency:'EUR' }}</span>
+            <span *ngIf="isAdmin()" class="precio">{{ producto.precio | currency:'EUR' }}</span>
           </div>
           <p class="producto-descripcion">{{ producto.descripcion }}</p>
           
@@ -132,7 +132,7 @@
         
         <div class="modal-info">
           <h2>{{ productoSeleccionado.nombre }}</h2>
-          <p class="modal-precio">{{ productoSeleccionado.precio | currency:'EUR' }}</p>
+          <p *ngIf="isAdmin()" class="modal-precio">{{ productoSeleccionado.precio | currency:'EUR' }}</p>
           <p class="modal-descripcion">{{ productoSeleccionado.descripcion }}</p>
           
           <div *ngIf="isAdmin()" class="modal-tallas">

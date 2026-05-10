@@ -58,13 +58,26 @@
          VISTA TARJETAS
     ============================== -->
     <div *ngIf="vistaActual === 'tarjetas'">
-        <div *ngIf="competicionesAgrupadas.length > 0" class="competiciones-agrupadas">
-            <div *ngFor="let grupo of competicionesAgrupadas" class="grupo-year">
-                <h2 class="year-titulo">{{ grupo.year }}</h2>
-                <div *ngFor="let mes of grupo.months" class="grupo-mes">
-                    <h3 class="mes-titulo">{{ mes.monthName }}</h3>
-                    <div class="competiciones-grid">
-                        <div *ngFor="let competicion of mes.competiciones" class="competicion-card">
+        <!-- Navegación de mes -->
+        <div class="lista-nav-mes mb-4">
+            <button class="lista-nav-btn" (click)="mesAnterior()">
+                <i class="fas fa-chevron-left"></i>
+            </button>
+            <span class="lista-mes-label">{{ getNombreMes() }} {{ anyoActual }}</span>
+            <button class="lista-nav-btn" (click)="mesSiguiente()">
+                <i class="fas fa-chevron-right"></i>
+            </button>
+        </div>
+
+        <div *ngIf="getCompeticionesDelMes().length > 0" class="competiciones-agrupadas">
+            <!-- Iteramos sobre los grupos de días -->
+            <div *ngFor="let grupo of getCompeticionesDelMesAgrupadasPorDia()" class="grupo-dia-wrap mb-5">
+                <h3 class="dia-header" style="border-bottom: 2px solid #eaeaea; padding-bottom: 0.5rem; margin-bottom: 1rem; color: #444; font-size: 1.25rem;">
+                    <i class="fas fa-calendar-day me-2"></i> {{ grupo.fechaObj | date:'dd/MM/yyyy' }}
+                </h3>
+                
+                <div class="competiciones-grid">
+                    <div *ngFor="let competicion of grupo.competiciones" class="competicion-card" id="competicion-{{competicion._id}}">
                             <div class="card-image" *ngIf="competicion.imageUrl">
                                 <img [src]="getImageUrl(competicion.imageUrl)" alt="Imagen de la competición">
                             </div>
@@ -149,14 +162,13 @@
                                 </div>
                             </div>
                         </div>
-                    </div>
                 </div>
             </div>
         </div>
 
-        <div *ngIf="competicionesAgrupadas.length === 0" class="no-results">
+        <div *ngIf="getCompeticionesDelMes().length === 0" class="no-results">
             <i class="fas fa-calendar-times"></i>
-            <p>No hay competiciones disponibles</p>
+            <p>No hay competiciones en {{ getNombreMes() }} {{ anyoActual }}</p>
         </div>
     </div>
 
@@ -187,7 +199,7 @@
                     <span class="lista-col-acciones">Acciones</span>
                 </div>
 
-                <div class="lista-row" *ngFor="let competicion of getCompeticionesDelMes()">
+                <div class="lista-row" *ngFor="let competicion of getCompeticionesDelMes()" id="competicion-{{competicion._id}}">
                     <!-- Fila principal -->
                     <div class="lista-row-main">
                         <span class="lista-col-fecha">

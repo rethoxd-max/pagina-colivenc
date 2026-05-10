@@ -127,6 +127,8 @@ export class CompeticionListComponent implements OnInit, OnDestroy {
           this.competicionId = competicion._id;
           this.loadInscripciones(this.competicionId);
         });
+
+        this.scrollToNearestCompetition();
       },
       (error) => {
         console.error('Error al cargar las competiciones:', error);
@@ -205,6 +207,8 @@ export class CompeticionListComponent implements OnInit, OnDestroy {
       })
       .sort((a, b) => new Date(b.fecha).getTime() - new Date(a.fecha).getTime());
     this.competicionesAgrupadas = this.agruparCompeticiones(this.filteredCompeticiones);
+
+    this.scrollToNearestCompetition();
   }
 
   getCategoriasUnicas(competicionId: string): string[] {
@@ -289,6 +293,7 @@ export class CompeticionListComponent implements OnInit, OnDestroy {
 
   cambiarVista(vista: 'tarjetas' | 'lista'): void {
     this.vistaActual = vista;
+    this.scrollToNearestCompetition();
   }
 
   mesAnterior(): void {
@@ -298,6 +303,7 @@ export class CompeticionListComponent implements OnInit, OnDestroy {
     } else {
       this.mesActual--;
     }
+    this.scrollToNearestCompetition();
   }
 
   mesSiguiente(): void {
@@ -307,6 +313,17 @@ export class CompeticionListComponent implements OnInit, OnDestroy {
     } else {
       this.mesActual++;
     }
+    this.scrollToNearestCompetition();
+  }
+
+  getCompeticionesAgrupadasDelMes(): CompeticionAgrupada[] {
+    return this.competicionesAgrupadas
+      .filter(yearGroup => yearGroup.year === this.anyoActual)
+      .map(yearGroup => ({
+        year: yearGroup.year,
+        months: yearGroup.months.filter(monthGroup => monthGroup.month === this.mesActual)
+      }))
+      .filter(yearGroup => yearGroup.months.length > 0);
   }
 
   getNombreMes(): string {
@@ -322,6 +339,29 @@ export class CompeticionListComponent implements OnInit, OnDestroy {
       .sort((a, b) => new Date(a.fecha).getTime() - new Date(b.fecha).getTime());
   }
 
+  getCompeticionesDelMesAgrupadasPorDia(): { fechaObj: Date, competiciones: any[] }[] {
+    const competicionesMes = this.getCompeticionesDelMes();
+    const agrupadas = new Map<number, any[]>();
+
+    competicionesMes.forEach(c => {
+      const dateObj = new Date(c.fecha);
+      dateObj.setHours(0, 0, 0, 0);
+      const time = dateObj.getTime();
+
+      if (!agrupadas.has(time)) {
+        agrupadas.set(time, []);
+      }
+      agrupadas.get(time)!.push(c);
+    });
+
+    return Array.from(agrupadas.entries())
+      .map(([time, comps]) => ({
+        fechaObj: new Date(time),
+        competiciones: comps
+      }))
+      .sort((a, b) => a.fechaObj.getTime() - b.fechaObj.getTime());
+  }
+
   isPasada(fecha: any): boolean {
     return new Date(fecha) < new Date(new Date().setHours(0, 0, 0, 0));
   }
@@ -335,5 +375,41 @@ export class CompeticionListComponent implements OnInit, OnDestroy {
       this.copiadoId = competicion._id;
       setTimeout(() => this.copiadoId = null, 2000);
     });
+  }
+
+  scrollToNearestCompetition(): void {
+    setTimeout(() => {
+      const hoy = new Date();
+      hoy.setHours(0, 0, 0, 0);
+      
+      if (this.mesActual === hoy.getMonth() && this.anyoActual === hoy.getFullYear()) {
+        const competicionesMes = this.getCompeticionesDelMes();
+        
+        const futuras = competicionesMes.filter(c => {
+          const fechaComp = new Date(c.fecha);
+          fechaComp.setHours(0, 0, 0, 0);
+          return fechaComp.getTime() >= hoy.getTime();
+        });
+        
+        if (futuras.length > 0) {
+          const primeraFecha = new Date(futuras[0].fecha);
+          primeraFecha.setHours(0, 0, 0, 0);
+          const fechaMasCercana = primeraFecha.getTime();
+          
+          const competicionesCercanas = futuras.filter(c => {
+            const f = new Date(c.fecha);
+            f.setHours(0, 0, 0, 0);
+            return f.getTime() === fechaMasCercana;
+          });
+          
+          const competicionObjetivo = competicionesCercanas[competicionesCercanas.length - 1];
+          
+          const element = document.getElementById(`competicion-${competicionObjetivo._id}`);
+          if (element) {
+            element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          }
+        }
+      }
+    }, 300);
   }
 }
