@@ -23,12 +23,6 @@ Write-Host "`n[1/4] Subiendo cambios a Git..." -ForegroundColor Cyan
 Set-Location $REPO_LOCAL
 git add .
 git commit -m "deploy: $(Get-Date -Format 'yyyy-MM-dd HH:mm')"
-git push origin main
-git checkout develop
-git merge main
-git push origin develop
-git checkout main
-    
     $CURRENT_BRANCH = git branch --show-current
     
     if ($CURRENT_BRANCH -eq "develop") {
