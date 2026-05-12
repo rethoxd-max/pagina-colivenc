@@ -65,8 +65,8 @@ router.get('/:id', async (req, res) => {
 const ObjectId = require('mongoose').Types.ObjectId;
 
 router.post('/', auth, (req, res, next) => {
-    if (!req.user.userTypes.includes('Admin')) {
-        return res.status(403).json({ message: 'Se requiere rol Admin' });
+    if (!req.user.userTypes.includes('Admin') && !req.user.userTypes.includes('Editor')) {
+        return res.status(403).json({ message: 'Se requiere rol Admin o Editor' });
     }
     next();
 }, upload.single('image'), async (req, res) => {
@@ -162,8 +162,8 @@ router.post('/', auth, (req, res, next) => {
 
 // Editar una competición (ruta protegida)
 router.put('/:id', auth, (req, res, next) => {
-    if (!req.user.userTypes.includes('Admin')) {
-        return res.status(403).json({ message: 'Se requiere rol Admin' });
+    if (!req.user.userTypes.includes('Admin') && !req.user.userTypes.includes('Editor')) {
+        return res.status(403).json({ message: 'Se requiere rol Admin o Editor' });
     }
     next();
 }, upload.single('image'), async (req, res) => {
@@ -251,8 +251,8 @@ router.put('/:id', auth, (req, res, next) => {
 
 // Eliminar una competición (ruta protegida)
 router.delete('/:id', auth, (req, res, next) => {
-    if (!req.user.userTypes.includes('Admin')) {
-        return res.status(403).json({ message: 'Se requiere rol Admin' });
+    if (!req.user.userTypes.includes('Admin') && !req.user.userTypes.includes('Editor')) {
+        return res.status(403).json({ message: 'Se requiere rol Admin o Editor' });
     }
     next();
 }, async (req, res) => {

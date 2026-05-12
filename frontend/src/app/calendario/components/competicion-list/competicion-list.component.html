@@ -16,7 +16,7 @@
 <section class="competiciones-container">
     <!-- Filtros -->
     <div class="filtros-container">
-        <div class="search-box">
+        <div class="search-box" [style.flex-grow]="!isAdmin() ? '1' : null">
             <input type="text" class="search-input" placeholder="Buscar competición..." [(ngModel)]="searchName"
                 (ngModelChange)="filterCompeticiones()">
             <i class="fas fa-search"></i>
@@ -42,7 +42,7 @@
             </div>
         </div>
 
-        <div class="categoria-select">
+        <div class="categoria-select" *ngIf="isAdmin()">
             <select [(ngModel)]="searchCategoria" (ngModelChange)="filterCompeticiones()">
                 <option value="">Todas las categorías</option>
                 <option *ngFor="let categoria of categoriasDisponibles" [value]="categoria">{{ categoria }}</option>

@@ -51,8 +51,8 @@ export const routes: Routes = [
     
     // Rutas de competiciones
     { path: 'competiciones', component: CompeticionListComponent },
-    { path: 'create-competicion', component: CompeticionFormComponent, canActivate: [AuthGuard, adminGuard] },
-    { path: 'edit-competicion/:id', component: CompeticionFormComponent, canActivate: [AuthGuard, adminGuard] },
+    { path: 'create-competicion', component: CompeticionFormComponent, canActivate: [AuthGuard, editorGuard] },
+    { path: 'edit-competicion/:id', component: CompeticionFormComponent, canActivate: [AuthGuard, editorGuard] },
     { path: 'datos-competiciones', component: CreateDatosCompeticionesComponent, canActivate: [AuthGuard, adminGuard] },
     { path: 'procesar-resultados', component: ProcesarResultadosComponent, canActivate: [AuthGuard, adminGuard] },
     

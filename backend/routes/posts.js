@@ -91,7 +91,12 @@ router.get('/:id', async (req, res) => {
 
 
 // Crear un post con imagen (ruta protegida)
-router.post('/', auth, upload, async (req, res) => {
+router.post('/', auth, (req, res, next) => {
+    if (!req.user.userTypes.includes('Admin') && !req.user.userTypes.includes('Editor')) {
+        return res.status(403).json({ message: 'Se requiere rol Admin o Editor' });
+    }
+    next();
+}, upload, async (req, res) => {
     try {
         const { title, content, category, disciplina } = req.body;
 
@@ -132,7 +137,12 @@ router.post('/', auth, upload, async (req, res) => {
 
 
 // Editar un post (ruta protegida)
-router.put('/:id', auth, upload, async (req, res) => {
+router.put('/:id', auth, (req, res, next) => {
+    if (!req.user.userTypes.includes('Admin') && !req.user.userTypes.includes('Editor')) {
+        return res.status(403).json({ message: 'Se requiere rol Admin o Editor' });
+    }
+    next();
+}, upload, async (req, res) => {
     try {
         const { title, content, category, disciplina } = req.body;
         const post = await Post.findById(req.params.id);
@@ -141,8 +151,9 @@ router.put('/:id', auth, upload, async (req, res) => {
             return res.status(404).json({ msg: 'Post no encontrado' });
         }
 
-        if (post.author.toString() !== req.user.id) {
-            return res.status(401).json({ msg: 'No autorizado' });
+        // Verificamos si es el autor, a menos que sea Admin o Editor
+        if (post.author.toString() !== req.user.id && !req.user.userTypes.includes('Admin') && !req.user.userTypes.includes('Editor')) {
+            return res.status(401).json({ msg: 'No autorizado para editar este post' });
         }
 
         // Actualizar los datos del post
@@ -188,7 +199,12 @@ router.put('/:id', auth, upload, async (req, res) => {
 });
 
 // Eliminar un post (ruta protegida)
-router.delete('/:id', auth, async (req, res) => {
+router.delete('/:id', auth, (req, res, next) => {
+    if (!req.user.userTypes.includes('Admin') && !req.user.userTypes.includes('Editor')) {
+        return res.status(403).json({ message: 'Se requiere rol Admin o Editor' });
+    }
+    next();
+}, async (req, res) => {
     try {
         const post = await Post.findById(req.params.id);
 
@@ -196,8 +212,9 @@ router.delete('/:id', auth, async (req, res) => {
             return res.status(404).json({ msg: 'Post no encontrado' });
         }
 
-        if (post.author.toString() !== req.user.id) {
-            return res.status(401).json({ msg: 'No autorizado' });
+        // Verificamos si es el autor, a menos que sea Admin o Editor
+        if (post.author.toString() !== req.user.id && !req.user.userTypes.includes('Admin') && !req.user.userTypes.includes('Editor')) {
+            return res.status(401).json({ msg: 'No autorizado para eliminar este post' });
         }
 
         // Borrar imagen del disco si existe

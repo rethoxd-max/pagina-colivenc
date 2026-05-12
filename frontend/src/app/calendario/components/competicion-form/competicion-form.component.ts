@@ -459,4 +459,8 @@ export class CompeticionFormComponent implements OnInit {
   isAdmin(): boolean {
     return this.authService.isAdmin();
   }
+
+  isEditor(): boolean {
+    return this.authService.isEditor(); // Asumiendo que esta función existe en tu AuthService
+  }
 }
