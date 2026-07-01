@@ -10,13 +10,36 @@ param(
     [string]$Solo = "todo"
 )
 
-$SSH_KEY    = "C:\Users\Pablo\.ssh\cecolivenc"
-$SERVER     = "root@178.104.136.39"
-$REPO_LOCAL = "C:\Users\Pablo\OneDrive\Documentos\paginacolivenc2\pagina-colivenc"
-$BACK_LOCAL = "$REPO_LOCAL\backend"
-$FRONT_DIST = "$REPO_LOCAL\frontend\dist\pagina-colivenc"
-$BACK_REMOTE = "/var/www/cecolivenc/repo/backend"
+$SSH_KEY      = "C:\Users\Pablo\.ssh\cecolivenc"
+$SERVER       = "root@178.104.136.39"
+$SSH_ARGS     = @("-i", $SSH_KEY, "-o", "ConnectTimeout=15", "-o", "BatchMode=yes")
+$REPO_LOCAL   = "C:\Users\Pablo\OneDrive\Documentos\paginacolivenc2\pagina-colivenc"
+$FRONT_DIST   = "$REPO_LOCAL\frontend\dist\pagina-colivenc"
+$REPO_REMOTE  = "/var/www/cecolivenc/repo"
 $FRONT_REMOTE = "/var/www/cecolivenc/frontend"
+
+# Ejecuta un comando en el servidor por SSH y para el script si falla
+# (antes el script seguía e imprimía "OK" aunque ssh fallara por timeout)
+function Invoke-RemoteCommand {
+    param([string]$Command, [string]$FailHint = "")
+    & ssh @SSH_ARGS $SERVER $Command
+    if ($LASTEXITCODE -ne 0) {
+        Write-Host "`nERROR: el comando remoto ha fallado (código $LASTEXITCODE)." -ForegroundColor Red
+        Write-Host "Comando: $Command" -ForegroundColor Red
+        if ($FailHint) { Write-Host $FailHint -ForegroundColor Yellow }
+        exit 1
+    }
+}
+
+# Copia archivos al servidor por SCP y para el script si falla
+function Invoke-RemoteCopy {
+    param([string[]]$LocalPaths, [string]$RemotePath)
+    & scp -i $SSH_KEY -o ConnectTimeout=15 -o BatchMode=yes -r @LocalPaths "${SERVER}:${RemotePath}"
+    if ($LASTEXITCODE -ne 0) {
+        Write-Host "`nERROR: scp ha fallado (código $LASTEXITCODE) subiendo a $RemotePath." -ForegroundColor Red
+        exit 1
+    }
+}
 
 # ── Git ───────────────────────────────────────────────────────
 Write-Host "`n[1/4] Subiendo cambios a Git..." -ForegroundColor Cyan
@@ -37,21 +60,26 @@ git commit -m "deploy: $(Get-Date -Format 'yyyy-MM-dd HH:mm')"
         git push origin develop
         git checkout main
     }
+if ($LASTEXITCODE -ne 0) {
+    Write-Host "ERROR: git push ha fallado. Revisa tu conexión o si hay conflictos." -ForegroundColor Red
+    exit 1
+}
 Write-Host "      Git OK" -ForegroundColor Green
 
 # ── Backend ───────────────────────────────────────────────────
 if ($Solo -eq "todo" -or $Solo -eq "backend") {
-    Write-Host "`n[2/4] Subiendo backend al servidor..." -ForegroundColor Cyan
-    scp -i $SSH_KEY -r `
-        "$BACK_LOCAL\models" `
-        "$BACK_LOCAL\routes" `
-        "$BACK_LOCAL\services" `
-        "$BACK_LOCAL\middleware" `
-        "$BACK_LOCAL\config" `
-        "$BACK_LOCAL\utils" `
-        "$BACK_LOCAL\index.js" `
-        "${SERVER}:${BACK_REMOTE}/"
-    ssh -i $SSH_KEY $SERVER "pm2 restart cecolivenc-backend"
+    Write-Host "`n[2/4] Sincronizando backend en el servidor (deploy/2-deploy.sh)..." -ForegroundColor Cyan
+    # Antes se subía el backend por scp, lo que dejaba el git del servidor desincronizado
+    # de lo que realmente corría en producción. Ahora se invoca el mismo script que se usa
+    # para actualizar manualmente en el servidor (deploy/2-deploy.sh), que hace
+    # "git pull --ff-only" + npm install + pm2 restart. Así hay una única fuente de verdad
+    # para la lógica de actualización del backend, en vez de duplicarla aquí.
+    $backendHint = "deploy/2-deploy.sh ha fallado, probablemente porque git pull --ff-only " + `
+        "no ha podido hacer fast-forward (cambios locales o archivos sin trackear en el " + `
+        "servidor). Entra por SSH o por la consola de Hetzner y revisa con " + `
+        "'git diff --ignore-space-at-eol --stat -- backend/' antes de resolverlo a mano. " + `
+        "No se sobrescribe nada automaticamente."
+    Invoke-RemoteCommand -Command "bash $REPO_REMOTE/deploy/2-deploy.sh" -FailHint $backendHint
     Write-Host "      Backend OK" -ForegroundColor Green
 }
 
@@ -66,8 +94,8 @@ if ($Solo -eq "todo" -or $Solo -eq "frontend") {
     }
 
     Write-Host "`n[4/4] Subiendo frontend y corrigiendo permisos..." -ForegroundColor Cyan
-    scp -i $SSH_KEY -r "$FRONT_DIST\." "${SERVER}:${FRONT_REMOTE}/"
-    ssh -i $SSH_KEY $SERVER "chmod 755 /var/www/cecolivenc && find $FRONT_REMOTE -type d -exec chmod 755 {} + && find $FRONT_REMOTE -type f -exec chmod 644 {} + && systemctl reload nginx"
+    Invoke-RemoteCopy -LocalPaths @("$FRONT_DIST\.") -RemotePath "$FRONT_REMOTE/"
+    Invoke-RemoteCommand -Command "chmod 755 /var/www/cecolivenc && find $FRONT_REMOTE -type d -exec chmod 755 {} + && find $FRONT_REMOTE -type f -exec chmod 644 {} + && systemctl reload nginx"
     Write-Host "      Frontend OK" -ForegroundColor Green
 }
 

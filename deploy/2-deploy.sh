@@ -12,7 +12,10 @@ echo "==> Actualizando código desde GitHub (rama main)..."
 cd $REPO_DIR
 git fetch origin
 git checkout main
-git pull origin main
+# --ff-only: si el repo del servidor tiene cambios locales o archivos sin trackear que
+# chocan con lo que viene de GitHub, esto falla en seco (gracias a "set -e" de arriba)
+# en vez de intentar fusionar o quedarse esperando un editor interactivo por SSH.
+git pull --ff-only origin main
 
 echo "==> Actualizando dependencias del backend..."
 cd $REPO_DIR/backend
