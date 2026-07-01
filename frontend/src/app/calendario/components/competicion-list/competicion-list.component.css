@@ -202,6 +202,10 @@
     transform: scale(1.05);
 }
 
+.card-image-pdf {
+    pointer-events: none;
+}
+
 .card-content {
     padding: 1.5rem;
 }

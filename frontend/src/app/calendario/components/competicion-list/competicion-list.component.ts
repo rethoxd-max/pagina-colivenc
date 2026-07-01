@@ -7,6 +7,8 @@ import { AuthService } from '../../../auth/services/auth.service';
 import { environment } from '../../../../environments/environment';
 import { DisciplinaFilterService } from '../../../services/disciplina-filter.service';
 import { Subscription } from 'rxjs';
+import { PdfViewerModule } from 'ng2-pdf-viewer';
+import { isPdf, isImageFile, getMediaUrl } from '../../utils/competicion-media.util';
 
 interface CompeticionAgrupada {
   year: number;
@@ -20,7 +22,7 @@ interface CompeticionAgrupada {
 @Component({
   selector: 'app-competicion-list',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, NgIf, RouterLink, FormsModule],
+  imports: [CommonModule, ReactiveFormsModule, NgIf, RouterLink, FormsModule, PdfViewerModule],
   templateUrl: './competicion-list.component.html',
   styleUrls: ['./competicion-list.component.css'],
   providers: [CompeticionService]
@@ -268,10 +270,22 @@ export class CompeticionListComponent implements OnInit, OnDestroy {
   }
 
   getImageUrl(imageUrl: string) {
-    if (imageUrl.startsWith('http')) {
-      return imageUrl;
-    }
-    return `${this.baseURL}${imageUrl}`;
+    return getMediaUrl(imageUrl);
+  }
+
+  isPdf(url: string | null | undefined): boolean {
+    return isPdf(url);
+  }
+
+  isEnlaceArchivo(enlace: any): boolean {
+    return enlace?.origen === 'archivo';
+  }
+
+  getEnlaceIcon(enlace: any): string {
+    if (!this.isEnlaceArchivo(enlace)) return 'fa-file-alt';
+    if (isPdf(enlace.url)) return 'fa-file-pdf';
+    if (isImageFile(enlace.url)) return 'fa-file-image';
+    return 'fa-paperclip';
   }
 
   isAdmin(): boolean {

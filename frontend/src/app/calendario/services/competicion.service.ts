@@ -10,6 +10,7 @@ import { Disciplina } from '../../services/disciplina.service';
 export interface EnlaceCompeticion {
   nombre: string;
   url: string;
+  origen?: 'url' | 'archivo';
 }
 
 export interface Competicion {

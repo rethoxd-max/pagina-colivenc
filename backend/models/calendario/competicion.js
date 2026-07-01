@@ -15,7 +15,8 @@ const competicionSchema = new mongoose.Schema({
     tokenPublico: { type: String, unique: true, default: () => crypto.randomBytes(8).toString('hex') },
     enlaces: [{
         nombre: { type: String, required: true },
-        url: { type: String, required: true }
+        url: { type: String, required: true },
+        origen: { type: String, enum: ['url', 'archivo'], default: 'url' }
     }],
     disciplina: { type: mongoose.Schema.Types.ObjectId, ref: 'Disciplina', default: null },
 });

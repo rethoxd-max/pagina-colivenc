@@ -4,11 +4,13 @@ import { HttpClient } from '@angular/common/http';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { environment } from '../../../../environments/environment';
+import { PdfViewerModule } from 'ng2-pdf-viewer';
+import { isPdf, isImageFile, getMediaUrl } from '../../utils/competicion-media.util';
 
 @Component({
   selector: 'app-inscripcion-publica',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, PdfViewerModule],
   template: `
     <div class="publica-wrapper">
 
@@ -26,13 +28,33 @@ import { environment } from '../../../../environments/environment';
       <!-- Formulario -->
       <div *ngIf="!cargando && !error && !enviado" class="publica-card">
         <div class="publica-header">
-          <img *ngIf="competicion?.imageUrl" [src]="competicion.imageUrl" class="publica-img" alt="Imagen competición" />
+          <img *ngIf="competicion?.imageUrl && !isPdf(competicion.imageUrl)" [src]="getMediaUrl(competicion.imageUrl)" class="publica-img" alt="Imagen competición" />
+          <div class="publica-pdf" *ngIf="competicion?.imageUrl && isPdf(competicion.imageUrl)">
+            <pdf-viewer [src]="getMediaUrl(competicion.imageUrl)"
+                [show-all]="true"
+                [render-text]="true"
+                [fit-to-page]="true"
+                [original-size]="false"
+                class="publica-pdf-viewer"></pdf-viewer>
+          </div>
           <h1 class="publica-nombre">{{ competicion?.nombre }}</h1>
           <div class="publica-meta">
             <span><i class="fas fa-calendar-day"></i> {{ competicion?.fecha | date:'dd/MM/yyyy' }}</span>
             <span><i class="fas fa-map-marker-alt"></i> {{ competicion?.lugar }}</span>
           </div>
           <p *ngIf="competicion?.descripcion" class="publica-desc">{{ competicion?.descripcion }}</p>
+
+          <div class="publica-enlaces" *ngIf="competicion?.enlaces && competicion.enlaces.length > 0">
+            <span class="publica-enlaces-label"><i class="fas fa-paperclip"></i> Documentos:</span>
+            <div class="publica-enlaces-list">
+              <a *ngFor="let enlace of competicion.enlaces"
+                  [href]="isEnlaceArchivo(enlace) ? getMediaUrl(enlace.url) : enlace.url"
+                  target="_blank" rel="noopener noreferrer"
+                  class="publica-enlace-chip">
+                <i class="fas" [ngClass]="getEnlaceIcon(enlace)"></i> {{ enlace.nombre }}
+              </a>
+            </div>
+          </div>
         </div>
 
         <form (ngSubmit)="enviar()" #form="ngForm" class="publica-form">
@@ -170,6 +192,38 @@ import { environment } from '../../../../environments/environment';
     .publica-ok i { font-size: 3.5rem; color: #10b981; margin-bottom: 1rem; }
     .publica-ok h2 { font-size: 1.6rem; color: #1e293b; margin-bottom: 0.75rem; }
     .publica-ok p { color: #475569; font-size: 1rem; }
+    .publica-pdf-viewer {
+      display: block;
+      width: 100%;
+      height: 320px;
+      border-radius: 10px;
+      margin-bottom: 1rem;
+      overflow: auto;
+    }
+    .publica-enlaces { margin-top: 0.5rem; margin-bottom: 1.25rem; }
+    .publica-enlaces-label {
+      display: block;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: #475569;
+      margin-bottom: 0.5rem;
+    }
+    .publica-enlaces-label i { margin-right: 0.3rem; color: #6366f1; }
+    .publica-enlaces-list { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+    .publica-enlace-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      background: #eef2ff;
+      color: #4f46e5;
+      border: 1px solid #c7d2fe;
+      padding: 0.3rem 0.75rem;
+      border-radius: 20px;
+      font-size: 0.82rem;
+      font-weight: 500;
+      text-decoration: none;
+    }
+    .publica-enlace-chip:hover { background: #e0e7ff; }
   `]
 })
 export class InscripcionPublicaComponent implements OnInit {
@@ -192,6 +246,25 @@ export class InscripcionPublicaComponent implements OnInit {
       next: (data) => { this.competicion = data; this.cargando = false; },
       error: () => { this.error = 'Enlace inválido o competición no encontrada.'; this.cargando = false; }
     });
+  }
+
+  isPdf(url: string | null | undefined): boolean {
+    return isPdf(url);
+  }
+
+  getMediaUrl(url: string | null | undefined): string {
+    return getMediaUrl(url);
+  }
+
+  isEnlaceArchivo(enlace: any): boolean {
+    return enlace?.origen === 'archivo';
+  }
+
+  getEnlaceIcon(enlace: any): string {
+    if (!this.isEnlaceArchivo(enlace)) return 'fa-file-alt';
+    if (isPdf(enlace.url)) return 'fa-file-pdf';
+    if (isImageFile(enlace.url)) return 'fa-file-image';
+    return 'fa-paperclip';
   }
 
   enviar(): void {

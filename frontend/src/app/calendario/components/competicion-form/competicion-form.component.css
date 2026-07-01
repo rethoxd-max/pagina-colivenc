@@ -272,6 +272,60 @@
     margin-bottom: 0.6rem;
 }
 
+.nf-enlace-content {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+}
+
+.nf-enlace-tipo-toggle {
+    display: inline-flex;
+    gap: 0.3rem;
+}
+
+.nf-tipo-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    font-size: 0.75rem;
+    padding: 0.2rem 0.6rem;
+    border-radius: 20px;
+    border: 1px solid #d1d5db;
+    background: #f9fafb;
+    color: #6b7280;
+    cursor: pointer;
+    transition: background 0.15s, border-color 0.15s, color 0.15s;
+}
+
+.nf-tipo-btn.active {
+    background: #1a2b4b;
+    border-color: #1a2b4b;
+    color: #fff;
+}
+
+.nf-enlace-file-label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    border: 1.5px dashed #d1d5db;
+    border-radius: 8px;
+    padding: 0.55rem 0.75rem;
+    font-size: 0.85rem;
+    color: #374151;
+    cursor: pointer;
+    background: #fff;
+    transition: border-color 0.15s, background 0.15s;
+}
+
+.nf-enlace-file-label:hover {
+    border-color: #1a2b4b;
+    background: #f0f4ff;
+}
+
+.nf-enlace-file-label i {
+    color: #9ca3af;
+}
+
 .nf-btn-remove {
     width: 36px;
     height: 36px;
@@ -385,8 +439,9 @@
         grid-template-rows: auto auto;
     }
 
-    .nf-enlace-row input:last-of-type {
+    .nf-enlace-row .nf-enlace-content {
         grid-column: 1;
+        grid-row: 2;
     }
 
     .nf-enlace-row .nf-btn-remove {

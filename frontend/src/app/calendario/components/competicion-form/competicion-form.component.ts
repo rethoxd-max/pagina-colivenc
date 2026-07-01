@@ -2,7 +2,7 @@ import { Component, OnInit, NgZone, ElementRef, ViewChild } from '@angular/core'
 import { ActivatedRoute, Router } from '@angular/router';
 import { FormBuilder, FormGroup, FormArray, ReactiveFormsModule, Validators } from '@angular/forms';
 import { CompeticionService, PruebaCompeticion, SectorCompeticion, CategoriaCompeticion } from '../../services/competicion.service';
-import { NgFor, NgIf } from '@angular/common';
+import { NgFor, NgIf, NgClass } from '@angular/common';
 import { environment } from '../../../../environments/environment';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -10,6 +10,8 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatSelectChange } from '@angular/material/select';
 import { DisciplinaService, Disciplina } from '../../../services/disciplina.service';
 import { AuthService } from '../../../auth/services/auth.service';
+import { PdfViewerModule } from 'ng2-pdf-viewer';
+import { isPdf as isPdfUtil } from '../../utils/competicion-media.util';
 /// <reference types="@types/googlemaps" />
 
 declare var google: any;
@@ -17,7 +19,7 @@ declare var google: any;
 @Component({
   selector: 'app-competicion-form',
   standalone: true,
-  imports: [ReactiveFormsModule, NgIf, NgFor, MatAutocompleteModule, MatFormFieldModule, MatSelectModule],
+  imports: [ReactiveFormsModule, NgIf, NgFor, NgClass, MatAutocompleteModule, MatFormFieldModule, MatSelectModule, PdfViewerModule],
   templateUrl: './competicion-form.component.html',
   styleUrls: ['./competicion-form.component.css'],
 })
@@ -30,6 +32,7 @@ export class CompeticionFormComponent implements OnInit {
   selectedFile: File | null = null;
   imageUrl: string | null = null;
   existingImage: string | null = null; // Variable para guardar el nombre de la imagen existente
+  enlaceFiles: (File | null)[] = []; // Archivo seleccionado (si lo hay) para cada fila de "enlaces", en paralelo al FormArray
 
   // Variables para categorías, sectores y pruebas
   categoriasDisponibles: CategoriaCompeticion[] = [];
@@ -129,8 +132,10 @@ export class CompeticionFormComponent implements OnInit {
             competicion.enlaces.forEach((enlace: any) => {
               this.enlaces.push(this.fb.group({
                 nombre: [enlace.nombre, Validators.required],
-                url: [enlace.url, Validators.required],
+                url: [enlace.url || ''],
+                origen: [enlace.origen || 'url'],
               }));
+              this.enlaceFiles.push(null);
             });
           }
 
@@ -363,13 +368,52 @@ export class CompeticionFormComponent implements OnInit {
     if (this.enlaces.length < 5) {
       this.enlaces.push(this.fb.group({
         nombre: ['', Validators.required],
-        url: ['', Validators.required],
+        url: [''],
+        origen: ['url'],
       }));
+      this.enlaceFiles.push(null);
     }
   }
 
   removeEnlace(index: number): void {
     this.enlaces.removeAt(index);
+    this.enlaceFiles.splice(index, 1);
+  }
+
+  // Alterna una fila de "enlaces" entre URL manual y archivo subido
+  onEnlaceTipoChange(index: number, origen: 'url' | 'archivo'): void {
+    this.enlaces.at(index).patchValue({ origen, url: '' });
+    this.enlaceFiles[index] = null;
+    const fileInput = document.getElementById(`enlace-file-${index}`) as HTMLInputElement;
+    if (fileInput) fileInput.value = '';
+  }
+
+  onEnlaceFileSelected(event: any, index: number): void {
+    const file = event.target.files[0];
+    if (!file) return;
+    this.enlaceFiles[index] = file;
+    const grupo = this.enlaces.at(index);
+    grupo.patchValue({ origen: 'archivo', url: '' });
+    if (!grupo.get('nombre')?.value) {
+      grupo.patchValue({ nombre: file.name });
+    }
+  }
+
+  isEnlaceArchivo(index: number): boolean {
+    return this.enlaces.at(index).get('origen')?.value === 'archivo';
+  }
+
+  getEnlaceFileName(index: number): string {
+    const file = this.enlaceFiles[index];
+    if (file) return file.name;
+    const url = this.enlaces.at(index).get('url')?.value;
+    return url ? url.split('/').pop() || '' : '';
+  }
+
+  isEnlacePdf(index: number): boolean {
+    const file = this.enlaceFiles[index];
+    if (file) return file.type === 'application/pdf';
+    return isPdfUtil(this.enlaces.at(index).get('url')?.value);
   }
 
   // Método para limpiar la selección de archivo y volver a mostrar la imagen existente
@@ -385,6 +429,10 @@ export class CompeticionFormComponent implements OnInit {
     if (fileInput) {
       fileInput.value = '';
     }
+  }
+
+  isPdf(url: string | null): boolean {
+    return isPdfUtil(url);
   }
 
   seleccionarPrueba(prueba: PruebaCompeticion): void {
@@ -433,9 +481,23 @@ export class CompeticionFormComponent implements OnInit {
       formData.append('existingImage', this.existingImage);
     }
 
-    // Enviar enlaces como JSON
-    const enlaces = this.enlaces.value;
-    formData.append('enlaces', JSON.stringify(enlaces));
+    // Enviar enlaces: mezcla de URLs manuales y archivos subidos (imagen o PDF)
+    const enlacesMeta: any[] = [];
+    this.enlaces.value.forEach((enlace: any, index: number) => {
+      if (!enlace.nombre) return;
+      const file = this.enlaceFiles[index];
+      if (enlace.origen === 'archivo') {
+        if (file) {
+          enlacesMeta.push({ nombre: enlace.nombre, origen: 'archivo', nuevoArchivo: true });
+          formData.append('adjuntos', file);
+        } else if (enlace.url) {
+          enlacesMeta.push({ nombre: enlace.nombre, origen: 'archivo', url: enlace.url, nuevoArchivo: false });
+        }
+      } else if (enlace.url) {
+        enlacesMeta.push({ nombre: enlace.nombre, origen: 'url', url: enlace.url });
+      }
+    });
+    formData.append('enlaces', JSON.stringify(enlacesMeta));
 
     if (this.categoriasSeleccionadas!.length < 1) {
       this.categoriasSeleccionadas = [];

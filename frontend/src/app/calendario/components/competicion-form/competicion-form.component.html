@@ -138,14 +138,14 @@
                 <!-- Imagen -->
                 <div class="nf-field">
                     <label class="nf-label">
-                        <i class="fas fa-image"></i> Imagen
+                        <i class="fas fa-image"></i> Imagen o Documento PDF
                     </label>
                     <label class="nf-upload" for="imagen">
                         <i class="fas fa-cloud-upload-alt nf-upload-icon"></i>
-                        <span class="nf-upload-text">Haz clic para seleccionar una imagen</span>
-                        <span class="nf-upload-hint">JPG, PNG o WEBP</span>
+                        <span class="nf-upload-text">Haz clic para seleccionar un archivo</span>
+                        <span class="nf-upload-hint">JPG, PNG, WEBP o PDF</span>
                         <input type="file" id="imagen" class="nf-upload-input"
-                            (change)="onFileSelected($event)" accept="image/*" />
+                            (change)="onFileSelected($event)" accept="image/*, application/pdf" />
                     </label>
                     <div class="nf-img-actions" *ngIf="selectedFile && isEditMode && existingImage">
                         <button type="button" class="nf-btn-link" (click)="clearFileSelection()">
@@ -153,14 +153,23 @@
                         </button>
                     </div>
                     <span class="nf-hint" *ngIf="isEditMode && existingImage && !selectedFile">
-                        Si no seleccionas imagen nueva, se mantiene la actual.
+                        Si no seleccionas un archivo nuevo, se mantiene el actual.
                     </span>
                 </div>
 
                 <!-- Vista previa -->
                 <div *ngIf="imageUrl" class="nf-preview">
                     <span class="nf-preview-label"><i class="fas fa-eye"></i> Vista previa</span>
-                    <img [src]="imageUrl" alt="Vista previa" class="nf-preview-img" />
+                    <img *ngIf="!isPdf(imageUrl)" [src]="imageUrl" alt="Vista previa" class="nf-preview-img" />
+                    <div *ngIf="isPdf(imageUrl)" style="width: 100%; min-height: 400px; background: #fff;">
+                        <pdf-viewer [src]="imageUrl"
+                            [render-text]="true"
+                            [original-size]="false"
+                            [fit-to-page]="true"
+                            [show-all]="true"
+                            style="display: block; width: 100%; height: 600px;">
+                        </pdf-viewer>
+                    </div>
                 </div>
 
                 <!-- Documentos y enlaces -->
@@ -175,8 +184,30 @@
                         [formGroupName]="i">
                         <input type="text" class="nf-input" formControlName="nombre"
                             placeholder="Circular, Reglamento..." />
-                        <input type="url" class="nf-input" formControlName="url"
-                            placeholder="https://..." />
+
+                        <div class="nf-enlace-content">
+                            <div class="nf-enlace-tipo-toggle">
+                                <button type="button" class="nf-tipo-btn" [class.active]="!isEnlaceArchivo(i)"
+                                    (click)="onEnlaceTipoChange(i, 'url')">
+                                    <i class="fas fa-link"></i> URL
+                                </button>
+                                <button type="button" class="nf-tipo-btn" [class.active]="isEnlaceArchivo(i)"
+                                    (click)="onEnlaceTipoChange(i, 'archivo')">
+                                    <i class="fas fa-file-upload"></i> Archivo
+                                </button>
+                            </div>
+
+                            <input *ngIf="!isEnlaceArchivo(i)" type="url" class="nf-input" formControlName="url"
+                                placeholder="https://..." />
+
+                            <label *ngIf="isEnlaceArchivo(i)" class="nf-enlace-file-label" [attr.for]="'enlace-file-' + i">
+                                <i class="fas" [ngClass]="isEnlacePdf(i) ? 'fa-file-pdf' : 'fa-file-image'"></i>
+                                <span>{{ getEnlaceFileName(i) || 'Selecciona una imagen o PDF' }}</span>
+                                <input type="file" [id]="'enlace-file-' + i" class="nf-upload-input"
+                                    (change)="onEnlaceFileSelected($event, i)" accept="image/*, application/pdf" />
+                            </label>
+                        </div>
+
                         <button type="button" class="nf-btn-remove" (click)="removeEnlace(i)" title="Eliminar">
                             <i class="fas fa-times"></i>
                         </button>
