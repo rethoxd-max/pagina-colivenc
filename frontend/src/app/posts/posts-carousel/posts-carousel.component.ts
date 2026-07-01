@@ -7,6 +7,8 @@ import { RouterLink } from '@angular/router';
 import { PostService } from '../services/posts.service';
 import { environment } from '../../../environments/environment';
 import { DisciplinaFilterService } from '../../services/disciplina-filter.service';
+import { PdfViewerModule } from 'ng2-pdf-viewer';
+import { isPdf, getPostMediaUrl } from '../utils/post-media.util';
 
 interface Post {
   _id: string;
@@ -18,7 +20,7 @@ interface Post {
 @Component({
   selector: 'app-posts-carousel',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, NgIf, RouterLink],
+  imports: [CommonModule, ReactiveFormsModule, NgIf, RouterLink, PdfViewerModule],
   templateUrl: './posts-carousel.component.html',
   styleUrls: ['./posts-carousel.component.css']
 })
@@ -77,11 +79,11 @@ export class PostsCarouselComponent implements OnInit, OnDestroy {
   }
 
   getImageUrl(imageUrl: string | undefined) {
-    if (!imageUrl) return '';
-    if (imageUrl.startsWith('http')) {
-      return imageUrl;
-    }
-    return `${this.baseURL}${imageUrl}`;
+    return getPostMediaUrl(imageUrl);
+  }
+
+  isPdf(imageUrl: string | undefined): boolean {
+    return isPdf(imageUrl);
   }
 
   ngOnDestroy() {

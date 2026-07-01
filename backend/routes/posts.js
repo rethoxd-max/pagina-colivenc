@@ -29,11 +29,11 @@ const storage = multer.diskStorage({
 const upload = multer({ 
     storage: storage,
     limits: {
-        fileSize: 5 * 1024 * 1024
+        fileSize: 15 * 1024 * 1024 // Aumentado a 15MB para soportar PDFs
     },
     fileFilter: function (req, file, cb) {
-        if (!file.mimetype.startsWith('image/')) {
-            return cb(new Error('Solo se permiten imágenes'));
+        if (!file.mimetype.startsWith('image/') && file.mimetype !== 'application/pdf') {
+            return cb(new Error('Solo se permiten imágenes o archivos PDF'));
         }
         cb(null, true);
     }
@@ -109,7 +109,7 @@ router.post('/', auth, (req, res, next) => {
             return res.status(500).json({ msg: 'Error al guardar la imagen' });
         }
 
-        const imageUrl = req.file ? `${BASE_URL}/uploads/posts/${req.file.filename}` : null;
+        const imageUrl = req.file ? `uploads/posts/${req.file.filename}` : null;
 
         const post = new Post({
             title,
@@ -180,7 +180,7 @@ router.put('/:id', auth, (req, res, next) => {
             }
 
             // Asignar la nueva imagen con la URL absoluta
-            post.imageUrl = `${BASE_URL}/uploads/posts/${req.file.filename}`;
+            post.imageUrl = `uploads/posts/${req.file.filename}`;
         }
 
         await post.save();

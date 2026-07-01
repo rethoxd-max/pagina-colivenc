@@ -41,6 +41,19 @@
     transform: scale(1.02);
 }
 
+.carousel-pdf-wrap {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    pointer-events: none;
+}
+
+.carousel-pdf-viewer {
+    display: block;
+    width: 100%;
+    height: 100%;
+}
+
 .carousel-text {
     position: absolute;
     bottom: 0;
@@ -142,6 +155,10 @@ button:hover {
         height: 300px;
     }
 
+    .carousel-pdf-wrap {
+        height: 300px;
+    }
+
     .carousel-text {
         padding: 2rem 1.5rem 1.5rem;
     }
@@ -172,6 +189,10 @@ button:hover {
 
 @media (max-width: 480px) {
     .carousel-image {
+        height: 250px;
+    }
+
+    .carousel-pdf-wrap {
         height: 250px;
     }
 

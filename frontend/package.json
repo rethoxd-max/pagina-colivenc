@@ -23,6 +23,7 @@
     "@stripe/stripe-js": "^7.3.0",
     "bootstrap": "^5.3.3",
     "chart.js": "^4.5.1",
+    "ng2-pdf-viewer": "^10.4.0",
     "rxjs": "~7.8.0",
     "tslib": "^2.3.0",
     "zone.js": "~0.14.10"

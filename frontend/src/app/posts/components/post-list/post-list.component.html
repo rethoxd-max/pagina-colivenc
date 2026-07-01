@@ -53,7 +53,15 @@
         <ng-container *ngIf="getPinnedPost() as featured">
             <div class="featured-post" (click)="verNoticia(featured._id)">
                 <div class="featured-image-wrap">
-                    <img *ngIf="featured.imageUrl" [src]="getImageUrl(featured.imageUrl)" [alt]="featured.title" class="featured-image">
+                    <img *ngIf="featured.imageUrl && !isPdf(featured.imageUrl)" [src]="getImageUrl(featured.imageUrl)" [alt]="featured.title" class="featured-image">
+                    <div *ngIf="featured.imageUrl && isPdf(featured.imageUrl)" class="featured-pdf-wrap">
+                        <pdf-viewer [src]="getImageUrl(featured.imageUrl)"
+                            [show-all]="false"
+                            [fit-to-page]="true"
+                            [render-text]="false"
+                            [original-size]="false"
+                            class="featured-pdf-viewer"></pdf-viewer>
+                    </div>
                     <div *ngIf="!featured.imageUrl" class="featured-image-placeholder"><i class="fas fa-newspaper"></i></div>
                     <span class="featured-badge"><i class="fas fa-thumbtack"></i> Destacada</span>
                 </div>
@@ -80,10 +88,18 @@
 
                 <!-- Imagen de la noticia -->
                 <div class="post-image-wrapper">
-                    <img *ngIf="post.imageUrl"
+                    <img *ngIf="post.imageUrl && !isPdf(post.imageUrl)"
                          [src]="getImageUrl(post.imageUrl)"
                          [alt]="post.title"
                          class="post-image">
+                    <div *ngIf="post.imageUrl && isPdf(post.imageUrl)" class="post-pdf-wrap">
+                        <pdf-viewer [src]="getImageUrl(post.imageUrl)"
+                            [show-all]="false"
+                            [fit-to-page]="true"
+                            [render-text]="false"
+                            [original-size]="false"
+                            class="post-pdf-viewer"></pdf-viewer>
+                    </div>
                     <div *ngIf="!post.imageUrl" class="post-image-placeholder">
                         <i class="fas fa-image"></i>
                     </div>

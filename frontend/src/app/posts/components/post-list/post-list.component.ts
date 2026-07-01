@@ -7,11 +7,13 @@ import { AuthService } from '../../../auth/services/auth.service';
 import { environment } from '../../../../environments/environment';
 import { DisciplinaFilterService } from '../../../services/disciplina-filter.service';
 import { Subscription } from 'rxjs';
+import { PdfViewerModule } from 'ng2-pdf-viewer';
+import { isPdf, getPostMediaUrl } from '../../utils/post-media.util';
 
 @Component({
   selector: 'app-post-list',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, FormsModule, NgIf, RouterLink],
+  imports: [CommonModule, ReactiveFormsModule, FormsModule, NgIf, RouterLink, PdfViewerModule],
   templateUrl: './post-list.component.html',
   styleUrls: ['./post-list.component.css'],
   providers: [PostService]
@@ -167,8 +169,10 @@ export class PostListComponent implements OnInit, OnDestroy {
   }
 
   getImageUrl(imageUrl: string) {
-    if (!imageUrl) return '';
-    if (imageUrl.startsWith('http')) return imageUrl;
-    return `${this.baseURL}${imageUrl}`;
+    return getPostMediaUrl(imageUrl);
+  }
+
+  isPdf(imageUrl: string): boolean {
+    return isPdf(imageUrl);
   }
 }

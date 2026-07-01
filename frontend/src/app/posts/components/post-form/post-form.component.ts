@@ -11,10 +11,12 @@ import { NgIf, NgFor } from '@angular/common';
 import { environment } from '../../../../environments/environment';
 import { DisciplinaService, Disciplina } from '../../../services/disciplina.service';
 import { forkJoin } from 'rxjs';
+import { PdfViewerModule } from 'ng2-pdf-viewer';
+import { isPdf as isPdfUtil, getPostMediaUrl } from '../../utils/post-media.util';
 @Component({
   selector: 'app-post-form',
   standalone: true,
-  imports: [ReactiveFormsModule, NgIf, NgFor],
+  imports: [ReactiveFormsModule, NgIf, NgFor, PdfViewerModule],
   templateUrl: './post-form.component.html',
   styleUrls: ['./post-form.component.css'],
 })
@@ -61,7 +63,7 @@ export class PostFormComponent implements OnInit {
             disciplina: post.disciplina?._id || post.disciplina || null,
           });
           if (post.imageUrl) {
-            this.imageUrl = `${this.baseUrl}/${post.imageUrl}`;
+            this.imageUrl = getPostMediaUrl(post.imageUrl);
           }
         }
       });
@@ -106,6 +108,10 @@ export class PostFormComponent implements OnInit {
       () => { this.router.navigate(['/noticias']); },
       (error) => { console.error('Error al guardar el post:', error); }
     );
+  }
+
+  isPdf(url: string | null): boolean {
+    return isPdfUtil(url);
   }
 
   volver(): void {

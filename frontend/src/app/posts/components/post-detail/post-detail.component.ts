@@ -4,6 +4,8 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { PostService } from '../../services/posts.service';
 import { AuthService } from '../../../auth/services/auth.service';
 import { environment } from '../../../../environments/environment';
+import { PdfViewerModule } from 'ng2-pdf-viewer';
+import { isPdf, getPostMediaUrl } from '../../utils/post-media.util';
 
 interface Post {
   _id: string;
@@ -16,7 +18,7 @@ interface Post {
 @Component({
   selector: 'app-post-detail',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, PdfViewerModule],
   template: `
     <div class="post-detail-page">
       <div class="post-container">
@@ -57,10 +59,20 @@ interface Post {
           </header>
 
           <!-- Imagen destacada -->
-          <figure *ngIf="post?.imageUrl" class="featured-image">
-            <img [src]="getImageUrl(post?.imageUrl)" 
+          <figure *ngIf="post?.imageUrl && !isPdf(post?.imageUrl)" class="featured-image">
+            <img [src]="getImageUrl(post?.imageUrl)"
                  [alt]="post?.title"
                  class="post-image">
+          </figure>
+
+          <!-- Documento PDF destacado -->
+          <figure *ngIf="post?.imageUrl && isPdf(post?.imageUrl)" class="featured-image featured-pdf">
+            <pdf-viewer [src]="getImageUrl(post?.imageUrl)"
+                [show-all]="true"
+                [render-text]="true"
+                [fit-to-page]="true"
+                [original-size]="false"
+                class="post-detail-pdf-viewer"></pdf-viewer>
           </figure>
 
           <!-- Contenido del artículo -->
@@ -266,6 +278,14 @@ interface Post {
       display: block;
     }
 
+    .post-detail-pdf-viewer {
+      display: block;
+      width: 100%;
+      height: 700px;
+      border-radius: 12px;
+      overflow: auto;
+    }
+
     /* Contenido */
     .article-content {
       padding: 2rem 2.5rem;
@@ -400,6 +420,10 @@ interface Post {
         padding: 0 1.25rem;
       }
 
+      .post-detail-pdf-viewer {
+        height: 450px;
+      }
+
       .article-content {
         padding: 1.5rem 1.25rem;
       }
@@ -446,11 +470,11 @@ export class PostDetailComponent implements OnInit {
   }
 
   getImageUrl(imageUrl: string | undefined): string {
-    if (!imageUrl) return '';
-    if (imageUrl.startsWith('http')) {
-      return imageUrl;
-    }
-    return `${this.baseURL}${imageUrl}`;
+    return getPostMediaUrl(imageUrl);
+  }
+
+  isPdf(imageUrl: string | undefined): boolean {
+    return isPdf(imageUrl);
   }
 
   volver() {

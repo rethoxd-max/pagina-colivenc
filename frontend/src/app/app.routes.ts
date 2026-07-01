@@ -4,7 +4,6 @@ import { RegisterComponent } from './auth/components/register/register.component
 import { LoginComponent } from './auth/components/login/login.component';
 import { AuthGuard } from './auth/guards/auth.guard';
 import { PostListComponent } from './posts/components/post-list/post-list.component';
-import { EditPostComponent } from './posts/components/edit-post/edit-post.component';
 import { RankingComponent } from './ranking/ranking.component';
 import { CreatePerformanceComponent } from './ranking/create-performance/create-performance.component';
 import { CompeticionListComponent } from './calendario/components/competicion-list/competicion-list.component';
@@ -47,7 +46,7 @@ export const routes: Routes = [
     { path: 'noticias', component: PostListComponent },
     { path: 'noticia/:id', component: PostDetailComponent },
     { path: 'create', component: PostFormComponent, canActivate: [AuthGuard, editorGuard] },
-    { path: 'edit/:id', component: EditPostComponent, canActivate: [AuthGuard, editorGuard] },
+    { path: 'edit/:id', component: PostFormComponent, canActivate: [AuthGuard, editorGuard] },
     
     // Rutas de competiciones
     { path: 'competiciones', component: CompeticionListComponent },

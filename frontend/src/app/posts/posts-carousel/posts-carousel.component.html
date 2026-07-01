@@ -1,7 +1,15 @@
 <div class="carousel-container" *ngIf="posts.length > 0">
     <a [routerLink]="['/noticia', posts[currentIndex]._id]" class="carousel-slide">
         <img [src]="getImageUrl(posts[currentIndex].imageUrl)" alt="Imagen del post" class="carousel-image"
-            *ngIf="posts[currentIndex].imageUrl">
+            *ngIf="posts[currentIndex].imageUrl && !isPdf(posts[currentIndex].imageUrl)">
+        <div class="carousel-pdf-wrap" *ngIf="posts[currentIndex].imageUrl && isPdf(posts[currentIndex].imageUrl)">
+            <pdf-viewer [src]="getImageUrl(posts[currentIndex].imageUrl)"
+                [show-all]="false"
+                [fit-to-page]="true"
+                [render-text]="false"
+                [original-size]="false"
+                class="carousel-pdf-viewer"></pdf-viewer>
+        </div>
         <div class="carousel-text">
             <h2>{{ posts[currentIndex].title }}</h2>
             <p>{{ posts[currentIndex].content | slice:0:150 }}...</p>
