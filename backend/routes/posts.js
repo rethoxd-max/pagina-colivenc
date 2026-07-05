@@ -76,6 +76,18 @@ router.get('/ultimos', async (req, res) => {
 
 
 
+// Obtener la noticia destacada (pública) — la que se muestra en el Home
+router.get('/destacado', async (req, res) => {
+    try {
+        const post = await Post.findOne({ destacado: true })
+            .populate('author', ['name'])
+            .populate('disciplina', 'nombre slug color icono');
+        res.json(post); // null si no hay ninguna destacada
+    } catch (error) {
+        res.status(500).json({ msg: 'Error en el servidor', error });
+    }
+});
+
 // Obtener un post específico por ID
 router.get('/:id', async (req, res) => {
     try {
@@ -194,6 +206,27 @@ router.put('/:id', auth, (req, res, next) => {
                 fs.unlinkSync(filePath);
             }
         }
+        res.status(500).json({ msg: 'Error en el servidor', error: error.message });
+    }
+});
+
+// Marcar/desmarcar un post como destacado (solo Admin/Editor) — solo puede haber uno a la vez
+router.patch('/:id/destacar', auth, async (req, res) => {
+    if (!req.user.userTypes.includes('Admin') && !req.user.userTypes.includes('Editor')) {
+        return res.status(403).json({ message: 'Se requiere rol Admin o Editor' });
+    }
+    try {
+        const post = await Post.findById(req.params.id);
+        if (!post) return res.status(404).json({ msg: 'Post no encontrado' });
+
+        const nuevoEstado = !post.destacado;
+        if (nuevoEstado) {
+            await Post.updateMany({ destacado: true }, { destacado: false });
+        }
+        post.destacado = nuevoEstado;
+        await post.save();
+        res.json(post);
+    } catch (error) {
         res.status(500).json({ msg: 'Error en el servidor', error: error.message });
     }
 });

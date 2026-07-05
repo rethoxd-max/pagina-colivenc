@@ -133,8 +133,8 @@
                             <!-- Pin (solo admin) -->
                             <button *ngIf="isAdmin()" class="btn-action btn-pin"
                                     (click)="togglePin($event, post._id)"
-                                    [class.active]="pinnedPostId === post._id"
-                                    [title]="pinnedPostId === post._id ? 'Quitar destacada' : 'Destacar noticia'">
+                                    [class.active]="post.destacado"
+                                    [title]="post.destacado ? 'Quitar destacada' : 'Destacar noticia'">
                                 <i class="fas fa-thumbtack"></i>
                             </button>
                             <!-- Admin: editar / borrar -->

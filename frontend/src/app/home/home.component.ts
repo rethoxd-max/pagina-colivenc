@@ -7,11 +7,12 @@ import { CalendarioLateralComponent } from './components/calendario-lateral/cale
 import { SocialSidebarComponent } from './components/social-sidebar/social-sidebar.component';
 import { PanelAnunciosComponent, Anuncio } from './components/panel-anuncios/panel-anuncios.component';
 import { TiendaPreviewComponent } from './components/tienda-preview/tienda-preview.component';
+import { FeaturedPostComponent } from './components/featured-post/featured-post.component';
 
 @Component({
   selector: 'app-home',
   standalone: true,
-  imports: [CommonModule, RouterModule, PostsCarouselComponent, HorariosEscuelaComponent, CalendarioLateralComponent, SocialSidebarComponent, PanelAnunciosComponent, TiendaPreviewComponent],
+  imports: [CommonModule, RouterModule, PostsCarouselComponent, HorariosEscuelaComponent, CalendarioLateralComponent, SocialSidebarComponent, PanelAnunciosComponent, TiendaPreviewComponent, FeaturedPostComponent],
   templateUrl: './home.component.html',
   styleUrl: './home.component.css'
 })

@@ -21,6 +21,19 @@ export class PostService {
     return this.http.get<any[]>(`${this.apiUrl}/ultimos`); // Endpoint para traer las últimas noticias
   }
 
+  getPostDestacado(): Observable<any> {
+    return this.http.get<any>(`${this.apiUrl}/destacado`);
+  }
+
+  toggleDestacado(id: string): Observable<any> {
+    const token = this.authService.getToken();
+    if (!token) {
+      throw new Error('No token found');
+    }
+    const headers = new HttpHeaders().set('x-auth-token', token);
+    return this.http.patch(`${this.apiUrl}/${id}/destacar`, {}, { headers });
+  }
+
   getPost(id: string): Observable<any> {
     return this.http.get<any>(`${this.apiUrl}/${id}`);
   }

@@ -25,7 +25,6 @@ export class PostListComponent implements OnInit, OnDestroy {
   searchTerm: string = '';
   fechaDesde: string = '';
   fechaHasta: string = '';
-  pinnedPostId: string | null = null;
   pageSize: number = 9;
   currentPage: number = 1;
   copiedPostId: string | null = null;
@@ -40,7 +39,6 @@ export class PostListComponent implements OnInit, OnDestroy {
   ) { }
 
   ngOnInit(): void {
-    this.pinnedPostId = localStorage.getItem('colivenc_pinned_post');
     this.loadPosts();
     this.filterSub = this.disciplinaFilterService.disciplina$.subscribe(() => this.applyFilters());
   }
@@ -99,24 +97,22 @@ export class PostListComponent implements OnInit, OnDestroy {
   hayMas(): boolean { return this.pagedPosts.length < this.filteredPosts.length; }
 
   getPinnedPost(): any {
-    if (!this.pinnedPostId || this.searchTerm || this.fechaDesde || this.fechaHasta) return null;
-    return this.posts.find(p => p._id === this.pinnedPostId) ?? null;
+    if (this.searchTerm || this.fechaDesde || this.fechaHasta) return null;
+    return this.posts.find(p => p.destacado) ?? null;
   }
 
   getNonPinnedPagedPosts(): any[] {
-    if (!this.pinnedPostId || this.searchTerm || this.fechaDesde || this.fechaHasta) return this.pagedPosts;
-    return this.pagedPosts.filter(p => p._id !== this.pinnedPostId);
+    return this.pagedPosts.filter(p => !p.destacado);
   }
 
   togglePin(event: Event, postId: string): void {
     event.stopPropagation();
-    if (this.pinnedPostId === postId) {
-      this.pinnedPostId = null;
-      localStorage.removeItem('colivenc_pinned_post');
-    } else {
-      this.pinnedPostId = postId;
-      localStorage.setItem('colivenc_pinned_post', postId);
-    }
+    this.postService.toggleDestacado(postId).subscribe({
+      next: () => {
+        this.posts.forEach(p => p.destacado = (p._id === postId ? !p.destacado : false));
+      },
+      error: (error) => { console.error('Error al marcar como destacada:', error); }
+    });
   }
 
   compartirNoticia(event: Event, post: any): void {
@@ -145,10 +141,6 @@ export class PostListComponent implements OnInit, OnDestroy {
       this.postService.deletePost(id).subscribe(
         () => {
           this.posts = this.posts.filter(post => post._id !== id);
-          if (this.pinnedPostId === id) {
-            this.pinnedPostId = null;
-            localStorage.removeItem('colivenc_pinned_post');
-          }
           this.applyFilters();
         },
         (error) => { console.error('Error al eliminar el post:', error); }

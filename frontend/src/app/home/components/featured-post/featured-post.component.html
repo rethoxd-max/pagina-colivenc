@@ -1,0 +1,34 @@
+<div class="fp-section">
+
+  <div *ngIf="cargando" class="fp-loading">
+    <i class="fas fa-spinner fa-spin"></i>
+  </div>
+
+  <div *ngIf="!cargando && !post" class="fp-empty">
+    <i class="fas fa-thumbtack"></i>
+    <p>No hay ninguna noticia destacada ahora mismo.</p>
+  </div>
+
+  <a *ngIf="!cargando && post" [routerLink]="['/noticia', post._id]" class="fp-card">
+    <div class="fp-thumb">
+      <img *ngIf="post.imageUrl && !isPdf(post.imageUrl)" [src]="getImageUrl(post.imageUrl)" [alt]="post.title" class="fp-thumb-img" />
+      <div *ngIf="post.imageUrl && isPdf(post.imageUrl)" class="fp-thumb-pdf">
+        <pdf-viewer [src]="getImageUrl(post.imageUrl)"
+            [show-all]="false"
+            [fit-to-page]="true"
+            [render-text]="false"
+            [original-size]="false"
+            class="fp-thumb-pdf-viewer"></pdf-viewer>
+      </div>
+      <div *ngIf="!post.imageUrl" class="fp-thumb-placeholder"><i class="fas fa-newspaper"></i></div>
+    </div>
+
+    <div class="fp-body">
+      <span class="fp-date"><i class="far fa-calendar-alt"></i> {{ (post.createdAt || post.date) | date:'dd MMM yyyy' }}</span>
+      <h4 class="fp-title">{{ post.title }}</h4>
+      <p class="fp-excerpt">{{ post.content | slice:0:80 }}...</p>
+      <span class="fp-link">Leer más <i class="fas fa-arrow-right"></i></span>
+    </div>
+  </a>
+
+</div>
