@@ -57,11 +57,17 @@
   transform: scale(1.06);
 }
 
-.fp-thumb-pdf,
-.fp-thumb-pdf-viewer {
+.fp-thumb-pdf {
   width: 100%;
   height: 100%;
+  overflow: hidden;
   pointer-events: none;
+}
+
+.fp-thumb-pdf-viewer {
+  display: block;
+  width: 100%;
+  height: 100%;
 }
 
 .fp-thumb-placeholder {

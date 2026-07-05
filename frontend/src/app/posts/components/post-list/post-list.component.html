@@ -71,7 +71,7 @@
                     <p class="featured-excerpt">{{ featured.content | slice:0:220 }}...</p>
                     <div class="featured-footer">
                         <span class="featured-read-more">Leer más <i class="fas fa-arrow-right"></i></span>
-                        <button *ngIf="isAdmin()" class="btn-unpin" (click)="togglePin($event, featured._id)" title="Quitar destacada">
+                        <button *ngIf="isAdmin() || isEditor()" class="btn-unpin" (click)="togglePin($event, featured._id)" title="Quitar destacada">
                             <i class="fas fa-thumbtack"></i> Quitar destacada
                         </button>
                     </div>
@@ -130,8 +130,8 @@
                                     [title]="copiedPostId === post._id ? 'Enlace copiado' : 'Compartir'">
                                 <i class="fas" [class.fa-check]="copiedPostId === post._id" [class.fa-share-alt]="copiedPostId !== post._id"></i>
                             </button>
-                            <!-- Pin (solo admin) -->
-                            <button *ngIf="isAdmin()" class="btn-action btn-pin"
+                            <!-- Pin (admin/editor) -->
+                            <button *ngIf="isAdmin() || isEditor()" class="btn-action btn-pin"
                                     (click)="togglePin($event, post._id)"
                                     [class.active]="post.destacado"
                                     [title]="post.destacado ? 'Quitar destacada' : 'Destacar noticia'">

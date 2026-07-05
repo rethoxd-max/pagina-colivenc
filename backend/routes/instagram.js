@@ -127,7 +127,7 @@ async function aplicarLimiteRetencion(limite = LIMITE_POSTS) {
 
 // POST /:id/refresh — refrescar metadatos de un post existente (solo admin)
 router.post('/:id/refresh', auth, async (req, res) => {
-    if (!req.user.userTypes.includes('Admin')) return res.status(403).json({ mensaje: 'Acceso denegado' });
+    if (!req.user.userTypes.includes('Admin') && !req.user.userTypes.includes('Editor')) return res.status(403).json({ mensaje: 'Acceso denegado' });
     try {
         const post = await PostInstagram.findById(req.params.id);
         if (!post) return res.status(404).json({ mensaje: 'Post no encontrado' });
@@ -156,7 +156,7 @@ router.get('/', async (req, res) => {
 
 // POST / — añadir URL de post (solo admin, con auto-scraping de imagen y descripción)
 router.post('/', auth, async (req, res) => {
-    if (!req.user.userTypes.includes('Admin')) return res.status(403).json({ mensaje: 'Acceso denegado' });
+    if (!req.user.userTypes.includes('Admin') && !req.user.userTypes.includes('Editor')) return res.status(403).json({ mensaje: 'Acceso denegado' });
     try {
         const { url } = req.body;
         if (!url || !url.includes('instagram.com')) return res.status(400).json({ mensaje: 'URL de Instagram no válida' });
@@ -175,7 +175,7 @@ router.post('/', auth, async (req, res) => {
 
 // DELETE /:id — eliminar post (solo admin)
 router.delete('/:id', auth, async (req, res) => {
-    if (!req.user.userTypes.includes('Admin')) return res.status(403).json({ mensaje: 'Acceso denegado' });
+    if (!req.user.userTypes.includes('Admin') && !req.user.userTypes.includes('Editor')) return res.status(403).json({ mensaje: 'Acceso denegado' });
     try {
         const post = await PostInstagram.findByIdAndDelete(req.params.id);
         if (!post) return res.status(404).json({ mensaje: 'Post no encontrado' });

@@ -35,7 +35,8 @@
 .ig-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 0.35rem;
+  gap: 0.5rem;
+  align-items: start;
 }
 
 .ig-card {
@@ -58,14 +59,13 @@
 .ig-card-img-wrap {
   position: relative;
   width: 100%;
-  aspect-ratio: 1 / 1;
+  line-height: 0;
   background: #f6f6f8;
 }
 
 .ig-card-img {
   width: 100%;
-  height: 100%;
-  object-fit: contain;
+  height: auto;
   display: block;
   transition: transform 0.3s ease;
 }
@@ -76,7 +76,7 @@
 
 .ig-card-img-placeholder {
   width: 100%;
-  height: 100%;
+  aspect-ratio: 1 / 1;
   display: flex;
   align-items: center;
   justify-content: center;

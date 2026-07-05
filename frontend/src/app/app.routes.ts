@@ -122,7 +122,7 @@ export const routes: Routes = [
     { path: 'admin/codigos-invitacion', component: CodigosInvitacionComponent, canActivate: [AuthGuard, adminGuard] },
     { path: 'admin/usuarios', component: AdminUsuariosComponent, canActivate: [AuthGuard, adminGuard] },
     { path: 'admin/disciplinas', component: AdminDisciplinasComponent, canActivate: [AuthGuard, adminGuard] },
-    { path: 'admin/instagram', component: AdminInstagramComponent, canActivate: [AuthGuard, adminGuard] },
+    { path: 'admin/instagram', component: AdminInstagramComponent, canActivate: [AuthGuard, editorGuard] },
     
     // Ruta por defecto
     { path: '', redirectTo: '/home', pathMatch: 'full' },

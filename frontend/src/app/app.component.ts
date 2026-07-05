@@ -123,6 +123,10 @@ export class AppComponent implements OnInit, OnDestroy {
     return this.authService.isAdmin();
   }
 
+  isEditor(): boolean {
+    return this.authService.isEditor();
+  }
+
   seleccionarDisciplina(id: string | null): void {
     this.disciplinaFilterService.setDisciplina(id);
     this.dropdownAbierto = false;
