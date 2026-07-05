@@ -6,6 +6,8 @@ const fs = require('fs');
 const PostInstagram = require('../models/PostInstagram');
 const auth = require('../middleware/auth');
 
+const LIMITE_POSTS = 4;
+
 // ── Helper: extraer shortcode de URL de Instagram ─────────────────────────────
 function extractShortcode(url) {
     const m = url.match(/instagram\.com\/(?:p|reel|tv)\/([A-Za-z0-9_-]+)/);
@@ -103,20 +105,25 @@ async function scrapeInstagram(url) {
     return { imagenUrl: '', descripcion: '' };
 }
 
-// ══════════════════════════════════════════════════════════════════════════════
+// ── Helper: borrar la imagen local asociada a un post (si es local) ──────────
+function eliminarImagenLocal(imagenUrl) {
+    if (!imagenUrl || !imagenUrl.startsWith('/uploads/instagram/')) return;
+    const filePath = path.join(__dirname, '..', imagenUrl);
+    fs.unlink(filePath, () => {});
+}
 
-// GET /fetch-metadata?url=... — previsualizar metadatos (solo admin)
-router.get('/fetch-metadata', auth, async (req, res) => {
-    if (!req.user.userTypes.includes('Admin')) return res.status(403).json({ mensaje: 'Acceso denegado' });
-    const { url } = req.query;
-    if (!url || !url.includes('instagram.com')) return res.status(400).json({ mensaje: 'URL de Instagram no válida' });
-    try {
-        const data = await scrapeInstagram(url);
-        res.json(data);
-    } catch (err) {
-        res.status(502).json({ mensaje: 'No se pudieron obtener los datos automáticamente.', detalle: err.message });
+// ── Helper: conservar solo los últimos N posts (por fecha de creación) ───────
+// Al superar el límite, borra de la base de datos y del disco los más antiguos.
+async function aplicarLimiteRetencion(limite = LIMITE_POSTS) {
+    const posts = await PostInstagram.find().sort({ createdAt: -1 });
+    const sobrantes = posts.slice(limite);
+    for (const post of sobrantes) {
+        eliminarImagenLocal(post.imagenUrl);
+        await PostInstagram.findByIdAndDelete(post._id);
     }
-});
+}
+
+// ══════════════════════════════════════════════════════════════════════════════
 
 // POST /:id/refresh — refrescar metadatos de un post existente (solo admin)
 router.post('/:id/refresh', auth, async (req, res) => {
@@ -125,9 +132,10 @@ router.post('/:id/refresh', auth, async (req, res) => {
         const post = await PostInstagram.findById(req.params.id);
         if (!post) return res.status(404).json({ mensaje: 'Post no encontrado' });
         const { imagenUrl, descripcion } = await scrapeInstagram(post.url);
+        if (imagenUrl && imagenUrl !== post.imagenUrl) eliminarImagenLocal(post.imagenUrl);
         const updated = await PostInstagram.findByIdAndUpdate(
             req.params.id,
-            { imagenUrl, descripcion },
+            { imagenUrl: imagenUrl || post.imagenUrl, descripcion: descripcion || post.descripcion },
             { new: true }
         );
         res.json(updated);
@@ -136,33 +144,28 @@ router.post('/:id/refresh', auth, async (req, res) => {
     }
 });
 
-// GET / — obtener todos los posts (público)
+// GET / — obtener los posts más recientes (público)
 router.get('/', async (req, res) => {
     try {
-        const posts = await PostInstagram.find().sort({ orden: 1, createdAt: -1 });
+        const posts = await PostInstagram.find().sort({ createdAt: -1 }).limit(LIMITE_POSTS);
         res.json(posts);
     } catch (err) {
         res.status(500).json({ mensaje: 'Error al obtener posts de Instagram' });
     }
 });
 
-// POST / — añadir URL de post (solo admin, con auto-scraping)
+// POST / — añadir URL de post (solo admin, con auto-scraping de imagen y descripción)
 router.post('/', auth, async (req, res) => {
     if (!req.user.userTypes.includes('Admin')) return res.status(403).json({ mensaje: 'Acceso denegado' });
     try {
-        const { url, orden, imagenUrl: imgManual, descripcion: descManual, likes, comentarios } = req.body;
+        const { url } = req.body;
         if (!url || !url.includes('instagram.com')) return res.status(400).json({ mensaje: 'URL de Instagram no válida' });
 
-        let imagenUrl = imgManual || '';
-        let descripcion = descManual || '';
-        if (!imagenUrl) {
-            const scraped = await scrapeInstagram(url);
-            imagenUrl = scraped.imagenUrl;
-            if (!descripcion) descripcion = scraped.descripcion;
-        }
+        const { imagenUrl, descripcion } = await scrapeInstagram(url);
 
-        const post = new PostInstagram({ url: url.trim(), orden: orden || 0, imagenUrl, descripcion, likes: likes || 0, comentarios: comentarios || 0 });
+        const post = new PostInstagram({ url: url.trim(), imagenUrl, descripcion });
         await post.save();
+        await aplicarLimiteRetencion();
         res.status(201).json(post);
     } catch (err) {
         if (err.code === 11000) return res.status(400).json({ mensaje: 'Esta URL ya está añadida' });
@@ -170,115 +173,13 @@ router.post('/', auth, async (req, res) => {
     }
 });
 
-// PUT /:id — actualizar campos manualmente (solo admin)
-router.put('/:id', auth, async (req, res) => {
-    if (!req.user.userTypes.includes('Admin')) return res.status(403).json({ mensaje: 'Acceso denegado' });
-    try {
-        const { imagenUrl, descripcion, likes, comentarios, orden } = req.body;
-        const post = await PostInstagram.findByIdAndUpdate(req.params.id, { imagenUrl, descripcion, likes, comentarios, orden }, { new: true });
-        if (!post) return res.status(404).json({ mensaje: 'Post no encontrado' });
-        res.json(post);
-    } catch (err) {
-        res.status(500).json({ mensaje: 'Error al actualizar el post' });
-    }
-});
-
 // DELETE /:id — eliminar post (solo admin)
 router.delete('/:id', auth, async (req, res) => {
     if (!req.user.userTypes.includes('Admin')) return res.status(403).json({ mensaje: 'Acceso denegado' });
     try {
         const post = await PostInstagram.findByIdAndDelete(req.params.id);
         if (!post) return res.status(404).json({ mensaje: 'Post no encontrado' });
-        res.json({ mensaje: 'Post eliminado' });
-    } catch (err) {
-        res.status(500).json({ mensaje: 'Error al eliminar el post' });
-    }
-});
-
-module.exports = router;
-
-
-// GET /fetch-metadata?url=... — obtener metadatos de Instagram (solo admin)
-router.get('/fetch-metadata', auth, async (req, res) => {
-    if (!req.user.userTypes.includes('Admin')) {
-        return res.status(403).json({ mensaje: 'Acceso denegado' });
-    }
-    const { url } = req.query;
-    if (!url || !url.includes('instagram.com')) {
-        return res.status(400).json({ mensaje: 'URL de Instagram no válida' });
-    }
-    try {
-        const response = await axios.get(url, {
-            headers: {
-                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-                'Accept-Language': 'es-ES,es;q=0.9',
-                'Accept': 'text/html,application/xhtml+xml',
-            },
-            timeout: 8000,
-        });
-        const html = response.data;
-
-        const getOG = (property) => {
-            const match = html.match(new RegExp(`<meta[^>]+property=["']${property}["'][^>]+content=["']([^"']+)["']`, 'i'))
-                || html.match(new RegExp(`<meta[^>]+content=["']([^"']+)["'][^>]+property=["']${property}["']`, 'i'));
-            return match ? match[1] : '';
-        };
-
-        const imagenUrl = getOG('og:image');
-        const descripcion = getOG('og:description') || getOG('og:title');
-
-        res.json({ imagenUrl, descripcion });
-    } catch (err) {
-        res.status(502).json({ mensaje: 'No se pudieron obtener los datos. Instagram puede bloquear la petición.', detalle: err.message });
-    }
-});
-
-// GET / — obtener todos los posts (público)
-router.get('/', async (req, res) => {
-    try {
-        const posts = await PostInstagram.find().sort({ orden: 1, createdAt: -1 });
-        res.json(posts);
-    } catch (err) {
-        res.status(500).json({ mensaje: 'Error al obtener posts de Instagram' });
-    }
-});
-
-// POST / — añadir URL de post (solo admin)
-router.post('/', auth, async (req, res) => {
-    if (!req.user.userTypes.includes('Admin')) {
-        return res.status(403).json({ mensaje: 'Acceso denegado' });
-    }
-    try {
-        const { url, orden, imagenUrl, descripcion, likes, comentarios } = req.body;
-        if (!url || !url.includes('instagram.com')) {
-            return res.status(400).json({ mensaje: 'URL de Instagram no válida' });
-        }
-        const post = new PostInstagram({
-            url: url.trim(),
-            orden: orden || 0,
-            imagenUrl: imagenUrl || '',
-            descripcion: descripcion || '',
-            likes: likes || 0,
-            comentarios: comentarios || 0,
-        });
-        await post.save();
-        res.status(201).json(post);
-    } catch (err) {
-        if (err.code === 11000) {
-            return res.status(400).json({ mensaje: 'Esta URL ya está añadida' });
-        }
-        res.status(500).json({ mensaje: 'Error al guardar el post' });
-    }
-});
-
-// DELETE /:id — eliminar post (solo admin)
-router.delete('/:id', auth, async (req, res) => {
-    if (!req.user.userTypes.includes('Admin')) {
-        return res.status(403).json({ mensaje: 'Acceso denegado' });
-    }
-    try {
-        const post = await PostInstagram.findByIdAndDelete(req.params.id);
-        if (!post) return res.status(404).json({ mensaje: 'Post no encontrado' });
+        eliminarImagenLocal(post.imagenUrl);
         res.json({ mensaje: 'Post eliminado' });
     } catch (err) {
         res.status(500).json({ mensaje: 'Error al eliminar el post' });

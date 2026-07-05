@@ -1,15 +1,12 @@
 <div class="ig-section">
 
   <div *ngIf="cargando" class="ig-loading">
-    <i class="fas fa-spinner fa-spin"></i> Cargando...
+    <i class="fas fa-spinner fa-spin"></i>
   </div>
 
   <div *ngIf="!cargando && posts.length === 0" class="ig-empty">
     <i class="fab fa-instagram"></i>
     <p>Pronto publicaremos nuestros posts aquí.</p>
-    <a href="https://www.instagram.com/c.e.colivenc" target="_blank" rel="noopener">
-      Ver perfil en Instagram
-    </a>
   </div>
 
   <div class="ig-grid" *ngIf="!cargando && posts.length > 0">
@@ -21,22 +18,19 @@
       class="ig-card">
 
       <div class="ig-card-img-wrap">
-        <img *ngIf="post.imagenUrl" [src]="getImagenUrl(post.imagenUrl)" alt="Instagram" class="ig-card-img" />
+        <img *ngIf="post.imagenUrl" [src]="getImagenUrl(post.imagenUrl)" alt="Instagram" class="ig-card-img" loading="lazy" />
         <div *ngIf="!post.imagenUrl" class="ig-card-img-placeholder">
           <i class="fab fa-instagram"></i>
         </div>
-        <span class="ig-card-badge"><i class="fab fa-instagram"></i></span>
+        <span class="ig-card-overlay">
+          <i class="fab fa-instagram"></i>
+        </span>
       </div>
-
-      <div class="ig-card-body">
-        <p class="ig-card-desc" *ngIf="post.descripcion">{{ post.descripcion }}</p>
-        <div class="ig-card-stats">
-          <span><i class="fas fa-heart"></i> {{ post.likes }}</span>
-          <span><i class="fas fa-comment"></i> {{ post.comentarios }}</span>
-        </div>
-      </div>
-
     </a>
   </div>
+
+  <a *ngIf="!cargando" href="https://www.instagram.com/c.e.colivenc" target="_blank" rel="noopener noreferrer" class="ig-perfil-link">
+    Ver perfil completo <i class="fas fa-arrow-right"></i>
+  </a>
 
 </div>

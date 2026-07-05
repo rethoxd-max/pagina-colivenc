@@ -9,12 +9,6 @@ const PostInstagramSchema = new mongoose.Schema({
     },
     imagenUrl: { type: String, default: '' },
     descripcion: { type: String, default: '' },
-    likes: { type: Number, default: 0 },
-    comentarios: { type: Number, default: 0 },
-    orden: {
-        type: Number,
-        default: 0,
-    },
 }, { timestamps: true });
 
 module.exports = mongoose.model('PostInstagram', PostInstagramSchema);

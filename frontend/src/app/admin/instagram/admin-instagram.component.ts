@@ -14,16 +14,13 @@ import { environment } from '../../../environments/environment';
 export class AdminInstagramComponent implements OnInit {
   posts: PostInstagram[] = [];
   nuevaUrl = '';
-  nuevaImagenUrl = '';
-  nuevaDescripcion = '';
-  nuevosLikes = 0;
-  nuevosComentarios = 0;
   cargando = false;
-  buscando = false;
+  anadiendo = false;
   refrescandoId: string | null = null;
   error = '';
   exito = '';
-  errorBusqueda = '';
+
+  readonly limitePosts = 4;
 
   constructor(private socialMediaService: SocialMediaService) {}
 
@@ -48,25 +45,17 @@ export class AdminInstagramComponent implements OnInit {
       this.error = 'La URL debe ser de una publicación de Instagram (instagram.com/p/... o /reel/...).';
       return;
     }
-    this.socialMediaService.addPost(
-      url,
-      this.posts.length,
-      this.nuevaImagenUrl.trim(),
-      this.nuevaDescripcion.trim(),
-      this.nuevosLikes,
-      this.nuevosComentarios,
-    ).subscribe({
+    this.anadiendo = true;
+    this.socialMediaService.addPost(url).subscribe({
       next: () => {
         this.exito = 'Post añadido correctamente.';
         this.nuevaUrl = '';
-        this.nuevaImagenUrl = '';
-        this.nuevaDescripcion = '';
-        this.nuevosLikes = 0;
-        this.nuevosComentarios = 0;
+        this.anadiendo = false;
         this.cargar();
       },
       error: (e) => {
         this.error = e?.error?.mensaje || 'Error al añadir el post.';
+        this.anadiendo = false;
       },
     });
   }
@@ -93,24 +82,6 @@ export class AdminInstagramComponent implements OnInit {
       error: (e) => {
         this.error = e?.error?.mensaje || 'No se pudieron obtener los datos automáticamente.';
         this.refrescandoId = null;
-      },
-    });
-  }
-
-  obtenerDatos(): void {
-    this.errorBusqueda = '';
-    const url = this.nuevaUrl.trim();
-    if (!url) { this.errorBusqueda = 'Introduce primero la URL del post.'; return; }
-    this.buscando = true;
-    this.socialMediaService.fetchMetadata(url).subscribe({
-      next: (data) => {
-        this.nuevaImagenUrl = data.imagenUrl || '';
-        this.nuevaDescripcion = data.descripcion || '';
-        this.buscando = false;
-      },
-      error: (e) => {
-        this.errorBusqueda = e?.error?.mensaje || 'No se pudieron obtener los datos automáticamente.';
-        this.buscando = false;
       },
     });
   }

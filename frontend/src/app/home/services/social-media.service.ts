@@ -10,9 +10,6 @@ export interface PostInstagram {
   url: string;
   imagenUrl: string;
   descripcion: string;
-  likes: number;
-  comentarios: number;
-  orden: number;
   createdAt: string;
 }
 
@@ -22,21 +19,13 @@ export class SocialMediaService {
   private authService = inject(AuthService);
   private apiUrl = `${environment.apiUrl}/instagram`;
 
-  fetchMetadata(url: string): Observable<{ imagenUrl: string; descripcion: string }> {
-    const headers = new HttpHeaders().set('x-auth-token', this.authService.getToken() || '');
-    return this.http.get<{ imagenUrl: string; descripcion: string }>(
-      `${this.apiUrl}/fetch-metadata`,
-      { headers, params: { url } }
-    );
-  }
-
   getPosts(): Observable<PostInstagram[]> {
     return this.http.get<PostInstagram[]>(this.apiUrl);
   }
 
-  addPost(url: string, orden: number = 0, imagenUrl = '', descripcion = '', likes = 0, comentarios = 0): Observable<PostInstagram> {
+  addPost(url: string): Observable<PostInstagram> {
     const headers = new HttpHeaders().set('x-auth-token', this.authService.getToken() || '');
-    return this.http.post<PostInstagram>(this.apiUrl, { url, orden, imagenUrl, descripcion, likes, comentarios }, { headers });
+    return this.http.post<PostInstagram>(this.apiUrl, { url }, { headers });
   }
 
   refreshPost(id: string): Observable<PostInstagram> {
