@@ -62,7 +62,7 @@ const allowedOrigins = process.env.NODE_ENV === 'production'
 
 const corsOptions = {
   origin: allowedOrigins.filter(Boolean),
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'x-auth-token', 'Authorization'],
   exposedHeaders: ['Content-Type', 'x-auth-token'],
   credentials: true,
