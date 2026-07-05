@@ -35,6 +35,7 @@ import { AdminUsuariosComponent } from './admin/admin-usuarios/admin-usuarios.co
 import { CalculadoraCombinadasComponent } from './calculadora-combinadas/calculadora-combinadas.component';
 import { AdminDisciplinasComponent } from './admin/disciplinas/admin-disciplinas.component';
 import { AdminInstagramComponent } from './admin/instagram/admin-instagram.component';
+import { AdminHorariosEscuelaComponent } from './admin/horarios-escuela/admin-horarios-escuela.component';
 
 
 export const routes: Routes = [
@@ -123,6 +124,7 @@ export const routes: Routes = [
     { path: 'admin/usuarios', component: AdminUsuariosComponent, canActivate: [AuthGuard, adminGuard] },
     { path: 'admin/disciplinas', component: AdminDisciplinasComponent, canActivate: [AuthGuard, adminGuard] },
     { path: 'admin/instagram', component: AdminInstagramComponent, canActivate: [AuthGuard, editorGuard] },
+    { path: 'admin/horarios-escuela', component: AdminHorariosEscuelaComponent, canActivate: [AuthGuard, editorGuard] },
     
     // Ruta por defecto
     { path: '', redirectTo: '/home', pathMatch: 'full' },

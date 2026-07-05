@@ -1,0 +1,95 @@
+<div class="he-container">
+  <div class="he-header">
+    <i class="fas fa-clock"></i>
+    <div>
+      <h2>Horarios de Entrenamiento</h2>
+      <p class="he-subtitle">Gestiona las secciones y tarjetas que se muestran en la página de inicio.</p>
+    </div>
+  </div>
+
+  <div class="he-card">
+    <h3>{{ editandoId ? 'Editar horario' : 'Añadir horario' }}</h3>
+
+    <form class="he-form" (ngSubmit)="guardar()">
+      <div class="he-field-row">
+        <div class="he-field">
+          <label>Sección *</label>
+          <input type="text" class="he-input" name="seccion" [(ngModel)]="form.seccion"
+            placeholder="Ej. Atletismo, Orientación..." list="secciones-existentes" [disabled]="guardando" />
+          <datalist id="secciones-existentes">
+            <option *ngFor="let s of seccionesExistentes" [value]="s"></option>
+          </datalist>
+        </div>
+        <div class="he-field">
+          <label>Categoría / Grupo *</label>
+          <input type="text" class="he-input" name="categoria" [(ngModel)]="form.categoria"
+            placeholder="Ej. Benjamín (2016-2017)" [disabled]="guardando" />
+        </div>
+      </div>
+
+      <div class="he-field">
+        <label>Horario *</label>
+        <input type="text" class="he-input" name="horario" [(ngModel)]="form.horario"
+          placeholder="Ej. 16:00 - 17:00" [disabled]="guardando" />
+      </div>
+
+      <div class="he-field">
+        <label>Días de entrenamiento *</label>
+        <div class="he-dias-selector">
+          <button type="button" class="he-dia-btn" *ngFor="let dia of diasSemana"
+            [class.active]="form.dias.includes(dia)" (click)="toggleDia(dia)" [disabled]="guardando">
+            {{ dia }}
+          </button>
+        </div>
+      </div>
+
+      <div class="he-form-actions">
+        <button type="submit" class="he-btn-guardar" [disabled]="guardando">
+          <i class="fas" [class.fa-check]="!guardando" [class.fa-spinner]="guardando" [class.fa-spin]="guardando"></i>
+          {{ guardando ? 'Guardando…' : (editandoId ? 'Guardar cambios' : 'Añadir horario') }}
+        </button>
+        <button type="button" class="he-btn-cancelar" *ngIf="editandoId" (click)="cancelarEdicion()" [disabled]="guardando">
+          Cancelar
+        </button>
+      </div>
+    </form>
+
+    <p class="he-msg he-msg-error" *ngIf="error"><i class="fas fa-circle-exclamation"></i> {{ error }}</p>
+    <p class="he-msg he-msg-exito" *ngIf="exito"><i class="fas fa-circle-check"></i> {{ exito }}</p>
+  </div>
+
+  <div class="he-card">
+    <h3>Horarios publicados</h3>
+
+    <div *ngIf="cargando" class="he-loading">
+      <i class="fas fa-spinner fa-spin"></i> Cargando...
+    </div>
+
+    <div *ngIf="!cargando && secciones.length === 0" class="he-empty">
+      No hay horarios publicados todavía.
+    </div>
+
+    <div *ngFor="let seccion of secciones" class="he-seccion">
+      <h4 class="he-seccion-titulo">{{ seccion.nombre }}</h4>
+      <div class="he-lista">
+        <div class="he-item" *ngFor="let horario of seccion.horarios" [class.he-item-editando]="editandoId === horario._id">
+          <div class="he-item-info">
+            <span class="he-item-categoria">{{ horario.categoria }}</span>
+            <span class="he-item-horario"><i class="far fa-clock"></i> {{ horario.horario }}</span>
+            <span class="he-item-dias">
+              <span class="he-dia-chip" *ngFor="let dia of horario.dias">{{ dia }}</span>
+            </span>
+          </div>
+          <div class="he-item-actions">
+            <button class="he-btn-icon he-btn-edit" (click)="editar(horario)" title="Editar">
+              <i class="fas fa-edit"></i>
+            </button>
+            <button class="he-btn-icon he-btn-del" (click)="eliminar(horario._id)" title="Eliminar">
+              <i class="fas fa-trash"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

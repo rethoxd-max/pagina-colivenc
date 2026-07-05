@@ -1,10 +1,10 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { HorariosEscuelaService, HorarioEscuela } from '../../services/horarios-escuela.service';
 
-interface Horario {
-  categoria: string;
-  horario: string;
-  dias: string[];
+interface SeccionHorarios {
+  nombre: string;
+  horarios: HorarioEscuela[];
 }
 
 @Component({
@@ -15,83 +15,32 @@ interface Horario {
   styleUrls: ['./horarios-escuela.component.css']
 })
 export class HorariosEscuelaComponent implements OnInit {
-  horarios: Horario[] = [];
-  temporadaActual: string = '';
+  secciones: SeccionHorarios[] = [];
+  cargando = true;
 
-  constructor() { }
+  constructor(private horariosService: HorariosEscuelaService) { }
 
   ngOnInit(): void {
-    this.calcularTemporada();
-    this.generarHorarios();
+    this.cargar();
   }
 
-  private calcularTemporada(): void {
-    const hoy = new Date();
-    const año = hoy.getFullYear();
-    const mes = hoy.getMonth(); // 0-11 (enero=0, agosto=7)
-    const dia = hoy.getDate();
-    
-    const AGOSTO = 7; // En JavaScript los meses van de 0 a 11
-    const DIA_CAMBIO_TEMPORADA = 20;
-    
-    // La temporada cambia el 20 de agosto
-    // Si estamos antes del 20 de agosto, estamos en la temporada del año actual
-    // Si estamos después del 20 de agosto, estamos en la temporada del año siguiente
-    let añoTemporada: number;
-    if (mes < AGOSTO || (mes === AGOSTO && dia < DIA_CAMBIO_TEMPORADA)) {
-      // Antes del 20 de agosto: temporada del año actual
-      añoTemporada = año;
-    } else {
-      // Después del 20 de agosto: temporada del año siguiente
-      añoTemporada = año + 1;
-    }
-    
-    
+  cargar(): void {
+    this.cargando = true;
+    this.horariosService.getHorarios().subscribe({
+      next: (data) => {
+        this.secciones = this.agruparPorSeccion(data);
+        this.cargando = false;
+      },
+      error: () => { this.cargando = false; }
+    });
   }
 
-  private getAñoNacimientoCategoria(edadMinima: number, edadMaxima: number): string {
-    const hoy = new Date();
-    const año = hoy.getFullYear();
-    const mes = hoy.getMonth();
-    const dia = hoy.getDate();
-    
-    // Calcular el año de referencia para la temporada
-    let añoTemporada: number;
-    if (mes < 7 || (mes === 7 && dia < 20)) {
-      añoTemporada = año;
-    } else {
-      añoTemporada = año + 1;
-    }
-    
-    // Los años de nacimiento se calculan restando la edad del año de la temporada
-    const añoNacimientoMayor = añoTemporada - edadMaxima;
-    const añoNacimientoMenor = añoTemporada - edadMinima;
-    
-    return `${añoNacimientoMayor}-${añoNacimientoMenor}`;
+  private agruparPorSeccion(horarios: HorarioEscuela[]): SeccionHorarios[] {
+    const mapa = new Map<string, HorarioEscuela[]>();
+    horarios.forEach(h => {
+      if (!mapa.has(h.seccion)) mapa.set(h.seccion, []);
+      mapa.get(h.seccion)!.push(h);
+    });
+    return Array.from(mapa.entries()).map(([nombre, horarios]) => ({ nombre, horarios }));
   }
-
-  private generarHorarios(): void {
-    this.horarios = [
-      {
-        categoria: `Benjamín (${this.getAñoNacimientoCategoria(8, 9)})`,
-        horario: '16:00 - 17:00',
-        dias: ['Lunes', 'Miércoles']
-      },
-      {
-        categoria: `Alevín (${this.getAñoNacimientoCategoria(10, 11)})`,
-        horario: '17:00 - 18:00',
-        dias: ['Lunes', 'Jueves', 'Viernes']
-      },
-      {
-        categoria: `Infantil (${this.getAñoNacimientoCategoria(12, 13)})`,
-        horario: '17:00 - 18:15',
-        dias: ['Lunes', 'Miércoles', 'Jueves']
-      },
-      {
-        categoria: `Cadete (${this.getAñoNacimientoCategoria(14, 15)})`,
-        horario: '17:00 - 18:30',
-        dias: ['Martes', 'Jueves', 'Viernes']
-      }
-    ];
-  }
-} 
+}

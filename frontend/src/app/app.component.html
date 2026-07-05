@@ -180,6 +180,13 @@
               <i class="fas fa-chevron-right nav-arrow"></i>
             </a>
           </li>
+          <li class="nav-item" *ngIf="isAdmin() || isEditor()">
+            <a class="nav-link admin-link" routerLink="/admin/horarios-escuela" routerLinkActive="active" data-bs-dismiss="offcanvas">
+              <div class="nav-icon"><i class="fas fa-clock"></i></div>
+              <span>Horarios de Entrenamiento</span>
+              <i class="fas fa-chevron-right nav-arrow"></i>
+            </a>
+          </li>
         </ul>
       </div>
     </nav>

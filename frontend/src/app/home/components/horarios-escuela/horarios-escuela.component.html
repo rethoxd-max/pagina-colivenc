@@ -1,32 +1,45 @@
 <div class="horarios-wrapper">
-    <div class="horarios-grid">
-        <div class="horario-card" *ngFor="let horario of horarios; let i = index" 
-             [style.--delay]="i * 0.1 + 's'">
-            <div class="card-accent"></div>
-            <div class="card-content">
-                <div class="categoria-header">
-                    <div class="categoria-icon">
-                        <i class="fas fa-running"></i>
-                    </div>
-                    <h3>{{horario.categoria}}</h3>
-                </div>
-                
-                <div class="horario-info">
-                    <div class="info-item">
-                        <i class="fas fa-clock"></i>
-                        <span>{{horario.horario}}</span>
-                    </div>
-                </div>
 
-                <div class="dias-section">
-                    <span class="dias-label">Días de entrenamiento</span>
-                    <div class="dias-lista">
-                        <span class="dia-chip" *ngFor="let dia of horario.dias">
-                            {{dia}}
-                        </span>
+    <div *ngIf="cargando" class="horarios-loading">
+        <i class="fas fa-spinner fa-spin"></i>
+    </div>
+
+    <div *ngIf="!cargando && secciones.length === 0" class="horarios-empty">
+        <i class="fas fa-calendar-times"></i>
+        <p>Todavía no hay horarios publicados.</p>
+    </div>
+
+    <div *ngFor="let seccion of secciones" class="seccion-horarios">
+        <h3 class="seccion-titulo">{{ seccion.nombre }}</h3>
+        <div class="horarios-grid">
+            <div class="horario-card" *ngFor="let horario of seccion.horarios; let i = index"
+                 [style.--delay]="i * 0.1 + 's'">
+                <div class="card-accent"></div>
+                <div class="card-content">
+                    <div class="categoria-header">
+                        <div class="categoria-icon">
+                            <i class="fas fa-running"></i>
+                        </div>
+                        <h3>{{horario.categoria}}</h3>
+                    </div>
+
+                    <div class="horario-info">
+                        <div class="info-item">
+                            <i class="fas fa-clock"></i>
+                            <span>{{horario.horario}}</span>
+                        </div>
+                    </div>
+
+                    <div class="dias-section">
+                        <span class="dias-label">Días de entrenamiento</span>
+                        <div class="dias-lista">
+                            <span class="dia-chip" *ngFor="let dia of horario.dias">
+                                {{dia}}
+                            </span>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-</div> 
+</div>
