@@ -1,15 +1,4 @@
 <section class="ranking-page">
-  <div class="ranking-header">
-    <span class="ranking-badge">
-      <i class="fas fa-trophy"></i>
-      Ranking del Club
-    </span>
-    <h1 class="ranking-title">Marcas y Rankings</h1>
-    <p class="ranking-subtitle">
-      Consulta las marcas y rankings de los atletas del club, actualizados en tiempo real.
-    </p>
-  </div>
-
   <div class="ranking-embed-wrap">
     <div class="ranking-loading" *ngIf="cargando">
       <i class="fas fa-spinner fa-spin"></i>
@@ -22,9 +11,4 @@
       loading="lazy"
       (load)="onCargado()"></iframe>
   </div>
-
-  <p class="ranking-fuente">
-    Datos proporcionados por
-    <a href="https://mundoatletismo.es" target="_blank" rel="noopener noreferrer">Mundo Atletismo</a>.
-  </p>
 </section>

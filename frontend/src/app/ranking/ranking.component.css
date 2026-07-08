@@ -1,39 +1,7 @@
 .ranking-page {
   max-width: 1400px;
   margin: 0 auto;
-  padding: 2rem 1rem 3rem;
-}
-
-.ranking-header {
-  text-align: center;
-  margin-bottom: 2rem;
-}
-
-.ranking-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  background: linear-gradient(135deg, #eff6ff, #dbeafe);
-  color: #2563eb;
-  font-weight: 600;
-  font-size: 0.85rem;
-  padding: 0.4rem 1rem;
-  border-radius: 20px;
-  margin-bottom: 1rem;
-}
-
-.ranking-title {
-  font-size: 2rem;
-  font-weight: 700;
-  color: #1e293b;
-  margin: 0 0 0.5rem;
-}
-
-.ranking-subtitle {
-  color: #64748b;
-  font-size: 1rem;
-  margin: 0 auto;
-  max-width: 600px;
+  padding: 1.25rem 1rem 2rem;
 }
 
 .ranking-embed-wrap {
@@ -69,33 +37,12 @@
 .ranking-iframe {
   display: block;
   width: 100%;
-  height: 65vh;
+  height: 75vh;
   border: none;
 }
 
-.ranking-fuente {
-  text-align: center;
-  color: #94a3b8;
-  font-size: 0.85rem;
-  margin-top: 1rem;
-}
-
-.ranking-fuente a {
-  color: #2563eb;
-  text-decoration: none;
-  font-weight: 600;
-}
-
-.ranking-fuente a:hover {
-  text-decoration: underline;
-}
-
 @media (max-width: 768px) {
-  .ranking-title {
-    font-size: 1.5rem;
-  }
-
   .ranking-iframe {
-    height: 75vh;
+    height: 80vh;
   }
 }

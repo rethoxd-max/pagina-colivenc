@@ -11,7 +11,8 @@ import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 })
 export class RankingComponent {
   // URL del embed de Mundo Atletismo para el club
-  private readonly embedUrl = 'https://mundoatletismo.es/embed/club/centre-esp-colivenc?nav=0';
+  // nav=1 muestra su cabecera/navegación propia para poder moverse por el resto de su web
+  private readonly embedUrl = 'https://mundoatletismo.es/embed/club/centre-esp-colivenc?nav=1';
   embedUrlSegura: SafeResourceUrl;
   cargando = true;
 
