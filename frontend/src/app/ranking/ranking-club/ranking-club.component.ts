@@ -69,4 +69,11 @@ export class RankingClubComponent implements OnInit {
   medalla(puesto: string): string {
     return puesto === '1' ? 'oro' : puesto === '2' ? 'plata' : puesto === '3' ? 'bronce' : '';
   }
+
+  // Normaliza el nombre de la prueba para mostrarlo (el JSON conserva el original del Excel):
+  // primera letra en mayúscula (si la hay) y el resto en minúsculas.
+  nombreMostrado(nombre: string): string {
+    if (!nombre) return nombre;
+    return nombre.charAt(0).toUpperCase() + nombre.slice(1).toLowerCase();
+  }
 }

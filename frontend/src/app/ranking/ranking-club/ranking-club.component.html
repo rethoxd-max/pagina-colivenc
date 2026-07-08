@@ -26,14 +26,14 @@
               class="rc-prueba-chip"
               [class.active]="i === pruebaIdx"
               (click)="setPrueba(i)">
-        {{ p.prueba }}
+        {{ nombreMostrado(p.prueba) }}
       </button>
     </div>
 
     <!-- Tabla -->
     <div class="rc-tabla-card" *ngIf="pruebaActual as pa">
       <div class="rc-tabla-head">
-        <h3>{{ pa.prueba }}</h3>
+        <h3>{{ nombreMostrado(pa.prueba) }}</h3>
         <span class="rc-count">{{ pa.entradas.length }} marca{{ pa.entradas.length !== 1 ? 's' : '' }}</span>
       </div>
 
