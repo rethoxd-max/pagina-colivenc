@@ -127,17 +127,11 @@ app.use('/uploads', (req, res, next) => {
 const authRoutes = require("./routes/auth");
 const postRoutes = require("./routes/posts");
 const atletaRoutes = require("./routes/ranking/atletas");
-const pruebaRoutes = require("./routes/ranking/pruebas");
-const marcaRoutes = require("./routes/ranking/marcas");
-const rankingRoutes = require("./routes/ranking");
-const sectorRoutes = require("./routes/ranking/sectores");
-const categoriaRoutes = require("./routes/ranking/categorias");
-const PcALRoutes = require("./routes/ranking/pcAl");
 const competicionesRoutes = require("./routes/calendario/competiciones");
 const pruebaCompeticionRoutes = require("./routes/calendario/competiciones/pruebasCompeticiones");
 const categoriaCompeticionRoutes = require("./routes/calendario/competiciones/categoriasCompeticiones");
 const sectorCompeticionRoutes = require("./routes/calendario/competiciones/sectoresCompeticiones");
-const inscripcionesRoutes = require("./routes/calendario/inscripciones");const inscripcionesPublicasRoutes = require('./routes/calendario/inscripciones-publicas');const perfilAtletaRoutes = require("./routes/perfil-atleta");
+const inscripcionesRoutes = require("./routes/calendario/inscripciones");const inscripcionesPublicasRoutes = require('./routes/calendario/inscripciones-publicas');
 
 // Rutas de entrenamiento
 const calendarioEntrenamientoRoutes = require("./routes/entrenamientos/calendariosEntrenamiento");
@@ -166,19 +160,12 @@ app.use("/tienda", tiendaRoutes);
 app.use("/auth", authRoutes);
 app.use("/posts", postRoutes);
 app.use("/atletas", atletaRoutes);
-app.use("/pruebas", pruebaRoutes);
-app.use("/marcas", marcaRoutes);
-app.use("/ranking", rankingRoutes);
-app.use("/sectores", sectorRoutes);
-app.use("/categorias", categoriaRoutes);
-app.use("/PcAL", PcALRoutes);
 app.use("/competiciones", competicionesRoutes);
 app.use("/pruebasCompeticion", pruebaCompeticionRoutes);
 app.use("/categoriasCompeticion", categoriaCompeticionRoutes);
 app.use("/sectoresCompeticion", sectorCompeticionRoutes);
 app.use("/inscripciones", inscripcionesRoutes);
 app.use("/inscripciones-publicas", inscripcionesPublicasRoutes);
-app.use("/perfil-atleta", perfilAtletaRoutes);
 app.use("/calendarios-entrenamiento", calendarioEntrenamientoRoutes);
 app.use("/dias-entrenamiento", diasEntrenamientoRoutes);
 app.use("/entrenamientos", entrenamientosRoutes);

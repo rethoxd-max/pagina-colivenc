@@ -5,7 +5,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { CommonModule } from '@angular/common';
 import { Observable, debounceTime, distinctUntilChanged, map, startWith } from 'rxjs';
-import { PerfilAtletaService, Atleta } from '../../../services/perfil-atleta.service';
+import { AtletaService, Atleta } from '../../services/atleta.service';
 
 @Component({
   selector: 'app-search-atleta',
@@ -26,7 +26,7 @@ export class SearchAtletaComponent implements OnInit {
   filteredAtletas$: Observable<Atleta[]> = new Observable<Atleta[]>();
   todosLosAtletas: Atleta[] = [];
 
-  constructor(private perfilAtletaService: PerfilAtletaService) {}
+  constructor(private atletaService: AtletaService) {}
 
   ngOnInit() {
     // Inicializar el control si no está definido
@@ -35,7 +35,7 @@ export class SearchAtletaComponent implements OnInit {
     }
 
     // Cargar todos los atletas al iniciar
-    this.perfilAtletaService.getAtletas().subscribe(atletas => {
+    this.atletaService.getAtletas().subscribe(atletas => {
       this.todosLosAtletas = atletas;
     });
 
@@ -53,7 +53,7 @@ export class SearchAtletaComponent implements OnInit {
 
   private _filterAtletas(value: string): Atleta[] {
     const filterValue = value.toLowerCase();
-    return this.todosLosAtletas.filter(atleta => 
+    return this.todosLosAtletas.filter(atleta =>
       atleta.nombre.toLowerCase().includes(filterValue)
     );
   }

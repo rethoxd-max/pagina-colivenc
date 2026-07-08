@@ -1,256 +1,30 @@
-<div class="ranking-page">
-    <!-- Header de la página -->
-    <div class="page-header">
-        <div class="header-content">
-            <span class="header-badge">
-                <i class="fas fa-trophy"></i>
-                Estadísticas
-            </span>
-            <h1 class="page-title">Ranking de Marcas</h1>
-            <p class="page-subtitle">Consulta las mejores marcas de nuestros atletas</p>
-        </div>
+<section class="ranking-page">
+  <div class="ranking-header">
+    <span class="ranking-badge">
+      <i class="fas fa-trophy"></i>
+      Ranking del Club
+    </span>
+    <h1 class="ranking-title">Marcas y Rankings</h1>
+    <p class="ranking-subtitle">
+      Consulta las marcas y rankings de los atletas del club, actualizados en tiempo real.
+    </p>
+  </div>
+
+  <div class="ranking-embed-wrap">
+    <div class="ranking-loading" *ngIf="cargando">
+      <i class="fas fa-spinner fa-spin"></i>
+      <span>Cargando datos del club...</span>
     </div>
+    <iframe
+      [src]="embedUrlSegura"
+      title="Ranking del club - Mundo Atletismo"
+      class="ranking-iframe"
+      loading="lazy"
+      (load)="onCargado()"></iframe>
+  </div>
 
-    <!-- Contenido principal - 3 columnas -->
-    <div class="ranking-container">
-        <ng-container *ngIf="isAdmin(); else servicioNoDisponible">
-            <div class="ranking-layout">
-                
-                <!-- Panel de filtros - IZQUIERDA -->
-            <aside class="filters-panel">
-                <div class="panel-header">
-                    <i class="fas fa-sliders-h"></i>
-                    <h3>Filtros</h3>
-                </div>
-                
-                <div class="filters-grid">
-                    <!-- Género -->
-                    <div class="filter-group">
-                        <label for="genero">
-                            <i class="fas fa-venus-mars"></i>
-                            Género
-                        </label>
-                        <select id="genero" [(ngModel)]="generoSeleccionado" (ngModelChange)="onGeneroSelected()">
-                            <option *ngFor="let opcion of opcionesGenero" [ngValue]="opcion.valor">{{ opcion.texto }}</option>
-                        </select>
-                    </div>
-
-                    <!-- Categoría (primer filtro principal) -->
-                    <div class="filter-group">
-                        <label for="categorias">
-                            <i class="fas fa-users"></i>
-                            Categoría
-                        </label>
-                        <select id="categorias" [(ngModel)]="categoriaSeleccionada" (ngModelChange)="onCategoriaSelected()">
-                            <option [ngValue]="null" disabled>Selecciona una categoría</option>
-                            <option *ngFor="let categoria of categorias" [ngValue]="categoria">{{ categoria.nombre_categoria }}</option>
-                        </select>
-                    </div>
-
-                    <!-- Sector (aparece después de seleccionar categoría) -->
-                    <div *ngIf="categoriaSeleccionada && sectores.length > 0" class="filter-group">
-                        <label for="sectores">
-                            <i class="fas fa-layer-group"></i>
-                            Sector
-                        </label>
-                        <select id="sectores" [(ngModel)]="sectorSeleccionado" (ngModelChange)="onSectorSelected()">
-                            <option [ngValue]="null" disabled>Selecciona un sector</option>
-                            <option *ngFor="let sector of sectores" [ngValue]="sector">{{ sector.nombre_sector }}</option>
-                        </select>
-                    </div>
-
-                    <!-- Prueba (aparece después de seleccionar sector) -->
-                    <div *ngIf="sectorSeleccionado && pruebas.length > 0" class="filter-group">
-                        <label for="pruebas">
-                            <i class="fas fa-running"></i>
-                            Prueba
-                        </label>
-                        <select id="pruebas" [(ngModel)]="pruebaSeleccionada" (ngModelChange)="onPruebaSelected()">
-                            <option [ngValue]="null" disabled>Selecciona una prueba</option>
-                            <option *ngFor="let prueba of pruebas" [ngValue]="prueba">{{ prueba.nombre_prueba }}</option>
-                        </select>
-                    </div>
-
-                    <!-- Mostrar marcas -->
-                    <div *ngIf="pruebaSeleccionada" class="filter-group">
-                        <label for="mostrar-marcas">
-                            <i class="fas fa-list-ol"></i>
-                            Mostrar
-                        </label>
-                        <select id="mostrar-marcas" [(ngModel)]="mostrarSoloMejorMarca" (ngModelChange)="onMostrarMarcasSelected()">
-                            <option *ngFor="let opcion of opcionesMostrarMarcas" [ngValue]="opcion.valor">{{ opcion.texto }}</option>
-                        </select>
-                    </div>
-
-                    <!-- Viento -->
-                    <div *ngIf="pruebaSeleccionada && requiereMedicionViento" class="filter-group">
-                        <label for="viento">
-                            <i class="fas fa-wind"></i>
-                            Viento
-                        </label>
-                        <select id="viento" [(ngModel)]="vientoValido" (ngModelChange)="onVientoSelected()">
-                            <option *ngFor="let opcion of opcionesViento" [ngValue]="opcion.valor">{{ opcion.texto }}</option>
-                        </select>
-                    </div>
-
-                    <!-- Año de temporada -->
-                    <div *ngIf="pruebaSeleccionada" class="filter-group">
-                        <label for="anyoTemporada">
-                            <i class="fas fa-calendar"></i>
-                            Año
-                        </label>
-                        <select id="anyoTemporada" [(ngModel)]="anyoTemporadaSeleccionado" (ngModelChange)="onAnyoTemporadaSelected()">
-                            <option [ngValue]="null">Todos los años</option>
-                            <option *ngFor="let anyo of anyosTemporada" [ngValue]="anyo">{{ anyo }}</option>
-                        </select>
-                    </div>
-
-                    <!-- PC/AL -->
-                    <div *ngIf="pruebaSeleccionada" class="filter-group">
-                        <label for="PcAL">
-                            <i class="fas fa-running"></i>
-                            PC/AL
-                        </label>
-                        <select id="PcAL" [(ngModel)]="PcALSeleccionado" (ngModelChange)="onPcALSelected()">
-                            <option [ngValue]="ambas">{{ambas.PcAL}}</option>
-                            <option *ngFor="let pcal of PcAL" [ngValue]="pcal">{{ pcal.PcAL }}</option>
-                        </select>
-                    </div>
-                </div>
-            </aside>
-
-            <!-- Contenido principal del ranking - CENTRO -->
-            <main class="results-panel">
-                <!-- Tabla de resultados -->
-                <div *ngIf="pruebaSeleccionada && categoriaSeleccionada && PcALSeleccionado && marcas.length > 0" class="results-section">
-                    <div class="results-header">
-                        <h4>
-                            <i class="fas fa-medal"></i>
-                            {{ pruebaSeleccionada.nombre_prueba }}
-                        </h4>
-                        <span class="results-count">{{ marcas.length }} marcas encontradas</span>
-                    </div>
-                    
-                    <div class="table-container">
-                        <table class="results-table">
-                            <thead>
-                                <tr>
-                                    <th class="col-rank">#</th>
-                                    <th *ngIf="mostrarAtleta" class="col-athlete">Atleta</th>
-                                    <th class="col-year">Año Nac.</th>
-                                    <th *ngIf="mostrarTiempo" class="col-time">Tiempo</th>
-                                    <th *ngIf="mostrarMetros" class="col-distance">Metros</th>
-                                    <th *ngIf="mostrarPuntos" class="col-points">Puntos</th>
-                                    <th *ngIf="mostrarViento" class="col-wind">Viento</th>
-                                    <th *ngIf="mostrarLugar" class="col-place">Lugar</th>
-                                    <th *ngIf="mostrarComentario" class="col-comment">Detalle</th>
-                                    <th *ngIf="mostrarFecha" class="col-date">Fecha</th>
-                                    <th *ngIf="isAdmin()" class="col-actions">Acciones</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr *ngFor="let marca of marcas; let i = index" [class.podium]="i < 3">
-                                    <td class="col-rank">
-                                        <span class="rank-badge" [class.gold]="i === 0" [class.silver]="i === 1" [class.bronze]="i === 2">
-                                            {{ i + 1 }}
-                                        </span>
-                                    </td>
-                                    <td *ngIf="mostrarAtleta" class="col-athlete">
-                                        <a [routerLink]="['/perfil-atleta', marca.nombre_atleta.slug || marca.nombre_atleta._id]" class="athlete-link">
-                                            <i class="fas fa-user-circle"></i>
-                                            {{ marca.nombre_atleta.nombre }}
-                                        </a>
-                                    </td>
-                                    <td class="col-year">
-                                        <span class="year-badge">{{ getAnyoNacimiento(marca.nombre_atleta.fecha_nacimiento) }}</span>
-                                    </td>
-                                    <td *ngIf="mostrarTiempo" class="col-time">
-                                        <span class="mark-value">{{ formatearTiempo(marca.horas, marca.minutos, marca.segundos) }}</span>
-                                    </td>
-                                    <td *ngIf="mostrarMetros" class="col-distance">
-                                        <span class="mark-value">{{ marca.metros }}</span>
-                                    </td>
-                                    <td *ngIf="mostrarPuntos" class="col-points">
-                                        <span class="mark-value">{{ marca.puntos }}</span>
-                                    </td>
-                                    <td *ngIf="mostrarViento" class="col-wind" [class.wind-illegal]="marca.viento > 2.0">
-                                        {{ marca.viento != null ? (marca.viento | number:'1.1-1') + ' m/s' : '-' }}
-                                    </td>
-                                    <td *ngIf="mostrarLugar" class="col-place">{{ marca.lugar }}</td>
-                                    <td *ngIf="mostrarComentario" class="col-comment">
-                                        <button class="btn-detail" (click)="openDecathlonModal(marca.comentario); $event.preventDefault();">
-                                            <i class="fas fa-eye"></i>
-                                            Ver
-                                        </button>
-                                    </td>
-                                    <td *ngIf="mostrarFecha" class="col-date">{{ marca.fecha_realizacion }}</td>
-                                    <td *ngIf="isAdmin()" class="col-actions">
-                                        <button (click)="deleteMarca(marca._id)" class="btn-delete-mark">
-                                            <i class="fas fa-trash"></i>
-                                        </button>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-
-                <!-- Estado sin resultados -->
-                <div *ngIf="pruebaSeleccionada && categoriaSeleccionada && PcALSeleccionado && marcas.length === 0" class="empty-state">
-                    <div class="empty-icon">
-                        <i class="fas fa-search"></i>
-                    </div>
-                    <h3>No hay marcas disponibles</h3>
-                    <p>No se encontraron marcas para los filtros seleccionados</p>
-                </div>
-
-                <!-- Estado inicial -->
-                <div *ngIf="!pruebaSeleccionada || !categoriaSeleccionada || !PcALSeleccionado" class="initial-state">
-                    <div class="initial-icon">
-                        <i class="fas fa-filter"></i>
-                    </div>
-                    <h3>Selecciona los filtros</h3>
-                    <p>Utiliza los filtros de la izquierda para buscar marcas específicas</p>
-                </div>
-            </main>
-
-            <!-- Buscador de atletas - DERECHA -->
-            <aside class="search-panel">
-                <div class="search-card">
-                    <div class="search-header">
-                        <i class="fas fa-search"></i>
-                        <h4>Buscar Atleta</h4>
-                    </div>
-                    <div class="search-content">
-                        <app-search-atleta 
-                            [nombreAtletaControl]="nombreAtletaControl"
-                            (atletaSeleccionado)="onAtletaSelected($event)">
-                        </app-search-atleta>
-                        <button class="btn-search" (click)="irAlPerfilAtleta()" [disabled]="!atletaSeleccionadoId">
-                            <i class="fas fa-user"></i>
-                            Ver perfil
-                        </button>
-                    </div>
-                    <div class="search-tip">
-                        <i class="fas fa-info-circle"></i>
-                        <span>Busca un atleta para ver su perfil completo con todas sus marcas</span>
-                    </div>
-                </div>
-            </aside>
-        </div>
-    </ng-container>
-
-    <ng-template #servicioNoDisponible>
-        <div class="empty-state service-down-message">
-            <div class="empty-icon service-down-icon">
-                <i class="fas fa-tools"></i>
-            </div>
-            <h2>Actualizando resultados</h2>
-            <p>Estamos realizando tareas de mantenimiento. El ranking no está disponible en este momento.</p>
-            <div class="maintenance-badge" style="margin-top: 1.5rem; display: inline-flex; align-items: center; gap: 0.5rem; background: rgba(255, 152, 0, 0.1); color: #e65100; padding: 0.6rem 1.2rem; border-radius: 20px; font-weight: 500; font-size: 0.9rem;">
-                <i class="fas fa-cog fa-spin"></i>
-                <span>Vuelve a intentarlo más tarde</span>
-            </div>
-        </div>
-    </ng-template>
-</div>
+  <p class="ranking-fuente">
+    Datos proporcionados por
+    <a href="https://mundoatletismo.es" target="_blank" rel="noopener noreferrer">Mundo Atletismo</a>.
+  </p>
+</section>

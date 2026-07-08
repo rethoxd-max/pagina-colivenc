@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { EntrenamientosService, GrupoEntrenamiento } from '../../services/entrenamientos.service';
-import { PerfilAtletaService, Atleta } from '../../../ranking/services/perfil-atleta.service';
+import { AtletaService, Atleta } from '../../../services/atleta.service';
 import { ActivatedRoute, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { MatIconModule } from '@angular/material/icon';
@@ -22,7 +22,7 @@ export class EditarGrupoComponent implements OnInit {
 
   constructor(
     private entrenamientosService: EntrenamientosService,
-    private perfilAtletaService: PerfilAtletaService,
+    private atletaService: AtletaService,
     private route: ActivatedRoute,
     private router: Router
   ) { }
@@ -44,7 +44,7 @@ export class EditarGrupoComponent implements OnInit {
   }
 
   cargarAtletasDisponibles() {
-    this.perfilAtletaService.getAtletas().subscribe({
+    this.atletaService.getAtletas().subscribe({
       next: (atletas: Atleta[]) => {
         this.atletasDisponibles = atletas.filter(atleta => 
           !this.atletas.some(a => a._id === atleta._id)
@@ -56,7 +56,7 @@ export class EditarGrupoComponent implements OnInit {
 
   buscarAtletas() {
     if (this.searchTerm.trim()) {
-      this.perfilAtletaService.getAtletas().subscribe({
+      this.atletaService.getAtletas().subscribe({
         next: (atletas: Atleta[]) => {
           this.atletasDisponibles = atletas
             .filter(atleta => atleta.nombre.toLowerCase().includes(this.searchTerm.toLowerCase()))

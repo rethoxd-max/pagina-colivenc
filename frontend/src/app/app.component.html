@@ -50,10 +50,6 @@
         <i class="fas fa-running"></i>
         <span class="action-text">Entrenamientos</span>
       </button>
-      <button *ngIf="isLoggedIn && atletaSlug" class="btn-action" [routerLink]="['/perfil-atleta', atletaSlug]" title="Mi Perfil">
-        <i class="fas fa-user"></i>
-        <span class="action-text">Perfil</span>
-      </button>
       <button *ngIf="isLoggedIn" class="btn-action" [routerLink]="['/cambiar-password']" title="Cambiar Contraseña">
         <i class="fas fa-key"></i>
         <span class="action-text">Contraseña</span>
@@ -138,13 +134,6 @@
       <div class="nav-section" *ngIf="isAdmin() || isEditor()">
         <span class="nav-section-title">Administración</span>
         <ul class="nav-list">
-          <li class="nav-item" *ngIf="isAdmin()">
-            <a class="nav-link admin-link" routerLink="/ranking/create-performance" routerLinkActive="active" data-bs-dismiss="offcanvas">
-              <div class="nav-icon"><i class="fas fa-chart-line"></i></div>
-              <span>Gestionar Ranking</span>
-              <i class="fas fa-chevron-right nav-arrow"></i>
-            </a>
-          </li>
           <li class="nav-item" *ngIf="isAdmin()">
             <a class="nav-link admin-link" routerLink="/datos-competiciones" routerLinkActive="active" data-bs-dismiss="offcanvas">
               <div class="nav-icon"><i class="fas fa-cog"></i></div>

@@ -2,7 +2,7 @@ import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { CompeticionService, Competicion, PruebaCompeticion } from '../../../calendario/services/competicion.service';
-import { PerfilAtletaService, Atleta } from '../../../ranking/services/perfil-atleta.service';
+import { AtletaService, Atleta } from '../../../services/atleta.service';
 import { DisciplinaFilterService } from '../../../services/disciplina-filter.service';
 import { Subscription } from 'rxjs';
 
@@ -33,7 +33,7 @@ export class CalendarioLateralComponent implements OnInit, OnDestroy {
 
   constructor(
     private competicionService: CompeticionService,
-    private perfilAtletaService: PerfilAtletaService,
+    private atletaService: AtletaService,
     private disciplinaFilterService: DisciplinaFilterService
   ) {}
 
@@ -70,7 +70,7 @@ export class CalendarioLateralComponent implements OnInit, OnDestroy {
   }
 
   loadAtletas(): void {
-    this.perfilAtletaService.getAtletas().subscribe(
+    this.atletaService.getAtletas().subscribe(
       (data: Atleta[]) => {
         this.atletas = data;
         this.checkCumpleaneros();

@@ -1,7 +1,6 @@
 const express = require('express');
 const router = express.Router();
 const Atleta = require('../../models/ranking/Atleta');
-const Marca = require('../../models/ranking/Marca');
 const User = require('../../models/User');
 const { generarSlugUnico } = require('../../utils/slugUtils');
 const mongoose = require('mongoose');
@@ -177,7 +176,6 @@ router.post('/fusionar-duplicados', auth, (req, res, next) => {
     const atletas = await Atleta.find().sort({ _id: 1 });
     const atletasPorNombre = {};
     let atletasBorrados = 0;
-    let marcasActualizadas = 0;
 
     for (const atleta of atletas) {
       const nombreKey = atleta.nombre.toLowerCase().trim();
@@ -193,13 +191,6 @@ router.post('/fusionar-duplicados', auth, (req, res, next) => {
           await atletaPrincipal.save();
         }
 
-        // Mover todas las marcas del duplicado al atleta principal
-        const result = await Marca.updateMany(
-          { nombre_atleta: atleta._id },
-          { $set: { nombre_atleta: atletaPrincipal._id } }
-        );
-        marcasActualizadas += result.modifiedCount;
-
         // Borrar el atleta duplicado
         await Atleta.findByIdAndDelete(atleta._id);
         atletasBorrados++;
@@ -208,8 +199,7 @@ router.post('/fusionar-duplicados', auth, (req, res, next) => {
 
     res.json({
       message: 'Fusión completada con éxito',
-      atletasBorrados,
-      marcasActualizadas
+      atletasBorrados
     });
   } catch (err) {
     res.status(500).json({ message: err.message });
@@ -223,9 +213,8 @@ router.delete('/', auth, (req, res, next) => {
   next();
 }, async (req, res) => {
   try {
-    await Marca.deleteMany({});
     await Atleta.deleteMany({});
-    res.json({ message: 'Todos los atletas y sus marcas eliminados' });
+    res.json({ message: 'Todos los atletas eliminados' });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
@@ -247,10 +236,8 @@ router.delete('/:identificador', auth, async (req, res) => {
       return res.status(404).json({ message: 'Atleta no encontrado' });
     }
     
-    // Borrar todas las marcas del atleta antes de borrarlo
-    await Marca.deleteMany({ nombre_atleta: atleta._id });
     await Atleta.deleteOne({ _id: atleta._id });
-    res.json({ message: 'Atleta y sus marcas eliminados' });
+    res.json({ message: 'Atleta eliminado' });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }

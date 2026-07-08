@@ -2,7 +2,7 @@ import { Component, OnInit, OnDestroy } from '@angular/core';
 import { Router, RouterLink, RouterModule, NavigationEnd } from '@angular/router';
 import { AuthService } from './auth/services/auth.service';
 import { CommonModule, NgIf } from '@angular/common';
-import { PerfilAtletaService } from './ranking/services/perfil-atleta.service';
+import { AtletaService } from './services/atleta.service';
 import { Subscription, filter } from 'rxjs';
 import { DisciplinaService, Disciplina } from './services/disciplina.service';
 import { DisciplinaFilterService } from './services/disciplina-filter.service';
@@ -19,7 +19,6 @@ export class AppComponent implements OnInit, OnDestroy {
   currentYear = new Date().getFullYear();
   isLoggedIn: boolean = false;
   atletaId: string | null = null;
-  atletaSlug: string | null = null;
   disciplinas: Disciplina[] = [];
   disciplinaSeleccionada: string | null = null;
   dropdownAbierto = false;
@@ -29,7 +28,7 @@ export class AppComponent implements OnInit, OnDestroy {
   constructor(
     private authService: AuthService,
     private router: Router,
-    private perfilAtletaService: PerfilAtletaService,
+    private atletaService: AtletaService,
     private disciplinaService: DisciplinaService,
     public disciplinaFilterService: DisciplinaFilterService
   ) { }
@@ -78,28 +77,17 @@ export class AppComponent implements OnInit, OnDestroy {
       
       if (userId) {
         // Obtener el ID del atleta correspondiente al usuario logueado
-        this.perfilAtletaService.getAtletaByUserId(userId).subscribe({
+        // (se usa para mostrar el acceso a "Entrenamientos" en la barra lateral)
+        this.atletaService.getAtletaByUserId(userId).subscribe({
           next: (atleta) => {
-            if (atleta && (atleta.slug || atleta._id)) {
+            if (atleta && atleta._id) {
               this.atletaId = atleta._id;
-              this.atletaSlug = atleta.slug || atleta._id;
-              const identificador = atleta.slug || atleta._id;
-              
-              // Solo redirigir si estamos exactamente en la ruta '/perfil-atleta' sin ID
-              const url = this.router.url;
-              if (url === '/perfil-atleta') {
-                this.router.navigate(['/perfil-atleta', identificador]);
-              }
             } else {
-              console.warn('El usuario actual no tiene un atleta asociado');
               this.atletaId = null;
-              this.atletaSlug = null;
             }
           },
-          error: (error) => {
-            console.error('Error al obtener el atleta del usuario:', error);
+          error: () => {
             this.atletaId = null;
-            this.atletaSlug = null;
           }
         });
       } else {

@@ -3,7 +3,7 @@ import { FormBuilder, FormControl, FormGroup, FormsModule, ReactiveFormsModule, 
 import { Router, ActivatedRoute } from '@angular/router';
 import { AuthService } from '../../../auth/services/auth.service';
 import { EntrenamientosService, GrupoEntrenamiento } from '../../services/entrenamientos.service';
-import { SearchAtletaComponent } from "../../../ranking/create-performance/components/search-atleta/search-atleta.component";
+import { SearchAtletaComponent } from "../../../shared/search-atleta/search-atleta.component";
 import { CommonModule } from '@angular/common';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { MatFormFieldModule } from '@angular/material/form-field';

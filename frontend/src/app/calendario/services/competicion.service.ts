@@ -4,7 +4,6 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { AuthService } from '../../auth/services/auth.service';
-import { Prueba } from '../../ranking/services/ranking.service';
 import { Disciplina } from '../../services/disciplina.service';
 
 export interface EnlaceCompeticion {

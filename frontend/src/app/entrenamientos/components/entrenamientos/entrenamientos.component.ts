@@ -2,9 +2,8 @@ import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { EntrenamientosService } from '../../services/entrenamientos.service';
 import { AuthService } from '../../../auth/services/auth.service';
-import { RankingService } from '../../../ranking/services/ranking.service';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
-import { PerfilAtletaService } from '../../../ranking/services/perfil-atleta.service';
+import { AtletaService } from '../../../services/atleta.service';
 import { MatIconModule } from '@angular/material/icon';
 
 @Component({
@@ -18,7 +17,7 @@ export class EntrenamientosComponent implements OnInit {
   gruposEntrenamiento: any[] = [];
   private entrenamientosService = inject(EntrenamientosService);
   private authService = inject(AuthService);
-  private perfilAtletaService = inject(PerfilAtletaService);
+  private atletaService = inject(AtletaService);
   isEntrenador: boolean = false;
   isAdmin: boolean = false;
   atletaId = '';
@@ -68,7 +67,7 @@ export class EntrenamientosComponent implements OnInit {
 
     // Cargar grupos donde es atleta
     console.log('Cargando grupos como atleta');
-    this.perfilAtletaService.getAtletaByUserId(this.userId).subscribe({
+    this.atletaService.getAtletaByUserId(this.userId).subscribe({
       next: (atleta) => {
         if (!atleta || !atleta._id) {
           console.error('No se encontró el atleta o no tiene ID válido');
