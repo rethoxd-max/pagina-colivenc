@@ -1,0 +1,183 @@
+.rc-wrap {
+  width: 100%;
+}
+
+.rc-estado {
+  text-align: center;
+  color: #94a3b8;
+  padding: 3rem 1rem;
+  font-size: 1rem;
+}
+
+.rc-error { color: #ef4444; }
+
+/* ── Toggle de género ── */
+.rc-genero {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: center;
+  margin-bottom: 1.25rem;
+}
+
+.rc-genero-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.55rem 1.4rem;
+  border: 1.5px solid #e2e8f0;
+  background: #fff;
+  color: #64748b;
+  border-radius: 24px;
+  font-size: 0.92rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.rc-genero-btn:hover { border-color: #cbd5e1; }
+
+.rc-genero-btn.active {
+  background: #2563eb;
+  border-color: #2563eb;
+  color: #fff;
+}
+
+/* ── Selector de prueba (chips) ── */
+.rc-pruebas {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  justify-content: center;
+  margin-bottom: 1.5rem;
+}
+
+.rc-prueba-chip {
+  padding: 0.35rem 0.85rem;
+  border: 1px solid #e2e8f0;
+  background: #f8fafc;
+  color: #475569;
+  border-radius: 16px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+}
+
+.rc-prueba-chip:hover {
+  background: #eef2ff;
+  border-color: #c7d2fe;
+  color: #4f46e5;
+}
+
+.rc-prueba-chip.active {
+  background: #4f46e5;
+  border-color: #4f46e5;
+  color: #fff;
+}
+
+/* ── Tarjeta de tabla ── */
+.rc-tabla-card {
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.06);
+  border: 1px solid rgba(0, 0, 0, 0.04);
+  overflow: hidden;
+}
+
+.rc-tabla-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1.1rem 1.4rem;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.rc-tabla-head h3 {
+  margin: 0;
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #1e293b;
+}
+
+.rc-count {
+  font-size: 0.82rem;
+  color: #94a3b8;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.rc-tabla-scroll {
+  overflow-x: auto;
+}
+
+.rc-tabla {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.88rem;
+}
+
+.rc-tabla thead th {
+  position: sticky;
+  top: 0;
+  background: #f8fafc;
+  color: #64748b;
+  font-weight: 600;
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  text-align: left;
+  padding: 0.7rem 0.9rem;
+  border-bottom: 1px solid #e2e8f0;
+  white-space: nowrap;
+}
+
+.rc-tabla tbody td {
+  padding: 0.6rem 0.9rem;
+  border-bottom: 1px solid #f1f5f9;
+  color: #334155;
+  vertical-align: middle;
+}
+
+.rc-fila:nth-child(even) { background: #fafbfc; }
+.rc-fila:hover { background: #f1f5f9; }
+
+/* Columnas */
+.rc-c-puesto { width: 48px; text-align: center; }
+.rc-c-marca { font-weight: 700; color: #1e293b; white-space: nowrap; }
+.rc-c-nombre { font-weight: 500; }
+.rc-c-anyo, .rc-c-fecha { color: #64748b; white-space: nowrap; }
+.rc-c-lugar { color: #64748b; }
+.rc-c-notas { color: #94a3b8; font-size: 0.78rem; }
+
+/* Medallas */
+.rc-puesto {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  font-weight: 700;
+  font-size: 0.82rem;
+  color: #64748b;
+}
+
+.rc-puesto.oro { background: linear-gradient(135deg, #fde68a, #f59e0b); color: #7c4a03; }
+.rc-puesto.plata { background: linear-gradient(135deg, #f1f5f9, #cbd5e1); color: #475569; }
+.rc-puesto.bronce { background: linear-gradient(135deg, #fed7aa, #d97706); color: #7c2d12; }
+
+.rc-fila.oro .rc-c-marca { color: #b45309; }
+
+.rc-actualizado {
+  text-align: center;
+  color: #cbd5e1;
+  font-size: 0.78rem;
+  margin: 1rem 0 0;
+}
+
+@media (max-width: 600px) {
+  .rc-tabla { font-size: 0.82rem; }
+  .rc-genero-btn { padding: 0.5rem 1.1rem; font-size: 0.85rem; }
+}

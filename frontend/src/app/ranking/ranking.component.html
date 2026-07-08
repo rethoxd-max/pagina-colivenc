@@ -1,5 +1,17 @@
 <section class="ranking-page">
-  <div class="ranking-embed-wrap">
+
+  <!-- Toggle entre Mundo Atletismo y Ranking Club -->
+  <div class="ranking-toggle">
+    <button class="ranking-toggle-btn" [class.active]="modo === 'mundo'" (click)="setModo('mundo')">
+      <i class="fas fa-globe"></i> Mundo Atletismo
+    </button>
+    <button class="ranking-toggle-btn" [class.active]="modo === 'club'" (click)="setModo('club')">
+      <i class="fas fa-trophy"></i> Ranking Club
+    </button>
+  </div>
+
+  <!-- Mundo Atletismo (embed) -->
+  <div class="ranking-embed-wrap" *ngIf="modo === 'mundo'">
     <div class="ranking-loading" *ngIf="cargando">
       <i class="fas fa-spinner fa-spin"></i>
       <span>Cargando datos del club...</span>
@@ -11,4 +23,8 @@
       loading="lazy"
       (load)="onCargado()"></iframe>
   </div>
+
+  <!-- Ranking Club (tabla propia) -->
+  <app-ranking-club *ngIf="modo === 'club'"></app-ranking-club>
+
 </section>

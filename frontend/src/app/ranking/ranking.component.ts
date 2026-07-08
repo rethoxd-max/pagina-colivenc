@@ -1,15 +1,18 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
+import { RankingClubComponent } from './ranking-club/ranking-club.component';
 
 @Component({
   selector: 'app-ranking',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, RankingClubComponent],
   templateUrl: './ranking.component.html',
   styleUrls: ['./ranking.component.css'],
 })
 export class RankingComponent {
+  modo: 'mundo' | 'club' = 'mundo';
+
   // URL del embed de Mundo Atletismo para el club
   // nav=1 muestra su cabecera/navegación propia para poder moverse por el resto de su web
   private readonly embedUrl = 'https://mundoatletismo.es/embed/club/centre-esp-colivenc?nav=1';
@@ -18,6 +21,10 @@ export class RankingComponent {
 
   constructor(private sanitizer: DomSanitizer) {
     this.embedUrlSegura = this.sanitizer.bypassSecurityTrustResourceUrl(this.embedUrl);
+  }
+
+  setModo(m: 'mundo' | 'club'): void {
+    this.modo = m;
   }
 
   onCargado(): void {

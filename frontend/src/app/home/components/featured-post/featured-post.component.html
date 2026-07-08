@@ -26,7 +26,7 @@
     <div class="fp-body">
       <span class="fp-date"><i class="far fa-calendar-alt"></i> {{ (post.createdAt || post.date) | date:'dd MMM yyyy' }}</span>
       <h4 class="fp-title">{{ post.title }}</h4>
-      <p class="fp-excerpt">{{ post.content | slice:0:80 }}...</p>
+      <p class="fp-excerpt">{{ post.content | slice:0:160 }}...</p>
       <span class="fp-link">Leer más <i class="fas fa-arrow-right"></i></span>
     </div>
   </a>
