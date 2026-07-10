@@ -471,259 +471,6 @@
     border-left: 4px solid #3498db;
 }
 
-/* Media queries para responsividad */
-@media (max-width: 768px) {
-    /* Hero */
-    .page-header {
-        padding: 2.5rem 1.25rem 2rem;
-    }
-
-    .page-title {
-        font-size: 2.1rem;
-    }
-
-    .page-subtitle {
-        font-size: 1rem;
-    }
-
-    .competiciones-container {
-        margin: 1.25rem auto;
-    }
-
-    /* Filtros: 1 columna y que ocupen el ancho */
-    .filtros-container {
-        grid-template-columns: 1fr;
-        padding: 1rem;
-        gap: 0.85rem;
-    }
-
-    .search-box {
-        flex-wrap: wrap;
-    }
-
-    /* Al envolver, el toggle baja a una 2ª fila: anclar el icono al centro
-       del input (1ª fila, ~2.9rem de alto) y no al centro de todo el contenedor */
-    .search-box > i {
-        top: 1.45rem;
-    }
-
-    /* El input ocupa toda la fila y el toggle baja debajo */
-    .search-input {
-        flex: 1 1 100%;
-    }
-
-    .vista-toggle {
-        margin-left: auto;
-    }
-
-    .categoria-select select,
-    .btn-nueva-competicion {
-        width: 100%;
-    }
-
-    .btn-nueva-competicion {
-        justify-content: center;
-    }
-
-    .competiciones-grid {
-        grid-template-columns: 1fr;
-        gap: 1.25rem;
-    }
-
-    .card-content {
-        padding: 1.25rem;
-    }
-
-    .card-header {
-        flex-wrap: wrap;
-        gap: 0.5rem;
-    }
-
-    .card-header h3 {
-        font-size: 1.25rem;
-    }
-
-    .card-actions {
-        flex-wrap: wrap;
-    }
-
-    .btn-action {
-        flex: 1 1 auto;
-        justify-content: center;
-        min-height: 40px;
-    }
-
-    .year-titulo {
-        font-size: 1.75rem;
-    }
-
-    .mes-titulo {
-        font-size: 1.25rem;
-    }
-
-    /* Navegación de mes: que no desborde */
-    .lista-nav-mes {
-        gap: 0.75rem;
-        flex-wrap: wrap;
-    }
-
-    .lista-mes-label {
-        min-width: 0;
-        font-size: 1.2rem;
-    }
-
-    /* ============================================
-       Vista lista -> tarjetas apiladas en móvil
-    ============================================ */
-    /* Ocultamos la cabecera de la tabla */
-    .lista-header-row {
-        display: none;
-    }
-
-    .lista-table-wrap {
-        background: transparent;
-        box-shadow: none;
-        overflow: visible;
-    }
-
-    .lista-row {
-        background: #ffffff;
-        border: 1px solid #f1f5f9;
-        border-radius: 12px;
-        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
-        margin-bottom: 1rem;
-        overflow: hidden;
-    }
-
-    .lista-row:last-child {
-        border-bottom: 1px solid #f1f5f9;
-    }
-
-    /* Fila principal pasa a bloque vertical */
-    .lista-row-main {
-        display: flex;
-        flex-direction: column;
-        align-items: stretch;
-        gap: 0.5rem;
-        padding: 1rem 1.15rem;
-    }
-
-    .lista-row:hover .lista-row-main {
-        background: transparent;
-    }
-
-    .lista-col-fecha {
-        font-size: 0.95rem;
-    }
-
-    .lista-col-nombre {
-        font-size: 1.1rem;
-        padding-right: 0;
-        white-space: normal;
-        overflow-wrap: anywhere;
-        word-break: break-word;
-    }
-
-    .lista-col-lugar {
-        font-size: 0.9rem;
-        padding-right: 0;
-        white-space: normal;
-        overflow-wrap: anywhere;
-    }
-
-    /* El tipo vuelve a mostrarse como chip en la tarjeta */
-    .lista-col-tipo {
-        align-self: flex-start;
-        font-size: 0.78rem;
-        max-width: 100%;
-        white-space: normal;
-    }
-
-    /* Acciones: alineadas al inicio y con áreas táctiles mayores */
-    .lista-col-acciones {
-        justify-content: flex-start;
-        flex-wrap: wrap;
-        gap: 0.5rem;
-        padding-top: 0.4rem;
-        border-top: 1px dashed #eef2f7;
-        margin-top: 0.25rem;
-    }
-
-    .lista-btn {
-        width: 40px;
-        height: 40px;
-        font-size: 0.9rem;
-    }
-
-    /* Pruebas y enlaces: siempre visibles (no hay hover en táctil) */
-    .lista-row-pruebas,
-    .lista-row-enlaces {
-        max-height: none;
-        overflow: visible;
-        padding: 0.6rem 1.15rem;
-        border-top-width: 1px;
-    }
-
-    .lista-row:hover .lista-row-pruebas,
-    .lista-row:hover .lista-row-enlaces {
-        max-height: none;
-        padding: 0.6rem 1.15rem;
-    }
-}
-
-@media (max-width: 480px) {
-    .page-header {
-        padding: 2rem 1rem 1.75rem;
-    }
-
-    .page-title {
-        font-size: 1.75rem;
-    }
-
-    .header-badge {
-        font-size: 0.8rem;
-    }
-
-    .competiciones-container {
-        padding: 0 0.75rem;
-    }
-
-    /* Filtros de fecha a 1 columna en móvil pequeño */
-    .filtros-fecha {
-        flex-direction: column;
-        gap: 0.75rem;
-    }
-
-    .fecha-input input {
-        min-height: 42px;
-    }
-
-    .card-header h3 {
-        font-size: 1.15rem;
-    }
-
-    .card-header .fecha {
-        font-size: 0.82rem;
-    }
-
-    /* Acciones de tarjeta apiladas a ancho completo */
-    .card-actions .btn-action {
-        flex: 1 1 100%;
-    }
-
-    /* Navegación de mes compacta */
-    .lista-nav-btn {
-        width: 42px;
-        height: 42px;
-    }
-
-    .lista-mes-label {
-        font-size: 1.05rem;
-        flex: 1 1 100%;
-        order: -1;
-    }
-}
-
 /* ========================================
    Toggle de vista
 ======================================== */
@@ -1061,4 +808,257 @@
     margin: 0;
     border-radius: 0;
     box-shadow: none;
+}
+
+/* Media queries para responsividad */
+@media (max-width: 768px) {
+    /* Hero */
+    .page-header {
+        padding: 2.5rem 1.25rem 2rem;
+    }
+
+    .page-title {
+        font-size: 2.1rem;
+    }
+
+    .page-subtitle {
+        font-size: 1rem;
+    }
+
+    .competiciones-container {
+        margin: 1.25rem auto;
+    }
+
+    /* Filtros: 1 columna y que ocupen el ancho */
+    .filtros-container {
+        grid-template-columns: 1fr;
+        padding: 1rem;
+        gap: 0.85rem;
+    }
+
+    .search-box {
+        flex-wrap: wrap;
+    }
+
+    /* Al envolver, el toggle baja a una 2ª fila: anclar el icono al centro
+       del input (1ª fila, ~2.9rem de alto) y no al centro de todo el contenedor */
+    .search-box > i {
+        top: 1.45rem;
+    }
+
+    /* El input ocupa toda la fila y el toggle baja debajo */
+    .search-input {
+        flex: 1 1 100%;
+    }
+
+    .vista-toggle {
+        margin-left: auto;
+    }
+
+    .categoria-select select,
+    .btn-nueva-competicion {
+        width: 100%;
+    }
+
+    .btn-nueva-competicion {
+        justify-content: center;
+    }
+
+    .competiciones-grid {
+        grid-template-columns: 1fr;
+        gap: 1.25rem;
+    }
+
+    .card-content {
+        padding: 1.25rem;
+    }
+
+    .card-header {
+        flex-wrap: wrap;
+        gap: 0.5rem;
+    }
+
+    .card-header h3 {
+        font-size: 1.25rem;
+    }
+
+    .card-actions {
+        flex-wrap: wrap;
+    }
+
+    .btn-action {
+        flex: 1 1 auto;
+        justify-content: center;
+        min-height: 40px;
+    }
+
+    .year-titulo {
+        font-size: 1.75rem;
+    }
+
+    .mes-titulo {
+        font-size: 1.25rem;
+    }
+
+    /* Navegación de mes: que no desborde */
+    .lista-nav-mes {
+        gap: 0.75rem;
+        flex-wrap: wrap;
+    }
+
+    .lista-mes-label {
+        min-width: 0;
+        font-size: 1.2rem;
+    }
+
+    /* ============================================
+       Vista lista -> tarjetas apiladas en móvil
+    ============================================ */
+    /* Ocultamos la cabecera de la tabla */
+    .lista-header-row {
+        display: none;
+    }
+
+    .lista-table-wrap {
+        background: transparent;
+        box-shadow: none;
+        overflow: visible;
+    }
+
+    .lista-row {
+        background: #ffffff;
+        border: 1px solid #f1f5f9;
+        border-radius: 12px;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+        margin-bottom: 1rem;
+        overflow: hidden;
+    }
+
+    .lista-row:last-child {
+        border-bottom: 1px solid #f1f5f9;
+    }
+
+    /* Fila principal pasa a bloque vertical */
+    .lista-row-main {
+        display: flex;
+        flex-direction: column;
+        align-items: stretch;
+        gap: 0.5rem;
+        padding: 1rem 1.15rem;
+    }
+
+    .lista-row:hover .lista-row-main {
+        background: transparent;
+    }
+
+    .lista-col-fecha {
+        font-size: 0.95rem;
+    }
+
+    .lista-col-nombre {
+        font-size: 1.1rem;
+        padding-right: 0;
+        white-space: normal;
+        overflow-wrap: anywhere;
+        word-break: break-word;
+    }
+
+    .lista-col-lugar {
+        font-size: 0.9rem;
+        padding-right: 0;
+        white-space: normal;
+        overflow-wrap: anywhere;
+    }
+
+    /* El tipo vuelve a mostrarse como chip en la tarjeta */
+    .lista-col-tipo {
+        align-self: flex-start;
+        font-size: 0.78rem;
+        max-width: 100%;
+        white-space: normal;
+    }
+
+    /* Acciones: alineadas al inicio y con áreas táctiles mayores */
+    .lista-col-acciones {
+        justify-content: flex-start;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        padding-top: 0.4rem;
+        border-top: 1px dashed #eef2f7;
+        margin-top: 0.25rem;
+    }
+
+    .lista-btn {
+        width: 40px;
+        height: 40px;
+        font-size: 0.9rem;
+    }
+
+    /* Pruebas y enlaces: siempre visibles (no hay hover en táctil) */
+    .lista-row-pruebas,
+    .lista-row-enlaces {
+        max-height: none;
+        overflow: visible;
+        padding: 0.6rem 1.15rem;
+        border-top-width: 1px;
+    }
+
+    .lista-row:hover .lista-row-pruebas,
+    .lista-row:hover .lista-row-enlaces {
+        max-height: none;
+        padding: 0.6rem 1.15rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .page-header {
+        padding: 2rem 1rem 1.75rem;
+    }
+
+    .page-title {
+        font-size: 1.75rem;
+    }
+
+    .header-badge {
+        font-size: 0.8rem;
+    }
+
+    .competiciones-container {
+        padding: 0 0.75rem;
+    }
+
+    /* Filtros de fecha a 1 columna en móvil pequeño */
+    .filtros-fecha {
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+
+    .fecha-input input {
+        min-height: 42px;
+    }
+
+    .card-header h3 {
+        font-size: 1.15rem;
+    }
+
+    .card-header .fecha {
+        font-size: 0.82rem;
+    }
+
+    /* Acciones de tarjeta apiladas a ancho completo */
+    .card-actions .btn-action {
+        flex: 1 1 100%;
+    }
+
+    /* Navegación de mes compacta */
+    .lista-nav-btn {
+        width: 42px;
+        height: 42px;
+    }
+
+    .lista-mes-label {
+        font-size: 1.05rem;
+        flex: 1 1 100%;
+        order: -1;
+    }
 }
