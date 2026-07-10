@@ -170,17 +170,66 @@ button:hover {
     border: 1px solid #e5e7eb;
 }
 
+/* Permitir que los nombres largos se ajusten sin desbordar */
+.group-name,
+.group-trainer {
+    overflow-wrap: anywhere;
+    word-break: break-word;
+}
+
 /* Responsive */
 @media (max-width: 768px) {
     .container {
         padding: 0.75rem;
     }
-    
+
     h1 {
         font-size: 1.25rem;
     }
-    
+
     h2 {
         font-size: 1rem;
+    }
+
+    /* Áreas táctiles cómodas para los controles */
+    .btn-new {
+        padding: 8px 12px;
+        font-size: 14px;
+        min-height: 40px;
+    }
+
+    .group-item {
+        padding: 10px;
+        gap: 8px;
+    }
+
+    .group-name {
+        font-size: 14px;
+    }
+
+    .group-trainer {
+        font-size: 12px;
+    }
+
+    .btn-edit {
+        min-width: 40px;
+        min-height: 40px;
+        padding: 8px;
+    }
+
+    .view-btn {
+        min-width: 32px;
+        text-align: center;
+        font-size: 18px;
+    }
+}
+
+@media (max-width: 480px) {
+    .header {
+        gap: 8px;
+    }
+
+    h1 {
+        font-size: 1.15rem;
     }
 }

@@ -73,7 +73,47 @@
 }
 
 @media (max-width: 768px) {
+  .ranking-page {
+    padding: 1rem 0.75rem 1.5rem;
+  }
+
+  /* Toggle: que quepa y haga wrap sin desbordar */
+  .ranking-toggle {
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-bottom: 1.25rem;
+  }
+
+  .ranking-toggle-btn {
+    padding: 0.6rem 1.1rem;
+    font-size: 0.9rem;
+    min-height: 44px;
+  }
+
+  .ranking-embed-wrap {
+    border-radius: 12px;
+    min-height: 50vh;
+  }
+
   .ranking-iframe {
-    height: 80vh;
+    height: 78vh;
+  }
+}
+
+@media (max-width: 480px) {
+  .ranking-page {
+    padding: 0.85rem 0.6rem 1.25rem;
+  }
+
+  /* En móvil pequeño el toggle ocupa el ancho a dos columnas */
+  .ranking-toggle-btn {
+    flex: 1 1 auto;
+    justify-content: center;
+    padding: 0.6rem 0.75rem;
+    font-size: 0.88rem;
+  }
+
+  .ranking-iframe {
+    height: 72vh;
   }
 }

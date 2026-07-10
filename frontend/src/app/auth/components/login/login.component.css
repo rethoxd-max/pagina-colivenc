@@ -197,12 +197,58 @@
 }
 
 /* ─── RESPONSIVE ──────────────────────────────────────────── */
-@media (max-width: 640px) {
+@media (max-width: 768px) {
+  .auth-page {
+    padding: 1rem 0.75rem;
+    align-items: flex-start;
+  }
+
+  .auth-card {
+    max-width: 460px;
+    min-height: 0;
+  }
+
   .auth-brand {
     display: none;
   }
 
   .auth-form-panel {
     padding: 2rem 1.5rem;
+  }
+
+  .auth-form-inner {
+    max-width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .auth-page {
+    padding: 0.75rem 0.5rem;
+  }
+
+  .auth-card {
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  }
+
+  .auth-form-panel {
+    padding: 1.75rem 1.15rem;
+  }
+
+  .form-title {
+    font-size: 1.4rem;
+  }
+
+  .form-subtitle {
+    margin-bottom: 1.5rem;
+  }
+
+  .field-input {
+    font-size: 16px; /* evita zoom automático en iOS al enfocar */
+    padding: 0.75rem 0.9rem 0.75rem 2.5rem;
+  }
+
+  .btn-submit {
+    padding: 0.85rem;
   }
 }

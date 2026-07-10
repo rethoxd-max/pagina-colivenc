@@ -1,3 +1,11 @@
 .example-full-width {
   width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+/* El mensaje de error debe poder ajustarse sin desbordar en pantallas estrechas */
+.text-danger {
+  word-break: break-word;
+  overflow-wrap: anywhere;
 }

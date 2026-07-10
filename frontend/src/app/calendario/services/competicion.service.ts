@@ -24,6 +24,7 @@ export interface Competicion {
   sectores: SectorCompeticion[];
   enlaces?: EnlaceCompeticion[];
   disciplina?: Disciplina | null;
+  postVinculado?: { _id: string; title: string; imageUrl?: string; category?: string; createdAt?: string } | string | null;
 }
 
 export interface PruebaCompeticion {

@@ -206,6 +206,7 @@
     animation: fadeInUp 0.6s ease-out calc(var(--delay, 0s)) both;
     display: flex;
     flex-direction: column;
+    min-width: 0;
 }
 
 @keyframes fadeInUp {
@@ -289,6 +290,7 @@
     display: flex;
     flex-direction: column;
     flex-grow: 1;
+    min-width: 0;
 }
 
 .post-date {
@@ -315,6 +317,8 @@
     -webkit-line-clamp: 3;
     -webkit-box-orient: vertical;
     overflow: hidden;
+    overflow-wrap: anywhere;
+    word-break: break-word;
 }
 
 .post-excerpt {
@@ -450,28 +454,62 @@
 ======================================== */
 @media (max-width: 768px) {
     .page-header {
-        padding: 3rem 1.5rem 2rem;
+        padding: 2.5rem 1.25rem 1.75rem;
     }
-    
+
     .page-title {
         font-size: 2rem;
     }
-    
+
     .page-subtitle {
         font-size: 1rem;
     }
-    
+
     .posts-container {
-        padding: 1.5rem;
+        padding: 1.5rem 1rem;
     }
-    
+
     .posts-grid {
         grid-template-columns: 1fr;
         gap: 1.5rem;
     }
-    
-    .post-actions {
+
+    /* En móvil no hay hover: mostrar siempre las acciones */
+    .post-actions,
+    .post-actions-row {
         opacity: 1;
+    }
+
+    /* Barra de controles: cada bloque ocupa el ancho completo */
+    .controls-bar {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 1rem;
+    }
+
+    .search-box {
+        flex: 1 1 auto;
+        width: 100%;
+        min-width: 0;
+    }
+
+    .fecha-filter {
+        flex-wrap: wrap;
+        width: 100%;
+    }
+
+    .fecha-input-wrap {
+        flex: 1 1 auto;
+        min-width: 0;
+    }
+
+    .fecha-input-wrap input[type="date"] {
+        width: 100%;
+    }
+
+    .btn-create {
+        width: 100%;
+        justify-content: center;
     }
 
     .featured-post {
@@ -480,11 +518,22 @@
 
     .featured-image-wrap {
         width: 100%;
+        min-height: auto;
         height: 200px;
     }
 
-    .fecha-filter {
-        flex-wrap: wrap;
+    .featured-content {
+        padding: 1.5rem 1.25rem;
+    }
+
+    .featured-title {
+        font-size: 1.35rem;
+    }
+
+    /* Áreas táctiles cómodas en móvil */
+    .btn-action {
+        width: 42px;
+        height: 42px;
     }
 }
 
@@ -650,6 +699,7 @@
 
 .featured-content {
     flex: 1;
+    min-width: 0;
     padding: 2rem 2rem 1.5rem;
     display: flex;
     flex-direction: column;
@@ -675,6 +725,8 @@
     color: var(--text-color);
     margin: 0 0 0.85rem;
     line-height: 1.3;
+    overflow-wrap: anywhere;
+    word-break: break-word;
 }
 
 .featured-excerpt {
@@ -810,4 +862,112 @@
     font-size: 0.85rem;
     font-weight: 400;
     opacity: 0.75;
+}
+
+/* ========================================
+   Responsive - Móvil pequeño
+======================================== */
+@media (max-width: 480px) {
+    .page-header {
+        padding: 2rem 1rem 1.5rem;
+    }
+
+    .page-title {
+        font-size: 1.6rem;
+        letter-spacing: -0.3px;
+    }
+
+    .page-subtitle {
+        font-size: 0.92rem;
+    }
+
+    .posts-container {
+        padding: 1.25rem 0.85rem;
+    }
+
+    .posts-grid {
+        gap: 1.25rem;
+    }
+
+    /* El footer de la card puede envolver si hay muchas acciones */
+    .post-footer {
+        flex-wrap: wrap;
+        gap: 0.6rem;
+    }
+
+    .post-actions-row {
+        flex-wrap: wrap;
+        margin-left: auto;
+    }
+
+    .post-content {
+        padding: 1.1rem 1.15rem 1.25rem;
+    }
+
+    .post-image-wrapper {
+        height: 190px;
+    }
+
+    /* Noticia destacada */
+    .featured-image-wrap {
+        height: 180px;
+    }
+
+    .featured-content {
+        padding: 1.25rem 1.1rem;
+    }
+
+    .featured-title {
+        font-size: 1.2rem;
+    }
+
+    .featured-excerpt {
+        font-size: 0.9rem;
+        margin-bottom: 1.25rem;
+    }
+
+    .featured-footer {
+        gap: 0.75rem;
+    }
+
+    .btn-unpin {
+        width: 100%;
+        justify-content: center;
+    }
+
+    /* Filtros de fecha apilados en pantallas muy estrechas */
+    .fecha-input-wrap {
+        flex: 1 1 100%;
+    }
+
+    .btn-limpiar-fecha {
+        align-self: stretch;
+        justify-content: center;
+        width: 100%;
+    }
+
+    /* Botón ver más a ancho completo y compacto */
+    .btn-ver-mas {
+        width: 100%;
+        justify-content: center;
+        padding: 0.85rem 1rem;
+        flex-wrap: wrap;
+    }
+
+    .empty-state {
+        padding: 3rem 1.25rem;
+    }
+
+    .empty-icon {
+        width: 80px;
+        height: 80px;
+    }
+
+    .empty-icon i {
+        font-size: 2rem;
+    }
+
+    .empty-state h3 {
+        font-size: 1.25rem;
+    }
 }

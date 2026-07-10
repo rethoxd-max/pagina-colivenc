@@ -627,15 +627,63 @@ import { Subscription } from 'rxjs';
       box-shadow: 0 8px 20px rgba(30, 60, 114, 0.3);
     }
     
-    @media (max-width: 480px) {
+    @media (max-width: 768px) {
       .carrito-container {
         width: 100%;
+        max-width: 400px;
         right: -100%;
         border-radius: 0;
       }
-      
+
       .carrito-header {
         border-radius: 0;
+      }
+
+      /* El dropdown de países nunca debe desbordar el panel */
+      .paises-dropdown {
+        width: 100%;
+        max-width: calc(100vw - 3rem);
+      }
+    }
+
+    @media (max-width: 480px) {
+      .carrito-container {
+        width: 100%;
+        max-width: none;
+        right: -100%;
+        border-radius: 0;
+      }
+
+      .carrito-items {
+        padding: 1rem;
+      }
+
+      .carrito-item {
+        padding: 0.85rem;
+        gap: 0.75rem;
+      }
+
+      .item-imagen-container {
+        width: 64px;
+        height: 64px;
+      }
+
+      .carrito-footer {
+        padding: 1.25rem 1rem;
+      }
+
+      .btn-comprar {
+        min-height: 48px;
+      }
+
+      .btn-cantidad {
+        width: 32px;
+        height: 32px;
+      }
+
+      .paises-dropdown {
+        width: 100%;
+        max-width: calc(100vw - 2rem);
       }
     }
   `]

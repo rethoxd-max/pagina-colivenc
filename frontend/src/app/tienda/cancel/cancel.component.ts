@@ -39,6 +39,29 @@ import { CommonModule } from '@angular/common';
       font-size: 3rem;
       margin-bottom: 1rem;
     }
+    .card-body {
+      padding: 2rem;
+    }
+    .btn {
+      min-height: 44px;
+    }
+    @media (max-width: 480px) {
+      .container.mt-5 {
+        margin-top: 1.5rem !important;
+      }
+      .card-body {
+        padding: 1.5rem 1rem;
+      }
+      .card-title {
+        font-size: 1.5rem;
+      }
+      .fas {
+        font-size: 2.25rem;
+      }
+      .lead {
+        font-size: 1rem;
+      }
+    }
   `]
 })
 export class CancelComponent {

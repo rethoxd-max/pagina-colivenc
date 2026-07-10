@@ -108,4 +108,65 @@ h2 {
 
 .btn-save:hover {
     background: #0056b3;
-} 
+}
+
+/* Permitir que los nombres largos de atletas se ajusten sin desbordar */
+.atleta-item span {
+    overflow-wrap: anywhere;
+    word-break: break-word;
+    min-width: 0;
+}
+
+/* Responsive: tablet / móvil */
+@media (max-width: 768px) {
+    .container {
+        padding: 16px;
+    }
+
+    h1 {
+        font-size: 20px;
+    }
+
+    h2 {
+        font-size: 16px;
+    }
+
+    .atletas-section,
+    .search-section {
+        padding: 12px;
+    }
+
+    .atleta-item {
+        padding: 10px;
+        gap: 8px;
+    }
+
+    /* Áreas táctiles cómodas */
+    .btn-remove,
+    .atleta-item mat-icon {
+        min-width: 40px;
+        min-height: 40px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .btn-save {
+        min-height: 44px;
+    }
+}
+
+@media (max-width: 480px) {
+    .container {
+        padding: 12px;
+    }
+
+    /* Botón de guardar a ancho completo para facilitar el toque */
+    .actions {
+        justify-content: stretch;
+    }
+
+    .btn-save {
+        width: 100%;
+    }
+}

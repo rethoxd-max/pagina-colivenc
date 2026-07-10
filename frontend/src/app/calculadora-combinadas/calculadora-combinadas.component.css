@@ -2,6 +2,8 @@
   min-height: 100vh;
   background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
   padding: 80px 20px 40px;
+  overflow-x: hidden;
+  box-sizing: border-box;
 }
 
 /* Header */
@@ -466,7 +468,6 @@
   font-size: 0.75rem;
   font-weight: 600;
   letter-spacing: 0.3px;
-  truncate: true;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -626,6 +627,13 @@
 
 .radar-canvas-wrapper {
   padding: 12px;
+  position: relative;
+  width: 100%;
+}
+
+.radar-canvas-wrapper canvas {
+  max-width: 100% !important;
+  height: auto !important;
 }
 
 /* Gráfico de líneas */
@@ -656,11 +664,14 @@
   padding: 16px;
   height: 320px;
   position: relative;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .linechart-wrapper canvas {
   width: 100% !important;
   height: 100% !important;
+  max-width: 100% !important;
 }
 
 /* Info Footer */
@@ -687,18 +698,37 @@
 
   .header-text h1 {
     font-size: 1.5rem;
+    word-break: break-word;
   }
 
   .filtros-container {
     flex-direction: column;
   }
 
+  .filtro-grupo {
+    min-width: 0;
+  }
+
   .btn-group {
     justify-content: flex-start;
   }
 
+  .btn-filtro {
+    flex: 1 1 auto;
+    justify-content: center;
+    min-height: 42px;
+  }
+
   .combinadas-grid {
     grid-template-columns: 1fr;
+  }
+
+  .combinada-card {
+    padding: 16px;
+  }
+
+  .card-content h3 {
+    word-break: break-word;
   }
 
   .atletas-bar {
@@ -707,6 +737,24 @@
 
   .atleta-badge {
     max-width: 100%;
+  }
+
+  .btn-add-atleta {
+    justify-content: center;
+    min-height: 44px;
+  }
+
+  .prueba-item {
+    padding: 16px;
+  }
+
+  .prueba-info {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .prueba-nombre {
+    word-break: break-word;
   }
 
   .atletas-inputs-row {
@@ -722,12 +770,28 @@
     max-width: 100%;
   }
 
+  .btn-limpiar {
+    min-height: 44px;
+  }
+
   .linechart-wrapper {
     height: 260px;
   }
 }
 
 @media (max-width: 480px) {
+  .calculadora-container {
+    padding: 66px 12px 24px;
+  }
+
+  .header-content {
+    gap: 12px;
+  }
+
+  .header-text h1 {
+    font-size: 1.3rem;
+  }
+
   .atletas-inputs-row {
     grid-template-columns: 1fr;
   }
@@ -736,5 +800,14 @@
   .radares-grid.grid-3,
   .radares-grid.grid-4 {
     grid-template-columns: 1fr;
+  }
+
+  .charts-section {
+    margin-top: 32px;
+  }
+
+  .linechart-wrapper {
+    height: 240px;
+    padding: 12px;
   }
 }

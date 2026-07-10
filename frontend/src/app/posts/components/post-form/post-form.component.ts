@@ -4,19 +4,21 @@ import { PostService } from '../../services/posts.service';
 import {
   FormBuilder,
   FormGroup,
+  FormsModule,
   ReactiveFormsModule,
   Validators,
 } from '@angular/forms';
-import { NgIf, NgFor } from '@angular/common';
+import { NgIf, NgFor, DatePipe } from '@angular/common';
 import { environment } from '../../../../environments/environment';
 import { DisciplinaService, Disciplina } from '../../../services/disciplina.service';
+import { CompeticionService } from '../../../calendario/services/competicion.service';
 import { forkJoin } from 'rxjs';
 import { PdfViewerModule } from 'ng2-pdf-viewer';
 import { isPdf as isPdfUtil, getPostMediaUrl } from '../../utils/post-media.util';
 @Component({
   selector: 'app-post-form',
   standalone: true,
-  imports: [ReactiveFormsModule, NgIf, NgFor, PdfViewerModule],
+  imports: [ReactiveFormsModule, FormsModule, NgIf, NgFor, DatePipe, PdfViewerModule],
   templateUrl: './post-form.component.html',
   styleUrls: ['./post-form.component.css'],
 })
@@ -28,6 +30,11 @@ export class PostFormComponent implements OnInit {
   imageUrl: string | null = null;
   disciplinas: Disciplina[] = [];
 
+  // Competición enlazada a esta noticia (buscador de texto, solo hoy o futuras)
+  competicionVinculada: any = null;
+  buscarCompeticionTexto = '';
+  private competicionesFuturas: any[] = [];
+
   baseUrl: string = environment.apiUrl;
 
   constructor(
@@ -35,7 +42,8 @@ export class PostFormComponent implements OnInit {
     private route: ActivatedRoute,
     private router: Router,
     private fb: FormBuilder,
-    private disciplinaService: DisciplinaService
+    private disciplinaService: DisciplinaService,
+    private competicionService: CompeticionService
   ) {
     // Inicializar formulario con validaciones
     this.postForm = this.fb.group({
@@ -47,6 +55,8 @@ export class PostFormComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    this.cargarCompeticionesFuturas();
+
     this.postId = this.route.snapshot.paramMap.get('id');
     if (this.postId) {
       this.isEditMode = true;
@@ -65,11 +75,44 @@ export class PostFormComponent implements OnInit {
           if (post.imageUrl) {
             this.imageUrl = getPostMediaUrl(post.imageUrl);
           }
+          if (post.competicion) {
+            this.competicionVinculada = post.competicion;
+          }
         }
       });
     } else {
       this.disciplinaService.getDisciplinas().subscribe(d => { this.disciplinas = d; });
     }
+  }
+
+  private cargarCompeticionesFuturas(): void {
+    this.competicionService.getCompeticiones().subscribe({
+      next: (competiciones) => {
+        const hoy = new Date();
+        hoy.setHours(0, 0, 0, 0);
+        this.competicionesFuturas = competiciones
+          .filter(c => new Date(c.fecha) >= hoy)
+          .sort((a, b) => new Date(a.fecha).getTime() - new Date(b.fecha).getTime());
+      },
+      error: () => { this.competicionesFuturas = []; }
+    });
+  }
+
+  get competicionesEncontradas(): any[] {
+    const texto = this.buscarCompeticionTexto.trim().toLowerCase();
+    if (!texto) return [];
+    return this.competicionesFuturas
+      .filter(c => c.nombre.toLowerCase().includes(texto))
+      .slice(0, 8);
+  }
+
+  seleccionarCompeticion(competicion: any): void {
+    this.competicionVinculada = competicion;
+    this.buscarCompeticionTexto = '';
+  }
+
+  quitarCompeticionVinculada(): void {
+    this.competicionVinculada = null;
   }
 
   onFileSelected(event: any) {
@@ -95,6 +138,7 @@ export class PostFormComponent implements OnInit {
     formData.append('category', this.postForm.get('category')?.value || '');
     const discId = this.postForm.get('disciplina')?.value;
     if (discId) formData.append('disciplina', discId);
+    formData.append('competicionVinculada', this.competicionVinculada?._id || '');
 
     if (this.selectedFile) {
       formData.append('image', this.selectedFile);

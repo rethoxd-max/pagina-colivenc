@@ -1,0 +1,37 @@
+/* Ajustes responsive para el formulario de inscripción (basado en Bootstrap) */
+.container {
+    max-width: 800px;
+}
+
+@media (max-width: 768px) {
+    .container {
+        margin-top: 2rem !important;
+        padding-left: 0.75rem;
+        padding-right: 0.75rem;
+    }
+
+    h2 {
+        font-size: 1.5rem;
+    }
+
+    .form-control {
+        font-size: 1rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .container {
+        margin-top: 1.5rem !important;
+    }
+
+    h2 {
+        font-size: 1.3rem;
+    }
+
+    /* Botón a ancho completo y con área táctil cómoda */
+    .btn-primary {
+        width: 100%;
+        padding: 0.7rem 1rem;
+        min-height: 44px;
+    }
+}

@@ -19,6 +19,7 @@ const competicionSchema = new mongoose.Schema({
         origen: { type: String, enum: ['url', 'archivo'], default: 'url' }
     }],
     disciplina: { type: mongoose.Schema.Types.ObjectId, ref: 'Disciplina', default: null },
+    postVinculado: { type: mongoose.Schema.Types.ObjectId, ref: 'Post', default: null },
 });
 
 module.exports = mongoose.model('Competicion', competicionSchema);

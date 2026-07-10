@@ -30,6 +30,9 @@ html {
 html, body {
     height: 100%;
     margin: 0;
+    /* Red de seguridad global: evita scroll horizontal en móvil */
+    max-width: 100%;
+    overflow-x: hidden;
 }
 
 body {
@@ -143,4 +146,61 @@ footer {
 .decathlon-dialog .mat-mdc-dialog-content {
     max-height: none !important;
     overflow: visible !important;
+}
+
+/* ========================================
+   Responsive global (base)
+======================================== */
+/* Evita que elementos multimedia desborden el ancho en móvil */
+img, video, iframe {
+    max-width: 100%;
+    height: auto;
+}
+
+@media (max-width: 768px) {
+    /* El navbar mide 70px en móvil (ver app.component.css) */
+    body {
+        padding-top: 70px;
+    }
+
+    app-root {
+        min-height: calc(100vh - 70px);
+    }
+
+    /* Tipografía base fluida para pantallas pequeñas */
+    h1 {
+        font-size: 2rem;
+        margin-bottom: 1rem;
+    }
+
+    h2 {
+        font-size: 1.6rem;
+    }
+
+    h3 {
+        font-size: 1.3rem;
+    }
+}
+
+@media (max-width: 480px) {
+    /* El navbar mide 64px a este tamaño (ver app.component.css) */
+    body {
+        padding-top: 64px;
+    }
+
+    app-root {
+        min-height: calc(100vh - 64px);
+    }
+
+    h1 {
+        font-size: 1.7rem;
+    }
+
+    h2 {
+        font-size: 1.4rem;
+    }
+
+    h3 {
+        font-size: 1.2rem;
+    }
 }

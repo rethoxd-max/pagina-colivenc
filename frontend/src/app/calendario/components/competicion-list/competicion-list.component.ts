@@ -50,6 +50,10 @@ export class CompeticionListComponent implements OnInit, OnDestroy {
   mesActual: number = new Date().getMonth();
   anyoActual: number = new Date().getFullYear();
 
+  // Competición a la que hay que saltar al entrar (llega por ?competicionId=... desde el mini calendario del Home)
+  private focoCompeticionId: string | null = null;
+  competicionDestacadaId: string | null = null;
+
   private nombresMeses = [
     'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
     'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'
@@ -67,6 +71,7 @@ export class CompeticionListComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.userId = this.authService.getUserId();
     this.competicionId = this.route.snapshot.paramMap.get('competicionId') || '';
+    this.focoCompeticionId = this.route.snapshot.queryParamMap.get('competicionId');
     this.loadCompeticiones();
     this.loadCategorias();
     this.filterSub = this.disciplinaFilterService.disciplina$.subscribe(() => this.filterCompeticiones());
@@ -130,7 +135,11 @@ export class CompeticionListComponent implements OnInit, OnDestroy {
           this.loadInscripciones(this.competicionId);
         });
 
-        this.scrollToNearestCompetition();
+        if (this.focoCompeticionId) {
+          this.irACompeticion(this.focoCompeticionId);
+        } else {
+          this.scrollToNearestCompetition();
+        }
       },
       (error) => {
         console.error('Error al cargar las competiciones:', error);
@@ -389,6 +398,29 @@ export class CompeticionListComponent implements OnInit, OnDestroy {
       this.copiadoId = competicion._id;
       setTimeout(() => this.copiadoId = null, 2000);
     });
+  }
+
+  // Salta al mes y a la competición indicados por ?competicionId=... en la URL
+  // (se usa al pulsar una competición desde el mini calendario del Home)
+  irACompeticion(id: string): void {
+    const competicion = this.competiciones.find(c => c._id === id);
+    if (!competicion) {
+      this.scrollToNearestCompetition();
+      return;
+    }
+
+    const fecha = new Date(competicion.fecha);
+    this.mesActual = fecha.getMonth();
+    this.anyoActual = fecha.getFullYear();
+    this.competicionDestacadaId = id;
+
+    setTimeout(() => {
+      const element = document.getElementById(`competicion-${id}`);
+      if (element) {
+        element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+      setTimeout(() => { this.competicionDestacadaId = null; }, 2500);
+    }, 300);
   }
 
   scrollToNearestCompetition(): void {

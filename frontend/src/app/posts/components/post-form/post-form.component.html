@@ -53,6 +53,46 @@
                     </select>
                 </div>
 
+                <!-- Competición relacionada -->
+                <div class="nf-field">
+                    <label class="nf-label">
+                        <i class="fas fa-trophy"></i> Competición relacionada
+                    </label>
+
+                    <!-- Competición ya seleccionada -->
+                    <div *ngIf="competicionVinculada" class="nf-vinculo-chip">
+                        <i class="fas fa-trophy nf-vinculo-icon"></i>
+                        <div class="nf-vinculo-info">
+                            <span class="nf-vinculo-nombre">{{ competicionVinculada.nombre }}</span>
+                            <span class="nf-vinculo-fecha">
+                                <i class="far fa-calendar-alt"></i> {{ competicionVinculada.fecha | date:'dd/MM/yyyy' }}
+                            </span>
+                        </div>
+                        <button type="button" class="nf-vinculo-quitar" (click)="quitarCompeticionVinculada()" title="Quitar vínculo">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+
+                    <!-- Buscador (solo si no hay ninguna seleccionada) -->
+                    <ng-container *ngIf="!competicionVinculada">
+                        <input type="text" class="nf-input"
+                            [(ngModel)]="buscarCompeticionTexto"
+                            [ngModelOptions]="{standalone: true}"
+                            placeholder="Buscar una competición futura por nombre..." />
+                        <div class="nf-vinculo-resultados" *ngIf="buscarCompeticionTexto.trim()">
+                            <button type="button" class="nf-vinculo-resultado"
+                                *ngFor="let c of competicionesEncontradas"
+                                (click)="seleccionarCompeticion(c)">
+                                <span class="nf-vinculo-nombre">{{ c.nombre }}</span>
+                                <span class="nf-vinculo-fecha">{{ c.fecha | date:'dd/MM/yyyy' }}</span>
+                            </button>
+                            <p *ngIf="competicionesEncontradas.length === 0" class="nf-vinculo-sin-resultados">
+                                No se han encontrado competiciones futuras con ese nombre.
+                            </p>
+                        </div>
+                    </ng-container>
+                </div>
+
                 <!-- Contenido -->
                 <div class="nf-field">
                     <label class="nf-label" for="content">
@@ -88,14 +128,14 @@
                     <img *ngIf="!isPdf(imageUrl)" [src]="imageUrl" alt="Vista previa" class="nf-preview-img" />
                     
                     <!-- Renderizado de PDF si el archivo subido es un documento -->
-                    <div *ngIf="isPdf(imageUrl)" style="width: 100%; min-height: 400px; background: #fff;">
-                        <pdf-viewer 
-                            [src]="imageUrl" 
-                            [render-text]="true" 
-                            [original-size]="false" 
+                    <div *ngIf="isPdf(imageUrl)" class="nf-pdf-wrap">
+                        <pdf-viewer
+                            [src]="imageUrl"
+                            [render-text]="true"
+                            [original-size]="false"
                             [fit-to-page]="true"
                             [show-all]="true"
-                            style="display: block; width: 100%; height: 600px;">
+                            class="nf-pdf-viewer">
                         </pdf-viewer>
                     </div>
                 </div>

@@ -130,9 +130,12 @@ import { isPdf, isImageFile, getMediaUrl } from '../../utils/competicion-media.u
       font-weight: 700;
       color: #1e293b;
       margin: 0 0 0.5rem;
+      word-break: break-word;
+      overflow-wrap: anywhere;
     }
     .publica-meta {
       display: flex;
+      flex-wrap: wrap;
       gap: 1.2rem;
       color: #64748b;
       font-size: 0.9rem;
@@ -143,6 +146,8 @@ import { isPdf, isImageFile, getMediaUrl } from '../../utils/competicion-media.u
       color: #475569;
       font-size: 0.9rem;
       margin-bottom: 1.25rem;
+      word-break: break-word;
+      overflow-wrap: anywhere;
     }
     .publica-form { margin-top: 1.5rem; }
     .publica-field { margin-bottom: 1.25rem; }
@@ -224,6 +229,41 @@ import { isPdf, isImageFile, getMediaUrl } from '../../utils/competicion-media.u
       text-decoration: none;
     }
     .publica-enlace-chip:hover { background: #e0e7ff; }
+    .publica-enlace-chip { max-width: 100%; word-break: break-word; overflow-wrap: anywhere; }
+
+    /* --- Responsive --- */
+    @media (max-width: 768px) {
+      .publica-wrapper {
+        padding: 1.5rem 0.75rem;
+        align-items: flex-start;
+      }
+      .publica-card {
+        padding: 1.5rem 1.25rem;
+      }
+      .publica-nombre { font-size: 1.35rem; }
+      .publica-ok { padding: 2.5rem 1.5rem; }
+    }
+
+    @media (max-width: 480px) {
+      .publica-wrapper {
+        padding: 1rem 0.5rem;
+      }
+      .publica-card {
+        padding: 1.25rem 1rem;
+        border-radius: 14px;
+      }
+      .publica-nombre { font-size: 1.2rem; }
+      .publica-meta {
+        flex-direction: column;
+        gap: 0.4rem;
+      }
+      .publica-btn { min-height: 48px; }
+      .publica-input { min-height: 44px; }
+      .publica-pdf-viewer { height: 240px; }
+      .publica-ok { padding: 2rem 1rem; }
+      .publica-ok i { font-size: 3rem; }
+      .publica-ok h2 { font-size: 1.35rem; }
+    }
   `]
 })
 export class InscripcionPublicaComponent implements OnInit {

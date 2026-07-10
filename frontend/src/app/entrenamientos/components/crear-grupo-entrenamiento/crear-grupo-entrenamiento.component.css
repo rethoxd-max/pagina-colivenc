@@ -1,0 +1,46 @@
+/* Permitir que los nombres largos de atletas se ajusten sin desbordar */
+.container span {
+    overflow-wrap: anywhere;
+    word-break: break-word;
+    min-width: 0;
+}
+
+/* Responsive: tablet / móvil */
+@media (max-width: 768px) {
+    /* Reducir el padding de Bootstrap (p-4) en pantallas pequeñas */
+    .container {
+        padding: 1rem !important;
+        margin-top: 1rem !important;
+    }
+
+    h2 {
+        font-size: 1.25rem;
+    }
+
+    /* Áreas táctiles cómodas para los botones */
+    .btn {
+        min-height: 40px;
+    }
+}
+
+@media (max-width: 480px) {
+    .container {
+        padding: 0.75rem !important;
+    }
+
+    /* Acciones a ancho completo y apiladas para facilitar el toque */
+    .d-flex.justify-content-end {
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+
+    .d-flex.justify-content-end .btn {
+        flex: 1 1 100%;
+        min-height: 44px;
+    }
+
+    /* Anular el margen lateral entre botones al apilarse */
+    .d-flex.justify-content-end .btn.me-2 {
+        margin-right: 0 !important;
+    }
+}

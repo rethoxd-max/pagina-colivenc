@@ -1,11 +1,20 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { PostService } from '../../services/posts.service';
 import { AuthService } from '../../../auth/services/auth.service';
 import { environment } from '../../../../environments/environment';
 import { PdfViewerModule } from 'ng2-pdf-viewer';
 import { isPdf, getPostMediaUrl } from '../../utils/post-media.util';
+import { getMediaUrl as getCompeticionMediaUrl } from '../../../calendario/utils/competicion-media.util';
+
+interface CompeticionResumen {
+  _id: string;
+  nombre: string;
+  fecha: string;
+  lugar?: string;
+  imageUrl?: string;
+}
 
 interface Post {
   _id: string;
@@ -13,12 +22,13 @@ interface Post {
   content: string;
   imageUrl?: string;
   createdAt: string;
+  competicion?: CompeticionResumen | null;
 }
 
 @Component({
   selector: 'app-post-detail',
   standalone: true,
-  imports: [CommonModule, PdfViewerModule],
+  imports: [CommonModule, RouterLink, PdfViewerModule],
   template: `
     <div class="post-detail-page">
       <div class="post-container">
@@ -78,6 +88,27 @@ interface Post {
           <!-- Contenido del artículo -->
           <div class="article-content">
             <div class="post-body" [innerHTML]="post?.content"></div>
+          </div>
+
+          <!-- Competición relacionada -->
+          <div *ngIf="post?.competicion as competicionRelacionada" class="related-competicion">
+            <span class="related-label"><i class="fas fa-trophy"></i> Competición relacionada</span>
+            <a [routerLink]="['/competiciones']" [queryParams]="{ competicionId: competicionRelacionada._id }" class="related-card">
+              <div class="related-thumb" *ngIf="competicionRelacionada.imageUrl">
+                <img [src]="getCompeticionImageUrl(competicionRelacionada.imageUrl)" alt="" />
+              </div>
+              <div class="related-thumb related-thumb-placeholder" *ngIf="!competicionRelacionada.imageUrl">
+                <i class="fas fa-running"></i>
+              </div>
+              <div class="related-info">
+                <span class="related-nombre">{{ competicionRelacionada.nombre }}</span>
+                <span class="related-meta">
+                  <i class="far fa-calendar-alt"></i> {{ competicionRelacionada.fecha | date:'dd/MM/yyyy' }}
+                  <ng-container *ngIf="competicionRelacionada.lugar"> · <i class="fas fa-map-marker-alt"></i> {{ competicionRelacionada.lugar }}</ng-container>
+                </span>
+              </div>
+              <i class="fas fa-arrow-right related-arrow"></i>
+            </a>
           </div>
 
           <!-- Footer del artículo -->
@@ -261,6 +292,8 @@ interface Post {
       color: var(--text-color);
       line-height: 1.3;
       margin: 0;
+      overflow-wrap: break-word;
+      word-wrap: break-word;
     }
 
     /* Imagen destacada */
@@ -271,6 +304,7 @@ interface Post {
 
     .post-image {
       width: 100%;
+      max-width: 100%;
       height: auto;
       max-height: 500px;
       object-fit: cover;
@@ -281,6 +315,7 @@ interface Post {
     .post-detail-pdf-viewer {
       display: block;
       width: 100%;
+      max-width: 100%;
       height: 700px;
       border-radius: 12px;
       overflow: auto;
@@ -295,6 +330,15 @@ interface Post {
       font-size: 1.125rem;
       line-height: 1.9;
       color: var(--text-color);
+      overflow-wrap: break-word;
+      word-wrap: break-word;
+    }
+
+    .post-body img,
+    .post-body video,
+    .post-body iframe {
+      max-width: 100%;
+      height: auto;
     }
 
     .post-body p {
@@ -303,6 +347,101 @@ interface Post {
 
     .post-body p:last-child {
       margin-bottom: 0;
+    }
+
+    /* Competición relacionada */
+    .related-competicion {
+      padding: 0 2.5rem 2rem;
+    }
+
+    .related-label {
+      display: block;
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: var(--text-light);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      margin-bottom: 0.75rem;
+    }
+
+    .related-card {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: 1rem 1.25rem;
+      background: #f8fafc;
+      border: 1.5px solid #e2e8f0;
+      border-radius: 14px;
+      text-decoration: none;
+      transition: var(--transition);
+    }
+
+    .related-card:hover {
+      border-color: var(--primary-color);
+      background: #eff6ff;
+      transform: translateY(-2px);
+    }
+
+    .related-thumb {
+      flex-shrink: 0;
+      width: 64px;
+      height: 64px;
+      border-radius: 10px;
+      overflow: hidden;
+      background: #e2e8f0;
+    }
+
+    .related-thumb img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .related-thumb-placeholder {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--primary-color);
+      font-size: 1.4rem;
+      background: linear-gradient(135deg, #eff6ff, #dbeafe);
+    }
+
+    .related-info {
+      flex: 1;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 0.3rem;
+    }
+
+    .related-nombre {
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--text-color);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .related-meta {
+      font-size: 0.82rem;
+      color: var(--text-light);
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+      flex-wrap: wrap;
+    }
+
+    .related-arrow {
+      flex-shrink: 0;
+      color: var(--primary-color);
+      font-size: 0.9rem;
+      transition: transform 0.2s ease;
+    }
+
+    .related-card:hover .related-arrow {
+      transform: translateX(4px);
     }
 
     /* Footer del artículo */
@@ -432,6 +571,10 @@ interface Post {
         font-size: 1rem;
       }
 
+      .related-competicion {
+        padding: 0 1.25rem 1.5rem;
+      }
+
       .article-footer {
         padding: 1.5rem 1.25rem;
       }
@@ -439,6 +582,74 @@ interface Post {
       .share-section {
         flex-direction: column;
         align-items: flex-start;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .post-detail-page {
+        padding: 0.75rem 0.4rem;
+      }
+
+      .admin-actions {
+        flex-wrap: wrap;
+      }
+
+      .btn-admin {
+        flex: 1 1 auto;
+        justify-content: center;
+      }
+
+      .article-header {
+        padding: 1.25rem 1rem;
+      }
+
+      .post-meta {
+        gap: 0.6rem;
+      }
+
+      .post-title {
+        font-size: 1.3rem;
+      }
+
+      .featured-image {
+        padding: 0 1rem;
+      }
+
+      .post-detail-pdf-viewer {
+        height: 380px;
+      }
+
+      .article-content {
+        padding: 1.25rem 1rem;
+      }
+
+      .post-body {
+        font-size: 0.95rem;
+        line-height: 1.75;
+      }
+
+      .related-competicion {
+        padding: 0 1rem 1.25rem;
+      }
+
+      .related-card {
+        padding: 0.85rem 1rem;
+        gap: 0.75rem;
+      }
+
+      .related-thumb {
+        width: 52px;
+        height: 52px;
+      }
+
+      .article-footer {
+        padding: 1.25rem 1rem;
+      }
+
+      .btn-all-news {
+        width: 100%;
+        justify-content: center;
+        padding: 0.9rem 1.5rem;
       }
     }
   `]
@@ -475,6 +686,10 @@ export class PostDetailComponent implements OnInit {
 
   isPdf(imageUrl: string | undefined): boolean {
     return isPdf(imageUrl);
+  }
+
+  getCompeticionImageUrl(imageUrl: string | undefined): string {
+    return getCompeticionMediaUrl(imageUrl);
   }
 
   volver() {

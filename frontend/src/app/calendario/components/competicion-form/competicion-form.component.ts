@@ -1,6 +1,6 @@
 import { Component, OnInit, NgZone, ElementRef, ViewChild } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { FormBuilder, FormGroup, FormArray, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormBuilder, FormGroup, FormArray, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { CompeticionService, PruebaCompeticion, SectorCompeticion, CategoriaCompeticion } from '../../services/competicion.service';
 import { NgFor, NgIf, NgClass } from '@angular/common';
 import { environment } from '../../../../environments/environment';
@@ -10,8 +10,10 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatSelectChange } from '@angular/material/select';
 import { DisciplinaService, Disciplina } from '../../../services/disciplina.service';
 import { AuthService } from '../../../auth/services/auth.service';
+import { PostService } from '../../../posts/services/posts.service';
 import { PdfViewerModule } from 'ng2-pdf-viewer';
 import { isPdf as isPdfUtil } from '../../utils/competicion-media.util';
+import { DatePipe } from '@angular/common';
 /// <reference types="@types/googlemaps" />
 
 declare var google: any;
@@ -19,7 +21,7 @@ declare var google: any;
 @Component({
   selector: 'app-competicion-form',
   standalone: true,
-  imports: [ReactiveFormsModule, NgIf, NgFor, NgClass, MatAutocompleteModule, MatFormFieldModule, MatSelectModule, PdfViewerModule],
+  imports: [ReactiveFormsModule, FormsModule, NgIf, NgFor, NgClass, MatAutocompleteModule, MatFormFieldModule, MatSelectModule, PdfViewerModule, DatePipe],
   templateUrl: './competicion-form.component.html',
   styleUrls: ['./competicion-form.component.css'],
 })
@@ -43,6 +45,11 @@ export class CompeticionFormComponent implements OnInit {
   sectorSeleccionado: string[] = [];
   disciplinas: Disciplina[] = [];
 
+  // Noticia enlazada a esta competición (buscador de texto por título)
+  postVinculado: any = null;
+  buscarPostTexto = '';
+  private todosLosPosts: any[] = [];
+
   // Variable para Google Maps Places Autocomplete
   autocomplete: any;
 
@@ -50,6 +57,7 @@ export class CompeticionFormComponent implements OnInit {
 
   constructor(
     private competicionService: CompeticionService,
+    private postService: PostService,
     private route: ActivatedRoute,
     private router: Router,
     private fb: FormBuilder,
@@ -81,6 +89,7 @@ export class CompeticionFormComponent implements OnInit {
     this.categoriasSeleccionadas = [];
     this.sectorSeleccionado = [];
     this.disciplinaService.getDisciplinas().subscribe(d => { this.disciplinas = d; });
+    this.cargarPostsParaVincular();
     // Cargar categorías y sectores al iniciar
     this.competicionService.getCategorias().subscribe(
       categorias => {
@@ -112,7 +121,11 @@ export class CompeticionFormComponent implements OnInit {
             pruebas: [],
             sector: ''
           });
-          
+
+          if (competicion.postVinculado) {
+            this.postVinculado = competicion.postVinculado;
+          }
+
           if (competicion.imageUrl) {
             // Extraer el nombre del archivo de la URL completa
             const urlParts = competicion.imageUrl.split('/');
@@ -435,6 +448,30 @@ export class CompeticionFormComponent implements OnInit {
     return isPdfUtil(url);
   }
 
+  private cargarPostsParaVincular(): void {
+    this.postService.getPosts(200).subscribe({
+      next: (posts) => { this.todosLosPosts = posts; },
+      error: () => { this.todosLosPosts = []; }
+    });
+  }
+
+  get postsEncontrados(): any[] {
+    const texto = this.buscarPostTexto.trim().toLowerCase();
+    if (!texto) return [];
+    return this.todosLosPosts
+      .filter(p => p.title.toLowerCase().includes(texto))
+      .slice(0, 8);
+  }
+
+  seleccionarPostVinculado(post: any): void {
+    this.postVinculado = post;
+    this.buscarPostTexto = '';
+  }
+
+  quitarPostVinculado(): void {
+    this.postVinculado = null;
+  }
+
   seleccionarPrueba(prueba: PruebaCompeticion): void {
     this.pruebasSeleccionadas.push(prueba);
     this.pruebasDisponibles = this.pruebasDisponibles.filter(p => p._id !== prueba._id);
@@ -462,6 +499,7 @@ export class CompeticionFormComponent implements OnInit {
 
     const disciplinaId = this.competicionForm.get('disciplina')?.value;
     if (disciplinaId) formData.append('disciplina', disciplinaId);
+    formData.append('postVinculado', this.postVinculado?._id || '');
 
     const categoriasIds = this.competicionForm.get('categorias')?.value;
     categoriasIds.forEach((id: string, index: number) => {

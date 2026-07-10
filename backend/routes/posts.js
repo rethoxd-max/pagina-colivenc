@@ -5,6 +5,10 @@ const router = express.Router();
 const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
+const mongoose = require('mongoose');
+const { sincronizarVinculoDesdeNoticia } = require('../utils/vinculoNoticiaCompeticion');
+
+const COMPETICION_POPULATE = 'nombre fecha lugar imageUrl';
 
 const BASE_URL = process.env.BASE_URL || 'http://localhost:3000';
 const UPLOAD_DIR = path.join(__dirname, '..', 'uploads', 'posts');
@@ -49,6 +53,7 @@ router.get('/', async (req, res) => {
         const posts = await Post.find()
             .populate('author', 'username')
             .populate('disciplina', 'nombre slug color icono')
+            .populate('competicion', COMPETICION_POPULATE)
             .sort({ date: -1 })
             .skip(skip)
             .limit(limit);
@@ -65,6 +70,7 @@ router.get('/ultimos', async (req, res) => {
         const posts = await Post.find()
             .populate('author', ['name'])
             .populate('disciplina', 'nombre slug color icono')
+            .populate('competicion', COMPETICION_POPULATE)
             .sort({ date: -1 })
             .limit(4);
 
@@ -81,7 +87,8 @@ router.get('/destacado', async (req, res) => {
     try {
         const post = await Post.findOne({ destacado: true })
             .populate('author', ['name'])
-            .populate('disciplina', 'nombre slug color icono');
+            .populate('disciplina', 'nombre slug color icono')
+            .populate('competicion', COMPETICION_POPULATE);
         res.json(post); // null si no hay ninguna destacada
     } catch (error) {
         res.status(500).json({ msg: 'Error en el servidor', error });
@@ -91,7 +98,10 @@ router.get('/destacado', async (req, res) => {
 // Obtener un post específico por ID
 router.get('/:id', async (req, res) => {
     try {
-        const post = await Post.findById(req.params.id).populate('author', ['name']).populate('disciplina', 'nombre slug color icono');
+        const post = await Post.findById(req.params.id)
+            .populate('author', ['name'])
+            .populate('disciplina', 'nombre slug color icono')
+            .populate('competicion', COMPETICION_POPULATE);
         if (!post) {
             return res.status(404).json({ msg: 'Post no encontrado' });
         }
@@ -110,7 +120,7 @@ router.post('/', auth, (req, res, next) => {
     next();
 }, upload, async (req, res) => {
     try {
-        const { title, content, category, disciplina } = req.body;
+        const { title, content, category, disciplina, competicionVinculada } = req.body;
 
         // Validaciones
         if (!title || !content) {
@@ -132,7 +142,12 @@ router.post('/', auth, (req, res, next) => {
             imageUrl,
         });
 
+        if (competicionVinculada && mongoose.Types.ObjectId.isValid(competicionVinculada)) {
+            await sincronizarVinculoDesdeNoticia(post, competicionVinculada);
+        }
+
         await post.save();
+        await post.populate('competicion', COMPETICION_POPULATE);
         res.json(post);
     } catch (error) {
         console.error('Error al crear post:', error);
@@ -156,7 +171,7 @@ router.put('/:id', auth, (req, res, next) => {
     next();
 }, upload, async (req, res) => {
     try {
-        const { title, content, category, disciplina } = req.body;
+        const { title, content, category, disciplina, competicionVinculada } = req.body;
         const post = await Post.findById(req.params.id);
 
         if (!post) {
@@ -173,6 +188,14 @@ router.put('/:id', auth, (req, res, next) => {
         post.content = content;
         post.category = category || '';
         post.disciplina = disciplina || null;
+
+        // Actualizar el vínculo con una competición (cadena vacía = quitar el vínculo)
+        if (competicionVinculada !== undefined) {
+            const idLimpio = competicionVinculada && mongoose.Types.ObjectId.isValid(competicionVinculada)
+                ? competicionVinculada
+                : null;
+            await sincronizarVinculoDesdeNoticia(post, idLimpio);
+        }
 
         // Si hay una nueva imagen, eliminar la antigua (si existe) y actualizar
         if (req.file) {
@@ -196,6 +219,7 @@ router.put('/:id', auth, (req, res, next) => {
         }
 
         await post.save();
+        await post.populate('competicion', COMPETICION_POPULATE);
         res.json(post);
     } catch (error) {
         console.error('Error al editar post:', error);
@@ -255,6 +279,11 @@ router.delete('/:id', auth, (req, res, next) => {
             const filename = post.imageUrl.split('/').pop();
             const filePath = path.join(UPLOAD_DIR, filename);
             if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
+        }
+
+        // Desenlazar la competición asociada, si la tenía
+        if (post.competicion) {
+            await sincronizarVinculoDesdeNoticia(post, null);
         }
 
         await post.deleteOne();

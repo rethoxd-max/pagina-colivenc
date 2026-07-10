@@ -6,7 +6,9 @@ const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
 const mongoose = require('mongoose');
+const { sincronizarVinculoDesdeCompeticion } = require('../../utils/vinculoNoticiaCompeticion');
 
+const POST_POPULATE = 'title imageUrl category date createdAt';
 const BASE_URL = process.env.BASE_URL || 'http://localhost:3000';
 const UPLOAD_DIR = path.join(__dirname, '..', '..', 'uploads', 'competiciones');
 
@@ -86,6 +88,7 @@ router.get('/', async (req, res) => {
     try {
         const competiciones = await Competicion.find()
             .populate('disciplina', 'nombre slug color icono')
+            .populate('postVinculado', POST_POPULATE)
             .sort({ fecha: -1 }); // Ordenar por fecha descendente
         res.json(competiciones);
     } catch (err) {
@@ -96,7 +99,9 @@ router.get('/', async (req, res) => {
 // Obtener una competición específica por ID
 router.get('/:id', async (req, res) => {
     try {
-        const competicion = await Competicion.findById(req.params.id);
+        const competicion = await Competicion.findById(req.params.id)
+            .populate('disciplina', 'nombre slug color icono')
+            .populate('postVinculado', POST_POPULATE);
         if (!competicion) {
             return res.status(404).json({ msg: 'Competición no encontrada' });
         }
@@ -193,7 +198,13 @@ router.post('/', auth, (req, res, next) => {
             disciplina: req.body.disciplina || null,
         });
 
+        const { postVinculado } = req.body;
+        if (postVinculado && mongoose.Types.ObjectId.isValid(postVinculado)) {
+            await sincronizarVinculoDesdeCompeticion(competicion, postVinculado);
+        }
+
         const nuevaCompeticion = await competicion.save();
+        await nuevaCompeticion.populate('postVinculado', POST_POPULATE);
         res.status(201).json(nuevaCompeticion);
     } catch (err) {
         console.error('Error al crear competición:', err);
@@ -272,6 +283,14 @@ router.put('/:id', auth, (req, res, next) => {
         // Actualizar disciplina
         competicion.disciplina = req.body.disciplina || null;
 
+        // Actualizar el vínculo con una noticia (cadena vacía = quitar el vínculo)
+        if (req.body.postVinculado !== undefined) {
+            const idLimpio = req.body.postVinculado && mongoose.Types.ObjectId.isValid(req.body.postVinculado)
+                ? req.body.postVinculado
+                : null;
+            await sincronizarVinculoDesdeCompeticion(competicion, idLimpio);
+        }
+
         // Manejar la imagen
         const imageFile = req.files && req.files.image && req.files.image[0];
         if (imageFile) {
@@ -294,6 +313,7 @@ router.put('/:id', auth, (req, res, next) => {
         }
 
         await competicion.save();
+        await competicion.populate('postVinculado', POST_POPULATE);
         res.json(competicion);
     } catch (error) {
         console.error('Error al actualizar competición:', error);
@@ -333,6 +353,11 @@ router.delete('/:id', auth, (req, res, next) => {
                 if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
             }
         });
+
+        // Desenlazar la noticia asociada, si la tenía
+        if (competicion.postVinculado) {
+            await sincronizarVinculoDesdeCompeticion(competicion, null);
+        }
 
         await competicion.deleteOne();
         res.status(200).json({ msg: 'Competición eliminada' });

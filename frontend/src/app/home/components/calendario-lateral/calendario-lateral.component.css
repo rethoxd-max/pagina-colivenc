@@ -139,6 +139,8 @@
     margin: 0;
     color: #2c3e50;
     font-size: 1.2rem;
+    min-width: 0;
+    overflow-wrap: break-word;
 }
 
 .tooltip-close {
@@ -171,6 +173,10 @@
     padding: 1rem;
     border-radius: 8px;
     transition: all 0.3s ease;
+    cursor: pointer;
+    min-width: 0;
+    overflow-wrap: break-word;
+    word-break: break-word;
 }
 
 .competicion-item:hover {
@@ -189,12 +195,17 @@
     color: #7f8c8d;
     font-size: 0.9rem;
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     gap: 0.5rem;
+    min-width: 0;
+    overflow-wrap: break-word;
+    word-break: break-word;
 }
 
 .competicion-item i {
     color: #3498db;
+    flex-shrink: 0;
+    margin-top: 0.2rem;
 }
 
 .competicion-tags {
@@ -223,6 +234,24 @@
     .calendario-container {
         margin-bottom: 1rem;
         padding: 1rem;
+    }
+}
+
+@media (max-width: 768px) {
+    .calendario-container {
+        padding: 1rem;
+    }
+
+    .tooltip-header h4 {
+        font-size: 1.05rem;
+    }
+
+    .competicion-item h5 {
+        font-size: 1rem;
+    }
+
+    .competicion-item p {
+        font-size: 0.85rem;
     }
 }
 

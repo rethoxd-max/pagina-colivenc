@@ -2,6 +2,15 @@
   padding: 20px;
   max-width: 800px;
   margin: 0 auto;
+  box-sizing: border-box;
+  width: 100%;
+}
+
+@media (max-width: 480px) {
+  .container,
+  .form-container {
+    padding: 12px;
+  }
 }
 
 .form-container {

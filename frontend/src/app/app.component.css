@@ -421,13 +421,103 @@ router-outlet + * {
         height: 85px;
         width: auto;
     }
+
+    /* Barra de acciones: reducir separación para que quepa en pantallas medianas */
+    .navbar-actions {
+        gap: 0.35rem;
+    }
+
+    .btn-action i {
+        font-size: 1.05rem;
+    }
+
+    /* Filtro de disciplina más compacto */
+    .disc-filter-btn {
+        padding: 0.45rem 0.7rem;
+    }
+
+    .disc-filter-label {
+        max-width: 70px;
+    }
+
+    /* Evita que el dropdown se salga de la pantalla por la derecha/izquierda */
+    .disc-dropdown {
+        min-width: 180px;
+        max-width: calc(100vw - 1.5rem);
+    }
+
+    /* Mostrar las flechas del menú lateral en móvil (no hay hover táctil) */
+    .nav-arrow {
+        opacity: 1;
+    }
 }
 
 /* ========================================
-   Otros estilos heredados
+   Responsive móvil pequeño
 ======================================== */
-.register-container {
-    padding: 160px;
+@media (max-width: 480px) {
+    .navbar {
+        height: 64px;
+    }
+
+    .navbar-container {
+        padding: 0 0.6rem;
+    }
+
+    .navbar-logo {
+        height: 48px;
+    }
+
+    .navbar-left {
+        gap: 0.5rem;
+    }
+
+    .menu-toggle {
+        width: 38px;
+        height: 38px;
+    }
+
+    /* Acciones muy compactas: iconos sin fondo excesivo, sin desbordar */
+    .navbar-actions {
+        gap: 0.15rem;
+    }
+
+    .btn-action {
+        padding: 0.4rem;
+        min-height: 40px;
+        min-width: 40px;
+        justify-content: center;
+    }
+
+    /* Filtro de disciplina: ocultar la etiqueta de texto, dejar solo icono + caret */
+    .disc-filter-label {
+        display: none;
+    }
+
+    .disc-filter-btn {
+        padding: 0.4rem 0.55rem;
+        min-height: 40px;
+    }
+
+    /* Anclar al viewport para no depender de la posición del filtro y no desbordar */
+    .disc-dropdown {
+        position: fixed;
+        top: 68px;
+        right: 0.6rem;
+        left: auto;
+        min-width: 0;
+        width: calc(100vw - 1.2rem);
+        max-width: 320px;
+    }
+
+    /* Footer más ajustado */
+    .site-footer {
+        padding: 1.5rem 1rem;
+    }
+
+    .footer-social {
+        gap: 1rem;
+    }
 }
 
 /* ========================================

@@ -2,7 +2,7 @@
   <div class="row justify-content-center">
     <div class="col-lg-10">
 
-      <div class="d-flex align-items-center justify-content-between mb-4">
+      <div class="d-flex align-items-center justify-content-between mb-4 flex-wrap gap-2 codigos-header">
         <h2 class="mb-0"><i class="fas fa-ticket-alt me-2"></i>Códigos de invitación</h2>
         <button class="btn btn-primary" (click)="generarCodigo()" [disabled]="generando">
           <i class="fas fa-plus me-2"></i>{{ generando ? 'Generando...' : 'Generar nuevo código' }}
@@ -23,7 +23,7 @@
           <div *ngIf="codigosDisponibles().length === 0" class="p-4 text-center text-muted">
             No hay códigos disponibles. Genera uno nuevo.
           </div>
-          <table *ngIf="codigosDisponibles().length > 0" class="table table-hover mb-0">
+          <table *ngIf="codigosDisponibles().length > 0" class="table table-hover mb-0 codigos-table">
             <thead class="table-light">
               <tr>
                 <th>Código</th>
@@ -34,16 +34,16 @@
             </thead>
             <tbody>
               <tr *ngFor="let c of codigosDisponibles()">
-                <td>
+                <td data-label="Código">
                   <code class="fs-6 fw-bold">{{ c.codigo }}</code>
                   <button class="btn btn-sm btn-outline-secondary ms-2" (click)="copiarCodigo(c.codigo)" title="Copiar">
                     <i class="fas" [class.fa-copy]="copiado !== c.codigo" [class.fa-check]="copiado === c.codigo"></i>
                     {{ copiado === c.codigo ? 'Copiado' : 'Copiar' }}
                   </button>
                 </td>
-                <td>{{ c.creadoPor.name }}</td>
-                <td>{{ c.creadoEn | date:'dd/MM/yyyy HH:mm' }}</td>
-                <td class="text-end">
+                <td data-label="Creado por">{{ c.creadoPor.name }}</td>
+                <td data-label="Fecha">{{ c.creadoEn | date:'dd/MM/yyyy HH:mm' }}</td>
+                <td class="text-end" data-label="Acciones">
                   <button class="btn btn-sm btn-outline-danger" (click)="eliminarCodigo(c._id)">
                     <i class="fas fa-trash"></i>
                   </button>
@@ -63,7 +63,7 @@
           <div *ngIf="codigosUsados().length === 0" class="p-4 text-center text-muted">
             Ningún código ha sido utilizado todavía.
           </div>
-          <table *ngIf="codigosUsados().length > 0" class="table table-hover mb-0">
+          <table *ngIf="codigosUsados().length > 0" class="table table-hover mb-0 codigos-table">
             <thead class="table-light">
               <tr>
                 <th>Código</th>
@@ -73,9 +73,9 @@
             </thead>
             <tbody>
               <tr *ngFor="let c of codigosUsados()">
-                <td><code>{{ c.codigo }}</code></td>
-                <td>{{ c.usadoPor?.name }} <small class="text-muted">({{ c.usadoPor?.email }})</small></td>
-                <td>{{ c.usadoEn | date:'dd/MM/yyyy HH:mm' }}</td>
+                <td data-label="Código"><code>{{ c.codigo }}</code></td>
+                <td data-label="Usado por">{{ c.usadoPor?.name }} <small class="text-muted">({{ c.usadoPor?.email }})</small></td>
+                <td data-label="Fecha de uso">{{ c.usadoEn | date:'dd/MM/yyyy HH:mm' }}</td>
               </tr>
             </tbody>
           </table>

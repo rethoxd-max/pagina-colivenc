@@ -81,8 +81,53 @@ textarea.form-control {
 .preview-imagen {
   max-width: 200px;
   max-height: 200px;
+  width: 100%;
   object-fit: contain;
   border: 1px solid #ddd;
   border-radius: 4px;
   padding: 0.5rem;
+  box-sizing: border-box;
+}
+
+/* Evita que inputs (sobre todo type="file") desborden el contenedor */
+.form-control {
+  width: 100%;
+  box-sizing: border-box;
+  max-width: 100%;
+}
+
+/* ========================================
+   Responsive
+======================================== */
+@media (max-width: 768px) {
+  .crear-producto-container {
+    margin: 1rem;
+    padding: 1.5rem;
+  }
+
+  .crear-producto-container h2 {
+    font-size: 1.4rem;
+  }
+
+  .producto-form {
+    gap: 1.25rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .crear-producto-container {
+    margin: 0.75rem;
+    padding: 1rem;
+    border-radius: 6px;
+  }
+
+  .form-actions {
+    flex-direction: column;
+  }
+
+  .btn-submit,
+  .btn-cancel {
+    width: 100%;
+    min-height: 44px;
+  }
 } 

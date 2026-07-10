@@ -12,9 +12,12 @@ interface EntradaRanking {
   extra: string;
 }
 
+type SectorClave = 'velocidad' | 'medio_fondo' | 'ruta_marcha' | 'saltos' | 'lanzamientos' | 'combinadas';
+
 interface PruebaRanking {
   prueba: string;
   tipo: 'estandar' | 'maraton';
+  sector: SectorClave;
   entradas: EntradaRanking[];
 }
 
@@ -22,6 +25,12 @@ interface RankingClubData {
   titulo: string;
   actualizado: string;
   generos: { M: PruebaRanking[]; F: PruebaRanking[] };
+}
+
+interface SectorInfo {
+  clave: SectorClave;
+  nombre: string;
+  icono: string;
 }
 
 @Component({
@@ -32,18 +41,32 @@ interface RankingClubData {
   styleUrls: ['./ranking-club.component.css'],
 })
 export class RankingClubComponent implements OnInit {
+  readonly SECTORES: SectorInfo[] = [
+    { clave: 'velocidad', nombre: 'Velocidad y vallas', icono: 'fa-bolt' },
+    { clave: 'medio_fondo', nombre: 'Medio y fondo', icono: 'fa-person-running' },
+    { clave: 'ruta_marcha', nombre: 'Ruta y marcha', icono: 'fa-road' },
+    { clave: 'saltos', nombre: 'Saltos', icono: 'fa-arrow-up-long' },
+    { clave: 'lanzamientos', nombre: 'Lanzamientos', icono: 'fa-dumbbell' },
+    { clave: 'combinadas', nombre: 'Pruebas combinadas', icono: 'fa-layer-group' },
+  ];
+
   data: RankingClubData | null = null;
   cargando = true;
   error = false;
 
   genero: 'M' | 'F' = 'M';
-  pruebaIdx = 0;
+  sectorActual: SectorClave = 'velocidad';
+  pruebaSeleccionada: PruebaRanking | null = null;
 
   constructor(private http: HttpClient) {}
 
   ngOnInit(): void {
     this.http.get<RankingClubData>('assets/ranking-club.json').subscribe({
-      next: (d) => { this.data = d; this.cargando = false; },
+      next: (d) => {
+        this.data = d;
+        this.cargando = false;
+        this.setSector(this.sectorActual);
+      },
       error: () => { this.error = true; this.cargando = false; },
     });
   }
@@ -52,18 +75,28 @@ export class RankingClubComponent implements OnInit {
     return this.data ? this.data.generos[this.genero] : [];
   }
 
-  get pruebaActual(): PruebaRanking | null {
-    return this.pruebas[this.pruebaIdx] ?? null;
+  pruebasDelSector(clave: SectorClave): PruebaRanking[] {
+    return this.pruebas.filter(p => p.sector === clave);
+  }
+
+  sectorTienePruebas(clave: SectorClave): boolean {
+    return this.pruebasDelSector(clave).length > 0;
   }
 
   setGenero(g: 'M' | 'F'): void {
     if (this.genero === g) return;
     this.genero = g;
-    this.pruebaIdx = 0;
+    this.setSector(this.sectorActual);
   }
 
-  setPrueba(i: number): void {
-    this.pruebaIdx = i;
+  setSector(clave: SectorClave): void {
+    this.sectorActual = clave;
+    const del = this.pruebasDelSector(clave);
+    this.pruebaSeleccionada = del[0] ?? null;
+  }
+
+  setPrueba(p: PruebaRanking): void {
+    this.pruebaSeleccionada = p;
   }
 
   medalla(puesto: string): string {

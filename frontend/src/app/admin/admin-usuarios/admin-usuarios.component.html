@@ -116,7 +116,7 @@
   <div class="card">
     <div class="card-body p-0">
       <div class="table-responsive">
-        <table class="table table-hover mb-0 align-middle">
+        <table class="table table-hover mb-0 align-middle usuarios-table">
           <thead class="table-light">
             <tr>
               <th>Nombre</th>
@@ -129,10 +129,10 @@
           </thead>
           <tbody>
             <tr *ngFor="let u of usuariosFiltrados">
-              <td>{{ u.name }}</td>
-              <td class="text-muted small">{{ u.email }}</td>
-              <td class="text-muted small">{{ u.dni || '—' }}</td>
-              <td>
+              <td data-label="Nombre">{{ u.name }}</td>
+              <td class="text-muted small" data-label="Email">{{ u.email }}</td>
+              <td class="text-muted small" data-label="DNI">{{ u.dni || '—' }}</td>
+              <td data-label="Roles">
                 <span *ngFor="let rol of u.userTypes"
                   class="badge me-1"
                   [class.bg-danger]="rol === 'Admin'"
@@ -143,12 +143,12 @@
                   {{ rol }}
                 </span>
               </td>
-              <td>
+              <td data-label="Estado">
                 <span class="badge" [class.bg-success]="u.activo" [class.bg-danger]="!u.activo">
                   {{ u.activo ? 'Activo' : 'Inactivo' }}
                 </span>
               </td>
-              <td class="text-end">
+              <td class="text-end acciones-cell" data-label="Acciones">
                 <button class="btn btn-sm btn-outline-primary me-1" (click)="abrirEdicion(u)" title="Editar">
                   <i class="fas fa-edit"></i>
                 </button>

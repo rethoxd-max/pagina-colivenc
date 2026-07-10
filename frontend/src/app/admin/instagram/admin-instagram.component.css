@@ -257,6 +257,15 @@
 
 .ai-btn-del:hover { background: #e74c3c; color: #fff; }
 
+@media (max-width: 768px) {
+  .ai-container { margin: 1.25rem auto; }
+  .ai-card { padding: 1.15rem; }
+  /* Rejilla algo más fluida en tablet/móvil */
+  .ai-grid {
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  }
+}
+
 @media (max-width: 480px) {
   .ai-url-row {
     flex-direction: column;
@@ -265,5 +274,26 @@
   .ai-btn-add {
     justify-content: center;
     padding: 0.7rem 1.3rem;
+    min-height: 44px;
+  }
+
+  /* Dos columnas fijas para aprovechar el ancho del móvil */
+  .ai-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.75rem;
+  }
+
+  /* Cabecera compacta */
+  .ai-header h2 { font-size: 1.2rem; }
+  .ai-header i { font-size: 1.6rem; }
+
+  /* Botones de acción táctiles */
+  .ai-btn-icon { padding: 0.7rem 0; min-height: 44px; }
+}
+
+@media (max-width: 360px) {
+  /* Una columna en pantallas muy estrechas */
+  .ai-grid {
+    grid-template-columns: 1fr;
   }
 }

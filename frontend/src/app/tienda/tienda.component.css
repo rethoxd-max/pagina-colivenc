@@ -681,56 +681,115 @@
     .page-header {
         padding: 3rem 1.5rem 2rem;
     }
-    
+
     .page-title {
         font-size: 2rem;
     }
-    
-    .tienda-container {
-        padding: 1.5rem;
+
+    .page-subtitle {
+        font-size: 1.05rem;
     }
-    
+
+    .tienda-container {
+        padding: 1.5rem 1rem;
+    }
+
     .actions-bar {
         flex-direction: column;
         gap: 1rem;
         align-items: stretch;
     }
-    
+
     .actions-buttons {
         justify-content: center;
+        flex-wrap: wrap;
     }
-    
+
+    /* 2 columnas en tablet/móvil grande */
     .productos-grid {
-        grid-template-columns: 1fr;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 1rem;
     }
-    
+
+    .producto-info {
+        padding: 1rem;
+    }
+
+    .producto-imagen-container {
+        height: 200px;
+    }
+
+    .modal-overlay {
+        padding: 1rem;
+    }
+
     .modal-body {
         grid-template-columns: 1fr;
     }
-    
+
     .modal-imagen {
         max-height: 250px;
     }
-    
+
     .modal-info {
         max-height: none;
+        padding: 1.5rem;
+    }
+
+    .modal-info h2 {
+        font-size: 1.4rem;
+    }
+
+    .modal-precio {
+        font-size: 1.6rem;
     }
 }
 
 @media (max-width: 480px) {
-    .btn-carrito-toggle span:not(.carrito-badge) {
-        display: none;
+    .page-title {
+        font-size: 1.6rem;
     }
-    
-    .btn-crear-producto span {
-        display: none;
+
+    .page-subtitle {
+        font-size: 0.95rem;
     }
-    
+
+    .btn-carrito-toggle,
+    .btn-crear-producto {
+        flex: 1;
+        justify-content: center;
+        min-height: 44px;
+    }
+
+    /* 1 columna en móvil pequeño */
+    .productos-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .producto-info h2 {
+        font-size: 1.05rem;
+        overflow-wrap: anywhere;
+    }
+
     .acciones-producto {
         flex-wrap: wrap;
     }
-    
+
     .btn-carrito {
         width: 100%;
+        min-height: 44px;
+    }
+
+    .modal-overlay {
+        padding: 0.75rem;
+    }
+
+    .modal-info {
+        padding: 1.25rem;
+    }
+
+    .btn-carrito-modal {
+        font-size: 1rem;
+        padding: 0.85rem 1.5rem;
     }
 }

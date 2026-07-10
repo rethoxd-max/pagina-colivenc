@@ -93,3 +93,55 @@
   font-size: 1.1rem;
   margin-top: 2rem;
 }
+
+/* --- Responsive --- */
+@media (max-width: 768px) {
+  .inscripciones-container {
+    margin: 1.5rem auto;
+    padding: 0.75rem;
+  }
+
+  .inscripciones-title {
+    font-size: 1.5rem;
+  }
+
+  .atleta-nombre {
+    word-break: break-word;
+    overflow-wrap: anywhere;
+  }
+
+  .prueba-item {
+    word-break: break-word;
+  }
+}
+
+@media (max-width: 480px) {
+  .inscripciones-container {
+    margin: 1rem auto;
+    padding: 0.5rem;
+  }
+
+  .inscripciones-title {
+    font-size: 1.3rem;
+    margin-bottom: 1rem;
+  }
+
+  .inscripcion-item {
+    padding: 1rem;
+  }
+
+  /* Acciones a ancho completo y apiladas, con área táctil cómoda */
+  .acciones-container {
+    flex-direction: column;
+    gap: 0.6rem;
+  }
+
+  .btn-accion {
+    width: 100%;
+    justify-content: center;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    min-height: 44px;
+  }
+}

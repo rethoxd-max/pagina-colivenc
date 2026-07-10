@@ -134,3 +134,73 @@
 .fp-card:hover .fp-link i {
   transform: translateX(3px);
 }
+
+/* ===== Responsive ===== */
+@media (max-width: 768px) {
+  .fp-section {
+    padding: 1.1rem;
+  }
+
+  .fp-card {
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .fp-thumb {
+    width: 100%;
+    height: auto;
+    aspect-ratio: 16 / 9;
+    border-radius: 14px;
+  }
+
+  .fp-empty p {
+    font-size: 1rem;
+  }
+
+  .fp-empty i {
+    font-size: 2.4rem;
+  }
+
+  .fp-date {
+    font-size: 0.85rem;
+  }
+
+  .fp-title {
+    font-size: 1.15rem;
+  }
+
+  .fp-excerpt {
+    font-size: 0.95rem;
+  }
+
+  .fp-link {
+    font-size: 0.95rem;
+    padding: 0.4rem 0;
+    min-height: 40px;
+    align-items: center;
+  }
+
+  .fp-link i {
+    font-size: 0.85rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .fp-section {
+    padding: 0.85rem;
+  }
+
+  .fp-thumb {
+    aspect-ratio: 4 / 3;
+    border-radius: 12px;
+  }
+
+  .fp-title {
+    font-size: 1.05rem;
+  }
+
+  .fp-excerpt {
+    font-size: 0.9rem;
+    -webkit-line-clamp: 4;
+  }
+}

@@ -71,6 +71,45 @@
                     </select>
                 </div>
 
+                <!-- Noticia relacionada -->
+                <div class="nf-field">
+                    <label class="nf-label">
+                        <i class="fas fa-newspaper"></i> Noticia relacionada
+                    </label>
+
+                    <!-- Noticia ya seleccionada -->
+                    <div *ngIf="postVinculado" class="nf-vinculo-chip">
+                        <i class="fas fa-newspaper nf-vinculo-icon"></i>
+                        <div class="nf-vinculo-info">
+                            <span class="nf-vinculo-nombre">{{ postVinculado.title }}</span>
+                            <span class="nf-vinculo-fecha" *ngIf="postVinculado.createdAt || postVinculado.date">
+                                <i class="far fa-calendar-alt"></i> {{ (postVinculado.createdAt || postVinculado.date) | date:'dd/MM/yyyy' }}
+                            </span>
+                        </div>
+                        <button type="button" class="nf-vinculo-quitar" (click)="quitarPostVinculado()" title="Quitar vínculo">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+
+                    <!-- Buscador (solo si no hay ninguna seleccionada) -->
+                    <ng-container *ngIf="!postVinculado">
+                        <input type="text" class="nf-input"
+                            [(ngModel)]="buscarPostTexto"
+                            [ngModelOptions]="{standalone: true}"
+                            placeholder="Buscar una noticia por título..." />
+                        <div class="nf-vinculo-resultados" *ngIf="buscarPostTexto.trim()">
+                            <button type="button" class="nf-vinculo-resultado"
+                                *ngFor="let p of postsEncontrados"
+                                (click)="seleccionarPostVinculado(p)">
+                                <span class="nf-vinculo-nombre">{{ p.title }}</span>
+                            </button>
+                            <p *ngIf="postsEncontrados.length === 0" class="nf-vinculo-sin-resultados">
+                                No se han encontrado noticias con ese título.
+                            </p>
+                        </div>
+                    </ng-container>
+                </div>
+
                 <!-- Categorías -->
                 <div *ngIf="isAdmin()" class="nf-field">
                     <label class="nf-label">

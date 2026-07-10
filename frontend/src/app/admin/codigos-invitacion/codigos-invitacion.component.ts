@@ -18,6 +18,7 @@ interface CodigoInvitacion {
   standalone: true,
   imports: [CommonModule],
   templateUrl: './codigos-invitacion.component.html',
+  styleUrls: ['./codigos-invitacion.component.css'],
 })
 export class CodigosInvitacionComponent implements OnInit {
   codigos: CodigoInvitacion[] = [];

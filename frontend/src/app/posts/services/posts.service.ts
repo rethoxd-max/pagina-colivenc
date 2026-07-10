@@ -13,8 +13,9 @@ export class PostService {
   private authService = inject(AuthService);
   private apiUrl = `${environment.apiUrl}/posts`;
 
-  getPosts(): Observable<any[]> {
-    return this.http.get<any[]>(this.apiUrl);
+  getPosts(limit?: number): Observable<any[]> {
+    const url = limit ? `${this.apiUrl}?limit=${limit}` : this.apiUrl;
+    return this.http.get<any[]>(url);
   }
 
   getUltimosPosts(): Observable<any[]> {

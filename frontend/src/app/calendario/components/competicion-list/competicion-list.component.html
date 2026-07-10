@@ -77,7 +77,7 @@
                 </h3>
                 
                 <div class="competiciones-grid">
-                    <div *ngFor="let competicion of grupo.competiciones" class="competicion-card" id="competicion-{{competicion._id}}">
+                    <div *ngFor="let competicion of grupo.competiciones" class="competicion-card" id="competicion-{{competicion._id}}" [class.competicion-destacada]="competicion._id === competicionDestacadaId">
                             <div class="card-image" *ngIf="competicion.imageUrl && !isPdf(competicion.imageUrl)">
                                 <img [src]="getImageUrl(competicion.imageUrl)" alt="Imagen de la competición">
                             </div>
@@ -126,7 +126,7 @@
                                 </div>
 
                                 <!-- Enlaces / documentos -->
-                                <div class="card-enlaces" *ngIf="competicion.enlaces && competicion.enlaces.length > 0 && isAdmin()">
+                                <div class="card-enlaces" *ngIf="competicion.enlaces && competicion.enlaces.length > 0">
                                     <span class="tag-label"><i class="fas fa-paperclip me-1"></i>Documentos:</span>
                                     <div class="enlaces-container">
                                         <a *ngFor="let enlace of competicion.enlaces"
@@ -136,6 +136,14 @@
                                             <i class="fas me-1" [ngClass]="getEnlaceIcon(enlace)"></i>{{ enlace.nombre }}
                                         </a>
                                     </div>
+                                </div>
+
+                                <!-- Noticia relacionada -->
+                                <div class="card-noticia-vinculada" *ngIf="competicion.postVinculado">
+                                    <span class="tag-label"><i class="fas fa-newspaper me-1"></i>Noticia relacionada:</span>
+                                    <a [routerLink]="['/noticia', competicion.postVinculado._id]" class="noticia-vinculada-chip">
+                                        <i class="fas fa-newspaper me-1"></i>{{ competicion.postVinculado.title }}
+                                    </a>
                                 </div>
 
                                 <div class="card-actions">
@@ -208,7 +216,7 @@
                     <span class="lista-col-acciones">Acciones</span>
                 </div>
 
-                <div class="lista-row" *ngFor="let competicion of getCompeticionesDelMes()" id="competicion-{{competicion._id}}">
+                <div class="lista-row" *ngFor="let competicion of getCompeticionesDelMes()" id="competicion-{{competicion._id}}" [class.competicion-destacada]="competicion._id === competicionDestacadaId">
                     <!-- Fila principal -->
                     <div class="lista-row-main">
                         <span class="lista-col-fecha">
@@ -263,13 +271,21 @@
                     </div>
 
                     <!-- Sub-fila de enlaces -->
-                    <div class="lista-row-enlaces" *ngIf="competicion.enlaces && competicion.enlaces.length > 0 && isAdmin()">
+                    <div class="lista-row-enlaces" *ngIf="competicion.enlaces && competicion.enlaces.length > 0">
                         <i class="fas fa-paperclip lista-pruebas-icon"></i>
                         <a *ngFor="let enlace of competicion.enlaces; let last = last"
                             [href]="isEnlaceArchivo(enlace) ? getImageUrl(enlace.url) : enlace.url"
                             target="_blank" rel="noopener noreferrer"
                             class="lista-enlace-item">
                             <i class="fas me-1" [ngClass]="getEnlaceIcon(enlace)"></i>{{ enlace.nombre }}<ng-container *ngIf="!last"> · </ng-container>
+                        </a>
+                    </div>
+
+                    <!-- Sub-fila de noticia relacionada -->
+                    <div class="lista-row-enlaces" *ngIf="competicion.postVinculado">
+                        <i class="fas fa-newspaper lista-pruebas-icon"></i>
+                        <a [routerLink]="['/noticia', competicion.postVinculado._id]" class="lista-enlace-item">
+                            {{ competicion.postVinculado.title }}
                         </a>
                     </div>
                 </div>

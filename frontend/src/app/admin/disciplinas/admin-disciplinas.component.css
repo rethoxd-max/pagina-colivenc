@@ -49,3 +49,25 @@
 .disc-btn-sm--edit:hover { background: #eff6ff; border-color: #bfdbfe; }
 .disc-btn-sm--del { color: #dc2626; }
 .disc-btn-sm--del:hover { background: #fef2f2; border-color: #fecaca; }
+
+/* ===== Responsive ===== */
+@media (max-width: 768px) {
+  .disc-page { margin: 1.25rem auto; }
+  .disc-form-card { padding: 1.15rem; }
+  /* Evita desbordes de textos largos (nombre/slug) */
+  .disc-item-info { min-width: 0; flex: 1 1 auto; }
+  .disc-item-nombre,
+  .disc-item-slug { word-break: break-word; overflow-wrap: anywhere; }
+}
+
+@media (max-width: 480px) {
+  /* Botones del formulario a ancho completo y táctiles */
+  .disc-form-actions { flex-direction: column-reverse; gap: 0.6rem; }
+  .disc-form-actions .disc-btn {
+    width: 100%;
+    justify-content: center;
+    min-height: 44px;
+  }
+  /* Ítems: acciones táctiles */
+  .disc-btn-sm { width: 40px; height: 40px; }
+}

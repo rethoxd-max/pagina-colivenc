@@ -1610,3 +1610,275 @@ textarea.form-control {
 .training-details p {
   margin: 5px 0;
 }
+
+/* Contenedor de scroll del calendario.
+   En escritorio no altera nada (sin scroll); en móvil permite el desplazamiento
+   horizontal controlado DENTRO del contenedor, evitando romper el ancho de la página. */
+.calendar-grid-scroll {
+  width: 100%;
+}
+
+/* ==========================================================================
+   RESPONSIVE (móvil y tablet)
+   Se preserva por completo el aspecto de escritorio; todos los ajustes van
+   dentro de media queries. Objetivo: cero scroll horizontal de página.
+   ========================================================================== */
+
+/* Evitar que texto largo (comentarios, nombres) fuerce desbordamiento horizontal */
+.training-details,
+.result-content,
+.competicion-name,
+.competicion-details,
+.atleta-name,
+.resultado-content,
+.training-indicator span {
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+@media (max-width: 768px) {
+  /* El wrapper ya pasa a columna (regla existente); reforzamos sin desbordes */
+  .calendar-wrapper {
+    padding: 1rem;
+    gap: 1.5rem;
+  }
+
+  .filters-panel {
+    padding: 1.25rem;
+    box-sizing: border-box;
+  }
+
+  /* Contenedor del calendario a ancho completo, sin padding lateral excesivo */
+  .calendar-container {
+    max-width: 100%;
+    padding: 0.75rem;
+    box-sizing: border-box;
+  }
+
+  /* La rejilla semanal mantiene 7 columnas pero con scroll horizontal
+     confinado a su propio contenedor (nunca a la página). */
+  .calendar-grid-scroll {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 0.5rem;
+  }
+
+  .calendar-grid {
+    /* Ancho mínimo para que las 7 columnas sean legibles; el scroll queda
+       dentro de .calendar-grid-scroll, no en el body. */
+    min-width: 560px;
+    gap: 6px;
+  }
+
+  .day-header {
+    padding: 6px;
+    font-size: 0.8rem;
+  }
+
+  .day-cell {
+    min-height: 90px;
+    padding: 4px;
+  }
+
+  .calendar-day {
+    min-height: 80px;
+    padding: 0.35rem;
+    gap: 0.35rem;
+  }
+
+  .day-number {
+    font-size: 14px;
+  }
+
+  .training-indicator {
+    font-size: 0.72rem;
+    padding: 4px 6px;
+  }
+
+  /* Cabecera del calendario: permitir wrap y áreas táctiles cómodas */
+  .calendar-header {
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .calendar-header h2 {
+    font-size: 1.15rem;
+    flex: 1 1 100%;
+    text-align: center;
+    order: -1;
+  }
+
+  .calendar-header button {
+    flex: 1;
+    min-height: 40px;
+  }
+
+  /* Barra de acciones de filtros: que ocupe el ancho y haga wrap */
+  .form-actions {
+    flex-wrap: wrap;
+  }
+
+  .apply-button,
+  .clear-button {
+    min-height: 44px;
+  }
+
+  /* Modales: ocupar casi todo el ancho de forma segura */
+  .modal-content,
+  .result-modal .modal-content,
+  .results-modal .modal-content {
+    width: 94%;
+    max-width: 94%;
+    box-sizing: border-box;
+  }
+
+  /* Filas de formulario del modal de edición -> apilar en 1 columna */
+  .form-row {
+    flex-direction: column;
+    gap: 0.75rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .training-form {
+    padding: 1rem;
+  }
+
+  .training-section {
+    padding: 0.75rem;
+  }
+
+  .array-item {
+    padding: 0.75rem;
+  }
+
+  /* Footer del modal: botones que hagan wrap y sean táctiles */
+  .modal-footer {
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .modal-footer button,
+  .edit-button,
+  .delete-button,
+  .add-result-button,
+  .view-results-button {
+    min-height: 44px;
+    margin-left: 0;
+  }
+
+  .add-result-button,
+  .view-results-button {
+    margin-left: 0;
+  }
+
+  /* Popup flotante de entrenamientos: confinarlo al ancho de pantalla.
+     Se ancla con position/left/top inline desde el TS, pero limitamos su
+     ancho máximo para que nunca desborde la página. */
+  .trainings-popup {
+    max-width: calc(100vw - 20px);
+    min-width: 0;
+    width: calc(100vw - 20px);
+    left: 10px !important;
+    right: 10px;
+    box-sizing: border-box;
+    max-height: 80vh;
+    overflow-y: auto;
+  }
+
+  /* Detalles del resultado dentro de las tarjetas de filtro */
+  .result-header {
+    flex-wrap: wrap;
+    gap: 0.25rem;
+  }
+
+  /* Buscador de competiciones: fila que puede envolver */
+  .competicion-details {
+    flex-wrap: wrap;
+    gap: 0.25rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .calendar-wrapper {
+    padding: 0.75rem;
+    gap: 1rem;
+  }
+
+  .filters-panel {
+    padding: 1rem;
+  }
+
+  .filters-panel h3 {
+    font-size: 1.25rem;
+  }
+
+  .calendar-container {
+    padding: 0.5rem;
+  }
+
+  /* Rejilla más compacta en móvil pequeño, manteniendo scroll interno */
+  .calendar-grid {
+    min-width: 480px;
+    gap: 4px;
+  }
+
+  .day-header {
+    padding: 4px;
+    font-size: 0.7rem;
+  }
+
+  .day-cell {
+    min-height: 78px;
+    padding: 3px;
+  }
+
+  .calendar-day {
+    min-height: 70px;
+    padding: 0.25rem;
+  }
+
+  .training-indicator {
+    font-size: 0.68rem;
+    padding: 3px 5px;
+  }
+
+  .training-indicator mat-icon {
+    font-size: 14px;
+    width: 14px;
+    height: 14px;
+    margin-right: 2px;
+  }
+
+  /* Acciones de filtros a 1 columna en pantallas muy pequeñas */
+  .form-actions {
+    flex-direction: column;
+  }
+
+  .apply-button,
+  .clear-button {
+    width: 100%;
+  }
+
+  .modal-header h2 {
+    font-size: 1.2rem;
+  }
+
+  .modal-header h3 {
+    font-size: 1.1rem;
+  }
+
+  /* Botones de acción del modal a ancho completo para mejor toque */
+  .modal-footer button,
+  .edit-button,
+  .delete-button,
+  .add-result-button,
+  .view-results-button {
+    flex: 1 1 100%;
+    justify-content: center;
+  }
+
+  .submit-button,
+  .cancel-button {
+    width: 100%;
+  }
+}

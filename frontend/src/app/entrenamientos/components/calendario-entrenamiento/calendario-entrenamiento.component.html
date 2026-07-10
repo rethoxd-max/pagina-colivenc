@@ -507,39 +507,41 @@
       <button (click)="nextMonth()">Siguiente</button>
     </div>
 
-    <div class="calendar-grid">
-      <div
-        class="day-header"
-        *ngFor="let day of ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom']"
-      >
-        {{ day }}
-      </div>
+    <div class="calendar-grid-scroll">
+      <div class="calendar-grid">
+        <div
+          class="day-header"
+          *ngFor="let day of ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom']"
+        >
+          {{ day }}
+        </div>
 
-      <div
-        class="day-cell"
-        *ngFor="let day of daysInMonth"
-        [class.empty-day]="!day"
-      >
-        <div class="calendar-day" *ngIf="day">
-          <div class="day-header-row">
-            <span class="day-number">{{ day.date.getDate() }}</span>
-            <button
-              class="add-training"
-              (click)="onClickAgregarOEditar(day.date)"
-              *ngIf="canAddTraining()"
-            >
-              <mat-icon>add</mat-icon>
-            </button>
-          </div>
-          <div class="training-indicators">
-            <div
-              *ngFor="let entrenamiento of day.diaEntrenamiento?.entrenamientos"
-              class="training-indicator"
-              [ngClass]="getTrainingClass(entrenamiento.tipo)"
-              (click)="openTrainingDetails(entrenamiento)"
-            >
-              <mat-icon>{{ getTrainingIcon(entrenamiento.tipo) }}</mat-icon>
-              <span>{{ entrenamiento.tipo }}</span>
+        <div
+          class="day-cell"
+          *ngFor="let day of daysInMonth"
+          [class.empty-day]="!day"
+        >
+          <div class="calendar-day" *ngIf="day">
+            <div class="day-header-row">
+              <span class="day-number">{{ day.date.getDate() }}</span>
+              <button
+                class="add-training"
+                (click)="onClickAgregarOEditar(day.date)"
+                *ngIf="canAddTraining()"
+              >
+                <mat-icon>add</mat-icon>
+              </button>
+            </div>
+            <div class="training-indicators">
+              <div
+                *ngFor="let entrenamiento of day.diaEntrenamiento?.entrenamientos"
+                class="training-indicator"
+                [ngClass]="getTrainingClass(entrenamiento.tipo)"
+                (click)="openTrainingDetails(entrenamiento)"
+              >
+                <mat-icon>{{ getTrainingIcon(entrenamiento.tipo) }}</mat-icon>
+                <span>{{ entrenamiento.tipo }}</span>
+              </div>
             </div>
           </div>
         </div>

@@ -37,8 +37,11 @@
             </button>
         </div>
         <div class="competiciones-list">
-            <div *ngFor="let competicion of getCompeticionesDelDia(selectedDate.getDate())" 
-                 class="competicion-item">
+            <div *ngFor="let competicion of getCompeticionesDelDia(selectedDate.getDate())"
+                 class="competicion-item"
+                 [routerLink]="['/competiciones']"
+                 [queryParams]="{ competicionId: competicion._id }"
+                 title="Ver esta competición en el calendario">
                 <h5>{{ competicion.nombre }}</h5>
                 <p><i class="fas fa-map-marker-alt"></i> {{ competicion.lugar }}</p>
                 <p><i class="fas fa-info-circle"></i> {{ competicion.descripcion }}</p>

@@ -48,16 +48,51 @@ interface Marca {
     .container {
       max-width: 800px;
       margin: 0 auto;
+      box-sizing: border-box;
     }
     textarea {
       font-family: monospace;
+      width: 100%;
+      max-width: 100%;
+      box-sizing: border-box;
     }
     pre {
       background-color: #f8f9fa;
       padding: 15px;
       border-radius: 5px;
       max-height: 500px;
-      overflow-y: auto;
+      overflow: auto;
+      max-width: 100%;
+      box-sizing: border-box;
+      white-space: pre-wrap;
+      word-break: break-word;
+      overflow-wrap: anywhere;
+    }
+    @media (max-width: 768px) {
+      .container {
+        padding-left: 12px;
+        padding-right: 12px;
+      }
+      h2 {
+        font-size: 1.5rem;
+        word-break: break-word;
+      }
+      .btn {
+        width: 100%;
+        min-height: 44px;
+      }
+      pre {
+        padding: 12px;
+        font-size: 0.85rem;
+      }
+    }
+    @media (max-width: 480px) {
+      h2 {
+        font-size: 1.3rem;
+      }
+      pre {
+        max-height: 360px;
+      }
     }
   `]
 })

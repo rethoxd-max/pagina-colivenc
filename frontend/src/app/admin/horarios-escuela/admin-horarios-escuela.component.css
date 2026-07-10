@@ -280,6 +280,14 @@
 
 .he-btn-del:hover { background: #e74c3c; color: #fff; }
 
+@media (max-width: 768px) {
+  .he-container { margin: 1.25rem auto; }
+  .he-card { padding: 1.15rem; }
+  /* Textos largos no desbordan */
+  .he-item-info { width: 100%; }
+  .he-item-categoria { word-break: break-word; overflow-wrap: anywhere; }
+}
+
 @media (max-width: 600px) {
   .he-field-row {
     flex-direction: column;
@@ -294,4 +302,20 @@
   .he-item-actions {
     align-self: flex-end;
   }
+}
+
+@media (max-width: 480px) {
+  /* Botones del formulario a ancho completo y táctiles */
+  .he-form-actions { flex-direction: column; }
+  .he-btn-guardar,
+  .he-btn-cancelar {
+    width: 100%;
+    justify-content: center;
+    min-height: 44px;
+  }
+  /* Cabecera compacta */
+  .he-header h2 { font-size: 1.2rem; }
+  .he-header i { font-size: 1.6rem; }
+  /* Acciones de cada ítem con área táctil */
+  .he-btn-icon { min-width: 42px; min-height: 40px; }
 }
