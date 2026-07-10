@@ -450,94 +450,6 @@
 }
 
 /* ========================================
-   Responsive
-======================================== */
-@media (max-width: 768px) {
-    .page-header {
-        padding: 2.5rem 1.25rem 1.75rem;
-    }
-
-    .page-title {
-        font-size: 2rem;
-    }
-
-    .page-subtitle {
-        font-size: 1rem;
-    }
-
-    .posts-container {
-        padding: 1.5rem 1rem;
-    }
-
-    .posts-grid {
-        grid-template-columns: 1fr;
-        gap: 1.5rem;
-    }
-
-    /* En móvil no hay hover: mostrar siempre las acciones */
-    .post-actions,
-    .post-actions-row {
-        opacity: 1;
-    }
-
-    /* Barra de controles: cada bloque ocupa el ancho completo */
-    .controls-bar {
-        flex-direction: column;
-        align-items: stretch;
-        gap: 1rem;
-    }
-
-    .search-box {
-        flex: 1 1 auto;
-        width: 100%;
-        min-width: 0;
-    }
-
-    .fecha-filter {
-        flex-wrap: wrap;
-        width: 100%;
-    }
-
-    .fecha-input-wrap {
-        flex: 1 1 auto;
-        min-width: 0;
-    }
-
-    .fecha-input-wrap input[type="date"] {
-        width: 100%;
-    }
-
-    .btn-create {
-        width: 100%;
-        justify-content: center;
-    }
-
-    .featured-post {
-        flex-direction: column;
-    }
-
-    .featured-image-wrap {
-        width: 100%;
-        min-height: auto;
-        height: 200px;
-    }
-
-    .featured-content {
-        padding: 1.5rem 1.25rem;
-    }
-
-    .featured-title {
-        font-size: 1.35rem;
-    }
-
-    /* Áreas táctiles cómodas en móvil */
-    .btn-action {
-        width: 42px;
-        height: 42px;
-    }
-}
-
-/* ========================================
    Filtro por rango de fechas
 ======================================== */
 .fecha-filter {
@@ -862,6 +774,94 @@
     font-size: 0.85rem;
     font-weight: 400;
     opacity: 0.75;
+}
+
+/* ========================================
+   Responsive
+======================================== */
+@media (max-width: 768px) {
+    .page-header {
+        padding: 2.5rem 1.25rem 1.75rem;
+    }
+
+    .page-title {
+        font-size: 2rem;
+    }
+
+    .page-subtitle {
+        font-size: 1rem;
+    }
+
+    .posts-container {
+        padding: 1.5rem 1rem;
+    }
+
+    .posts-grid {
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+    }
+
+    /* En móvil no hay hover: mostrar siempre las acciones */
+    .post-actions,
+    .post-actions-row {
+        opacity: 1;
+    }
+
+    /* Barra de controles: cada bloque ocupa el ancho completo */
+    .controls-bar {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 1rem;
+    }
+
+    .search-box {
+        flex: 1 1 auto;
+        width: 100%;
+        min-width: 0;
+    }
+
+    .fecha-filter {
+        flex-wrap: wrap;
+        width: 100%;
+    }
+
+    .fecha-input-wrap {
+        flex: 1 1 auto;
+        min-width: 0;
+    }
+
+    .fecha-input-wrap input[type="date"] {
+        width: 100%;
+    }
+
+    .btn-create {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .featured-post {
+        flex-direction: column;
+    }
+
+    .featured-image-wrap {
+        width: 100%;
+        min-height: auto;
+        height: 200px;
+    }
+
+    .featured-content {
+        padding: 1.5rem 1.25rem;
+    }
+
+    .featured-title {
+        font-size: 1.35rem;
+    }
+
+    /* Áreas táctiles cómodas en móvil */
+    .btn-action {
+        width: 42px;
+        height: 42px;
+    }
 }
 
 /* ========================================
