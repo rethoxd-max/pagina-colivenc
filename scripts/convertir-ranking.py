@@ -297,6 +297,47 @@ def recalcular_puestos(entradas, categoria):
 # Se detecta por contenido: si la col2 parece un año y la col3 NO es numérica.
 # ══════════════════════════════════════════════════════════════════════════
 
+CATEGORIA_EDAD_KEYWORDS = (
+    "junior", "sub-20", "sub 20", "sub20", "absolut", "promesa",
+    "cadete", "senior", "veteran", "master",
+)
+
+
+def es_divisor_categoria_edad(c0, c1, c2, c3):
+    """Detecta una fila-divisor de categoría de edad dentro de un mismo
+    bloque de prueba (ej. 'JUNIOR- SUB20' insertada entre las marcas
+    Absoluta y las Junior de Decathlon/Heptathlon masculino). Estas filas
+    no traen puesto/marca/año, solo la etiqueta de categoría en col 1."""
+    if c0 or c2 or c3 or not c1:
+        return False
+    c1l = c1.lower()
+    return any(k in c1l for k in CATEGORIA_EDAD_KEYWORDS)
+
+
+def nombre_categoria_edad(c1):
+    c1l = c1.lower()
+    if "junior" in c1l or "sub" in c1l:
+        return "Junior"
+    if "cadete" in c1l:
+        return "Cadete"
+    if "promesa" in c1l:
+        return "Promesa"
+    if "veteran" in c1l:
+        return "Veterano"
+    if "master" in c1l:
+        return "Master"
+    return "Absoluta"
+
+
+ANOTACION_JUNIOR_RE = re.compile(r"\s*\(\s*junior\s*\)\s*", re.IGNORECASE)
+
+
+def limpiar_nombre(nombre):
+    """Quita anotaciones redundantes tipo '(junior)' del nombre del atleta;
+    la categoría ya queda reflejada al agrupar en tablas separadas."""
+    return ANOTACION_JUNIOR_RE.sub("", nombre).strip()
+
+
 def bloque_volta_peu_desplazado(sh, primera_fila_datos):
     c2 = cellv(sh, primera_fila_datos, 2)
     c3 = cellv(sh, primera_fila_datos, 3)
@@ -338,12 +379,17 @@ def parse_libro(path, deducidos=None):
                 desplazado = bloque_volta_peu_desplazado(sh, primera)
 
         entradas = []
+        categoria_edad_actual = "Absoluta"
         for dr in range(hr + 1, fin):
             if is_header(sh, dr):
                 continue
             c0 = cellv(sh, dr, 0)
             c1 = cellv(sh, dr, 1)
             c2 = cellv(sh, dr, 2)
+            c3 = cellv(sh, dr, 3)
+            if es_divisor_categoria_edad(c0, c1, c2, c3):
+                categoria_edad_actual = nombre_categoria_edad(c1)
+                continue
             if c0 and not c0.isdigit() and not c1 and not c2:
                 continue
             if not c1 and not c2:
@@ -358,12 +404,13 @@ def parse_libro(path, deducidos=None):
                     extra_parts.append(f"Años participando: {anyos_part}")
                 entrada = {
                     "puesto": c0,
-                    "nombre": nom,
+                    "nombre": limpiar_nombre(nom),
                     "marca": cellv(sh, dr, 3),
                     "anyo_nac": "",
                     "fecha": cellv(sh, dr, 4),
                     "lugar": cellv(sh, dr, 5),
                     "extra": " · ".join(extra_parts),
+                    "categoria_edad": categoria_edad_actual,
                 }
             elif desplazado:
                 # nombre | año edición | edición (romano) | MARCA REAL | (vacío) | puesto top-10
@@ -376,43 +423,63 @@ def parse_libro(path, deducidos=None):
                     extra_parts.append(f"Entre los 10 primeros ese año: {top10}")
                 entrada = {
                     "puesto": c0,
-                    "nombre": c1,
+                    "nombre": limpiar_nombre(c1),
                     "marca": cellv(sh, dr, 4, dm),
                     "anyo_nac": "",
                     "fecha": cellv(sh, dr, 2),  # año de la edición
                     "lugar": cellv(sh, dr, 5),
                     "extra": " · ".join(extra_parts),
+                    "categoria_edad": categoria_edad_actual,
                 }
             else:
                 extras = [conv_fecha(sh, dr, c, dm) for c in range(6, sh.ncols)]
                 extras = [e for e in extras if e]
                 entrada = {
                     "puesto": c0,
-                    "nombre": c1,
+                    "nombre": limpiar_nombre(c1),
                     "marca": cellv(sh, dr, 2, dm),
                     "anyo_nac": cellv(sh, dr, 3),
                     "fecha": conv_fecha(sh, dr, 4, dm),
                     "lugar": cellv(sh, dr, 5),
                     "extra": " · ".join(extras),
+                    "categoria_edad": categoria_edad_actual,
                 }
             entradas.append(entrada)
 
         if entradas:
             cat = categoria_prueba(nombre, maraton)
             sector = sector_prueba(nombre, cat, maraton)
-            entradas = recalcular_puestos(entradas, cat)
 
-            # aviso de marcas que no se han podido interpretar (quedan sin puesto)
-            sin_marca_real = [e for e in entradas if e["puesto"] == "" and e["marca"]]
-            for e in sin_marca_real:
-                avisos.append(f"  {os.path.basename(path)} / {nombre}: no se pudo interpretar la marca '{e['marca']}' de {e['nombre']}")
+            # Si el bloque traía un divisor de categoría de edad (ej. Decathlon
+            # y Heptathlon masculino mezclan Absoluta y Junior en el mismo
+            # bloque del Excel), las marcas de cada categoría no son
+            # comparables entre sí (implementos/vallas distintos): se separan
+            # en tablas de ranking independientes, cada una recalculada por
+            # su cuenta.
+            grupos_edad = {}
+            orden_edad = []
+            for e in entradas:
+                cat_edad = e.pop("categoria_edad")
+                if cat_edad not in grupos_edad:
+                    grupos_edad[cat_edad] = []
+                    orden_edad.append(cat_edad)
+                grupos_edad[cat_edad].append(e)
+
+            categorias = []
+            for cat_edad in orden_edad:
+                entradas_cat = recalcular_puestos(grupos_edad[cat_edad], cat)
+                sufijo = f" ({cat_edad})" if len(orden_edad) > 1 else ""
+                sin_marca_real = [e for e in entradas_cat if e["puesto"] == "" and e["marca"]]
+                for e in sin_marca_real:
+                    avisos.append(f"  {os.path.basename(path)} / {nombre}{sufijo}: no se pudo interpretar la marca '{e['marca']}' de {e['nombre']}")
+                categorias.append({"nombre": cat_edad, "entradas": entradas_cat})
 
             pruebas.append({
                 "prueba": nombre,
                 "tipo": "maraton" if maraton else "estandar",
                 "sector": sector,
                 "orden": distancia_orden(nombre),
-                "entradas": entradas,
+                "categorias": categorias,
             })
 
     pruebas.sort(key=lambda p: (SECTOR_ORDEN.get(p["sector"], 99), p["orden"]))
@@ -446,8 +513,8 @@ def main():
     with open(SALIDA, "w", encoding="utf-8") as f:
         json.dump(data, f, ensure_ascii=False, indent=1)
 
-    tm = sum(len(p["entradas"]) for p in masculino)
-    tf = sum(len(p["entradas"]) for p in femenino)
+    tm = sum(len(c["entradas"]) for p in masculino for c in p["categorias"])
+    tf = sum(len(c["entradas"]) for p in femenino for c in p["categorias"])
     print(f"Masculino: {len(masculino)} pruebas, {tm} marcas")
     print(f"Femenino:  {len(femenino)} pruebas, {tf} marcas")
     print(f"Escrito: {SALIDA}")

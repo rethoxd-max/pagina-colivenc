@@ -42,50 +42,57 @@
       </button>
     </div>
 
-    <!-- Tabla -->
-    <div class="rc-tabla-card" *ngIf="pruebaSeleccionada as pa">
-      <div class="rc-tabla-head">
-        <h3>{{ nombreMostrado(pa.prueba) }}</h3>
-        <span class="rc-count">{{ pa.entradas.length }} marca{{ pa.entradas.length !== 1 ? 's' : '' }}</span>
-      </div>
+    <!-- Tabla(s): una por cada categoría de edad de la prueba seleccionada
+         (la mayoría tiene una sola -Absoluta-; Decathlon y Heptathlon
+         masculino traen además Junior, con marcas no comparables entre sí) -->
+    <ng-container *ngIf="pruebaSeleccionada as pa">
+      <div class="rc-tabla-card" *ngFor="let cat of pa.categorias">
+        <div class="rc-tabla-head">
+          <h3>
+            {{ nombreMostrado(pa.prueba) }}
+            <span class="rc-categoria-tag" *ngIf="pa.categorias.length > 1">{{ cat.nombre }}</span>
+          </h3>
+          <span class="rc-count">{{ cat.entradas.length }} marca{{ cat.entradas.length !== 1 ? 's' : '' }}</span>
+        </div>
 
-      <div class="rc-tabla-scroll">
-        <table class="rc-tabla">
-          <thead>
-            <tr *ngIf="pa.tipo !== 'maraton'">
-              <th class="rc-c-puesto">#</th>
-              <th class="rc-c-nombre">Atleta</th>
-              <th class="rc-c-marca">Marca</th>
-              <th class="rc-c-anyo">Año nac.</th>
-              <th class="rc-c-fecha">Fecha</th>
-              <th class="rc-c-lugar">Lugar</th>
-              <th class="rc-c-notas">Notas</th>
-            </tr>
-            <tr *ngIf="pa.tipo === 'maraton'">
-              <th class="rc-c-puesto">#</th>
-              <th class="rc-c-nombre">Atleta</th>
-              <th class="rc-c-marca">Marca</th>
-              <th class="rc-c-fecha">Año</th>
-              <th class="rc-c-lugar">Salida-Meta</th>
-              <th class="rc-c-notas">Notas</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr *ngFor="let e of pa.entradas" [class]="'rc-fila ' + medalla(e.puesto)">
-              <td class="rc-c-puesto" data-label="Puesto">
-                <span class="rc-puesto" [class]="medalla(e.puesto)">{{ e.puesto || '–' }}</span>
-              </td>
-              <td class="rc-c-nombre" data-label="Atleta">{{ e.nombre }}</td>
-              <td class="rc-c-marca" data-label="Marca">{{ e.marca || '–' }}</td>
-              <td class="rc-c-anyo" *ngIf="pa.tipo !== 'maraton'" data-label="Año nac.">{{ e.anyo_nac || '–' }}</td>
-              <td class="rc-c-fecha" [attr.data-label]="pa.tipo === 'maraton' ? 'Año' : 'Fecha'">{{ e.fecha || '–' }}</td>
-              <td class="rc-c-lugar" [attr.data-label]="pa.tipo === 'maraton' ? 'Salida-Meta' : 'Lugar'">{{ e.lugar || '–' }}</td>
-              <td class="rc-c-notas" data-label="Notas">{{ e.extra }}</td>
-            </tr>
-          </tbody>
-        </table>
+        <div class="rc-tabla-scroll">
+          <table class="rc-tabla">
+            <thead>
+              <tr *ngIf="pa.tipo !== 'maraton'">
+                <th class="rc-c-puesto">#</th>
+                <th class="rc-c-nombre">Atleta</th>
+                <th class="rc-c-marca">Marca</th>
+                <th class="rc-c-anyo">Año nac.</th>
+                <th class="rc-c-fecha">Fecha</th>
+                <th class="rc-c-lugar">Lugar</th>
+                <th class="rc-c-notas">Notas</th>
+              </tr>
+              <tr *ngIf="pa.tipo === 'maraton'">
+                <th class="rc-c-puesto">#</th>
+                <th class="rc-c-nombre">Atleta</th>
+                <th class="rc-c-marca">Marca</th>
+                <th class="rc-c-fecha">Año</th>
+                <th class="rc-c-lugar">Salida-Meta</th>
+                <th class="rc-c-notas">Notas</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let e of cat.entradas" [class]="'rc-fila ' + medalla(e.puesto)">
+                <td class="rc-c-puesto" data-label="Puesto">
+                  <span class="rc-puesto" [class]="medalla(e.puesto)">{{ e.puesto || '–' }}</span>
+                </td>
+                <td class="rc-c-nombre" data-label="Atleta">{{ e.nombre }}</td>
+                <td class="rc-c-marca" data-label="Marca">{{ e.marca || '–' }}</td>
+                <td class="rc-c-anyo" *ngIf="pa.tipo !== 'maraton'" data-label="Año nac.">{{ e.anyo_nac || '–' }}</td>
+                <td class="rc-c-fecha" [attr.data-label]="pa.tipo === 'maraton' ? 'Año' : 'Fecha'">{{ e.fecha || '–' }}</td>
+                <td class="rc-c-lugar" [attr.data-label]="pa.tipo === 'maraton' ? 'Salida-Meta' : 'Lugar'">{{ e.lugar || '–' }}</td>
+                <td class="rc-c-notas" data-label="Notas">{{ e.extra }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
       </div>
-    </div>
+    </ng-container>
 
     <p class="rc-actualizado">Actualizado: {{ data.actualizado }}</p>
 

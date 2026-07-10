@@ -14,11 +14,16 @@ interface EntradaRanking {
 
 type SectorClave = 'velocidad' | 'medio_fondo' | 'ruta_marcha' | 'saltos' | 'lanzamientos' | 'combinadas';
 
+interface CategoriaRanking {
+  nombre: string;
+  entradas: EntradaRanking[];
+}
+
 interface PruebaRanking {
   prueba: string;
   tipo: 'estandar' | 'maraton';
   sector: SectorClave;
-  entradas: EntradaRanking[];
+  categorias: CategoriaRanking[];
 }
 
 interface RankingClubData {

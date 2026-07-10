@@ -137,6 +137,26 @@
   overflow: hidden;
 }
 
+/* Cuando una prueba tiene varias categorías de edad (ej. Decathlon/Heptathlon
+   con Absoluta y Junior), se muestra una tarjeta-tabla por categoría */
+.rc-tabla-card + .rc-tabla-card {
+  margin-top: 1.25rem;
+}
+
+.rc-categoria-tag {
+  display: inline-block;
+  margin-left: 0.6rem;
+  padding: 0.15rem 0.6rem;
+  border-radius: 10px;
+  background: #eef2ff;
+  color: #4f46e5;
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  vertical-align: middle;
+}
+
 .rc-tabla-head {
   display: flex;
   align-items: baseline;
