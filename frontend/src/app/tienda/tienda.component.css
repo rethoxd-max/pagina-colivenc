@@ -725,6 +725,12 @@
 
     .modal-body {
         grid-template-columns: 1fr;
+        /* En móvil la imagen y la info se apilan: si el conjunto supera los
+           90vh del modal, que el propio body haga scroll (si no, el botón
+           "Añadir al carrito" puede quedar inalcanzable, oculto por el
+           overflow:hidden de .modal-content). */
+        max-height: 90vh;
+        overflow-y: auto;
     }
 
     .modal-imagen {

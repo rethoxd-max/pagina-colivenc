@@ -138,10 +138,10 @@ import { Subscription } from 'rxjs';
     
     .carrito-container {
       position: fixed;
-      top: 60px;
+      top: 80px;
       right: -420px;
       width: 400px;
-      height: calc(100vh - 60px);
+      height: calc(100vh - 80px);
       background: #ffffff;
       box-shadow: -5px 0 25px rgba(0, 0, 0, 0.15);
       transition: right 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -631,6 +631,8 @@ import { Subscription } from 'rxjs';
       .carrito-container {
         width: 100%;
         max-width: 400px;
+        top: 70px;
+        height: calc(100vh - 70px);
         right: -100%;
         border-radius: 0;
       }
@@ -650,6 +652,8 @@ import { Subscription } from 'rxjs';
       .carrito-container {
         width: 100%;
         max-width: none;
+        top: 64px;
+        height: calc(100vh - 64px);
         right: -100%;
         border-radius: 0;
       }
