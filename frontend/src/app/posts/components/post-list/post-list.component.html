@@ -49,8 +49,8 @@
             <ng-container *ngIf="(fechaDesde || fechaHasta) && !searchTerm"> en el rango de fechas seleccionado</ng-container>
         </p>
 
-        <!-- Noticia destacada (pin) -->
-        <ng-container *ngIf="getPinnedPost() as featured">
+        <!-- Noticias destacadas (pin, hasta 2) -->
+        <ng-container *ngFor="let featured of getPinnedPosts()">
             <div class="featured-post" (click)="verNoticia(featured._id)">
                 <div class="featured-image-wrap">
                     <img *ngIf="featured.imageUrl && !isPdf(featured.imageUrl)" [src]="getImageUrl(featured.imageUrl)" [alt]="featured.title" class="featured-image">

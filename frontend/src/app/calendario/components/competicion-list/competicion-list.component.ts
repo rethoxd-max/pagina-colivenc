@@ -8,7 +8,7 @@ import { environment } from '../../../../environments/environment';
 import { DisciplinaFilterService } from '../../../services/disciplina-filter.service';
 import { Subscription } from 'rxjs';
 import { PdfViewerModule } from 'ng2-pdf-viewer';
-import { isPdf, isImageFile, getMediaUrl } from '../../utils/competicion-media.util';
+import { isPdf, getMediaUrl, getFileIcon } from '../../utils/competicion-media.util';
 
 interface CompeticionAgrupada {
   year: number;
@@ -291,10 +291,8 @@ export class CompeticionListComponent implements OnInit, OnDestroy {
   }
 
   getEnlaceIcon(enlace: any): string {
-    if (!this.isEnlaceArchivo(enlace)) return 'fa-file-alt';
-    if (isPdf(enlace.url)) return 'fa-file-pdf';
-    if (isImageFile(enlace.url)) return 'fa-file-image';
-    return 'fa-paperclip';
+    if (!this.isEnlaceArchivo(enlace)) return 'fa-link';
+    return getFileIcon(enlace.url);
   }
 
   isAdmin(): boolean {

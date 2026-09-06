@@ -321,6 +321,14 @@
     color: #a16207;
 }
 
+.cta-buttons {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
 .cta-button {
     position: relative;
     z-index: 1;
@@ -451,6 +459,11 @@
 
     .cta-content h3 {
         font-size: 1.5rem;
+    }
+
+    .cta-buttons {
+        flex-direction: column;
+        width: 100%;
     }
 }
 

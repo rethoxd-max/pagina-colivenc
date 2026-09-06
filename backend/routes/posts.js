@@ -30,18 +30,64 @@ const storage = multer.diskStorage({
     }
 });
 
-const upload = multer({ 
+const upload = multer({
     storage: storage,
     limits: {
-        fileSize: 15 * 1024 * 1024 // Aumentado a 15MB para soportar PDFs
+        fileSize: 50 * 1024 * 1024 // 50MB, para soportar documentos adjuntos de cualquier tipo
     },
     fileFilter: function (req, file, cb) {
-        if (!file.mimetype.startsWith('image/') && file.mimetype !== 'application/pdf') {
-            return cb(new Error('Solo se permiten imágenes o archivos PDF'));
+        // La imagen principal debe seguir siendo una imagen o un PDF (se usa como portada/preview)
+        if (file.fieldname === 'image' && !file.mimetype.startsWith('image/') && file.mimetype !== 'application/pdf') {
+            return cb(new Error('La imagen principal debe ser una imagen o un PDF'));
         }
         cb(null, true);
     }
-}).single('image');
+});
+
+// Acepta la imagen principal y hasta 10 archivos adjuntos (para los "enlaces" de tipo archivo)
+const uploadFields = upload.fields([
+    { name: 'image', maxCount: 1 },
+    { name: 'adjuntos', maxCount: 10 }
+]);
+
+// Combina los enlaces enviados (URL manual o archivo ya existente) con los ficheros
+// recién subidos, en el mismo orden en que el frontend los añadió al FormData.
+function resolveEnlaces(enlacesMeta, archivosAdjuntos) {
+    const disponibles = [...(archivosAdjuntos || [])];
+    const resueltos = [];
+
+    for (const item of enlacesMeta) {
+        if (!item || !item.nombre) continue;
+
+        if (item.origen === 'archivo') {
+            if (item.nuevoArchivo && disponibles.length > 0) {
+                const file = disponibles.shift();
+                resueltos.push({
+                    nombre: item.nombre,
+                    url: `uploads/posts/${file.filename}`,
+                    origen: 'archivo'
+                });
+            } else if (item.url) {
+                // Archivo ya existente que no se ha reemplazado en esta edición
+                resueltos.push({ nombre: item.nombre, url: item.url, origen: 'archivo' });
+            }
+        } else if (item.url) {
+            resueltos.push({ nombre: item.nombre, url: item.url, origen: 'url' });
+        }
+    }
+
+    return resueltos;
+}
+
+// Borra del disco todos los archivos que multer haya guardado en la petición (campos 'image' y 'adjuntos')
+function eliminarArchivosSubidos(files) {
+    if (!files) return;
+    const todos = [...(files.image || []), ...(files.adjuntos || [])];
+    todos.forEach(file => {
+        const filePath = path.join(UPLOAD_DIR, file.filename);
+        if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
+    });
+}
 
 // Obtener todos los posts (con paginación opcional)
 router.get('/', async (req, res) => {
@@ -82,14 +128,16 @@ router.get('/ultimos', async (req, res) => {
 
 
 
-// Obtener la noticia destacada (pública) — la que se muestra en el Home
+// Obtener las noticias destacadas (pública) — hasta 2, se muestran en el Home
 router.get('/destacado', async (req, res) => {
     try {
-        const post = await Post.findOne({ destacado: true })
+        const posts = await Post.find({ destacado: true })
             .populate('author', ['name'])
             .populate('disciplina', 'nombre slug color icono')
-            .populate('competicion', COMPETICION_POPULATE);
-        res.json(post); // null si no hay ninguna destacada
+            .populate('competicion', COMPETICION_POPULATE)
+            .sort({ date: -1 })
+            .limit(2);
+        res.json(posts); // array vacío si no hay ninguna destacada
     } catch (error) {
         res.status(500).json({ msg: 'Error en el servidor', error });
     }
@@ -118,7 +166,7 @@ router.post('/', auth, (req, res, next) => {
         return res.status(403).json({ message: 'Se requiere rol Admin o Editor' });
     }
     next();
-}, upload, async (req, res) => {
+}, uploadFields, async (req, res) => {
     try {
         const { title, content, category, disciplina, competicionVinculada } = req.body;
 
@@ -127,11 +175,25 @@ router.post('/', auth, (req, res, next) => {
             return res.status(400).json({ msg: 'El título y el contenido son obligatorios.' });
         }
 
-        if (req.file && !require('fs').existsSync(require('path').join(UPLOAD_DIR, req.file.filename))) {
+        const imageFile = req.files && req.files.image && req.files.image[0];
+
+        if (imageFile && !fs.existsSync(path.join(UPLOAD_DIR, imageFile.filename))) {
             return res.status(500).json({ msg: 'Error al guardar la imagen' });
         }
 
-        const imageUrl = req.file ? `uploads/posts/${req.file.filename}` : null;
+        const imageUrl = imageFile ? `uploads/posts/${imageFile.filename}` : null;
+
+        // Parsear enlaces (mezcla de URLs manuales y archivos subidos)
+        let enlacesMeta = [];
+        if (req.body.enlaces) {
+            try {
+                enlacesMeta = JSON.parse(req.body.enlaces);
+                if (!Array.isArray(enlacesMeta)) enlacesMeta = [];
+            } catch (e) {
+                enlacesMeta = [];
+            }
+        }
+        const enlaces = resolveEnlaces(enlacesMeta, req.files && req.files.adjuntos);
 
         const post = new Post({
             title,
@@ -140,6 +202,7 @@ router.post('/', auth, (req, res, next) => {
             disciplina: disciplina || null,
             author: req.user.id,
             imageUrl,
+            enlaces,
         });
 
         if (competicionVinculada && mongoose.Types.ObjectId.isValid(competicionVinculada)) {
@@ -151,13 +214,8 @@ router.post('/', auth, (req, res, next) => {
         res.json(post);
     } catch (error) {
         console.error('Error al crear post:', error);
-        // Si hay un error y se subió un archivo, eliminarlo
-        if (req.file) {
-            const filePath = path.join(UPLOAD_DIR, req.file.filename);
-            if (fs.existsSync(filePath)) {
-                fs.unlinkSync(filePath);
-            }
-        }
+        // Si hay un error, eliminar todos los archivos subidos en esta petición (imagen + adjuntos)
+        eliminarArchivosSubidos(req.files);
         res.status(500).json({ msg: 'Error en el servidor', error: error.message });
     }
 });
@@ -169,7 +227,7 @@ router.put('/:id', auth, (req, res, next) => {
         return res.status(403).json({ message: 'Se requiere rol Admin o Editor' });
     }
     next();
-}, upload, async (req, res) => {
+}, uploadFields, async (req, res) => {
     try {
         const { title, content, category, disciplina, competicionVinculada } = req.body;
         const post = await Post.findById(req.params.id);
@@ -197,8 +255,34 @@ router.put('/:id', auth, (req, res, next) => {
             await sincronizarVinculoDesdeNoticia(post, idLimpio);
         }
 
+        // Actualizar enlaces (mezcla de URLs manuales y archivos subidos)
+        if (req.body.enlaces !== undefined) {
+            let enlacesMeta = [];
+            try {
+                const parsed = JSON.parse(req.body.enlaces);
+                enlacesMeta = Array.isArray(parsed) ? parsed : [];
+            } catch (e) {
+                enlacesMeta = [];
+            }
+
+            const nuevosEnlaces = resolveEnlaces(enlacesMeta, req.files && req.files.adjuntos);
+
+            // Borrar del disco los archivos de enlaces antiguos que ya no están en la lista nueva
+            const nuevasUrls = new Set(nuevosEnlaces.map(e => e.url));
+            (post.enlaces || []).forEach(enlaceAntiguo => {
+                if (enlaceAntiguo.origen === 'archivo' && enlaceAntiguo.url && !nuevasUrls.has(enlaceAntiguo.url)) {
+                    const oldFilename = enlaceAntiguo.url.split('/').pop();
+                    const oldPath = path.join(UPLOAD_DIR, oldFilename);
+                    if (fs.existsSync(oldPath)) fs.unlinkSync(oldPath);
+                }
+            });
+
+            post.enlaces = nuevosEnlaces;
+        }
+
         // Si hay una nueva imagen, eliminar la antigua (si existe) y actualizar
-        if (req.file) {
+        const imageFile = req.files && req.files.image && req.files.image[0];
+        if (imageFile) {
             // Eliminar la imagen anterior si existe
             if (post.imageUrl) {
                 const oldFilename = post.imageUrl.split('/').pop();
@@ -209,13 +293,13 @@ router.put('/:id', auth, (req, res, next) => {
             }
 
             // Verificar si la nueva imagen se subió correctamente
-            const newFilePath = path.join(UPLOAD_DIR, req.file.filename);
+            const newFilePath = path.join(UPLOAD_DIR, imageFile.filename);
             if (!fs.existsSync(newFilePath)) {
                 return res.status(500).json({ msg: 'Error al guardar la nueva imagen' });
             }
 
-            // Asignar la nueva imagen con la URL absoluta
-            post.imageUrl = `uploads/posts/${req.file.filename}`;
+            // Asignar la nueva imagen
+            post.imageUrl = `uploads/posts/${imageFile.filename}`;
         }
 
         await post.save();
@@ -223,18 +307,13 @@ router.put('/:id', auth, (req, res, next) => {
         res.json(post);
     } catch (error) {
         console.error('Error al editar post:', error);
-        // Si hay un error y se subió un archivo, eliminarlo
-        if (req.file) {
-            const filePath = path.join(UPLOAD_DIR, req.file.filename);
-            if (fs.existsSync(filePath)) {
-                fs.unlinkSync(filePath);
-            }
-        }
+        // Si hay un error, eliminar todos los archivos subidos en esta petición (imagen + adjuntos)
+        eliminarArchivosSubidos(req.files);
         res.status(500).json({ msg: 'Error en el servidor', error: error.message });
     }
 });
 
-// Marcar/desmarcar un post como destacado (solo Admin/Editor) — solo puede haber uno a la vez
+// Marcar/desmarcar un post como destacado (solo Admin/Editor) — máximo 2 a la vez
 router.patch('/:id/destacar', auth, async (req, res) => {
     if (!req.user.userTypes.includes('Admin') && !req.user.userTypes.includes('Editor')) {
         return res.status(403).json({ message: 'Se requiere rol Admin o Editor' });
@@ -245,7 +324,10 @@ router.patch('/:id/destacar', auth, async (req, res) => {
 
         const nuevoEstado = !post.destacado;
         if (nuevoEstado) {
-            await Post.updateMany({ destacado: true }, { destacado: false });
+            const totalDestacados = await Post.countDocuments({ destacado: true });
+            if (totalDestacados >= 2) {
+                return res.status(400).json({ msg: 'Ya hay 2 noticias destacadas. Quita una antes de destacar otra.' });
+            }
         }
         post.destacado = nuevoEstado;
         await post.save();
@@ -280,6 +362,15 @@ router.delete('/:id', auth, (req, res, next) => {
             const filePath = path.join(UPLOAD_DIR, filename);
             if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
         }
+
+        // Eliminar los archivos adjuntos (enlaces de tipo 'archivo')
+        (post.enlaces || []).forEach(enlace => {
+            if (enlace.origen === 'archivo' && enlace.url) {
+                const filename = enlace.url.split('/').pop();
+                const filePath = path.join(UPLOAD_DIR, filename);
+                if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
+            }
+        });
 
         // Desenlazar la competición asociada, si la tenía
         if (post.competicion) {

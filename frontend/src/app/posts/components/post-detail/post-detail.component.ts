@@ -5,7 +5,7 @@ import { PostService } from '../../services/posts.service';
 import { AuthService } from '../../../auth/services/auth.service';
 import { environment } from '../../../../environments/environment';
 import { PdfViewerModule } from 'ng2-pdf-viewer';
-import { isPdf, getPostMediaUrl } from '../../utils/post-media.util';
+import { isPdf, getPostMediaUrl, getFileIcon } from '../../utils/post-media.util';
 import { getMediaUrl as getCompeticionMediaUrl } from '../../../calendario/utils/competicion-media.util';
 
 interface CompeticionResumen {
@@ -16,6 +16,12 @@ interface CompeticionResumen {
   imageUrl?: string;
 }
 
+interface EnlacePost {
+  nombre: string;
+  url: string;
+  origen: 'url' | 'archivo';
+}
+
 interface Post {
   _id: string;
   title: string;
@@ -23,6 +29,7 @@ interface Post {
   imageUrl?: string;
   createdAt: string;
   competicion?: CompeticionResumen | null;
+  enlaces?: EnlacePost[];
 }
 
 @Component({
@@ -109,6 +116,21 @@ interface Post {
               </div>
               <i class="fas fa-arrow-right related-arrow"></i>
             </a>
+          </div>
+
+          <!-- Documentos y enlaces -->
+          <div *ngIf="post?.enlaces as enlacesPost" class="post-enlaces">
+            <ng-container *ngIf="enlacesPost.length > 0">
+              <span class="related-label"><i class="fas fa-paperclip"></i> Documentos y enlaces</span>
+              <div class="enlaces-list">
+                <a *ngFor="let enlace of enlacesPost"
+                   [href]="isEnlaceArchivo(enlace) ? getImageUrl(enlace.url) : enlace.url"
+                   target="_blank" rel="noopener noreferrer"
+                   class="enlace-chip">
+                  <i class="fas" [ngClass]="getEnlaceIcon(enlace)"></i>{{ enlace.nombre }}
+                </a>
+              </div>
+            </ng-container>
           </div>
 
           <!-- Footer del artículo -->
@@ -444,6 +466,38 @@ interface Post {
       transform: translateX(4px);
     }
 
+    /* Documentos y enlaces */
+    .post-enlaces {
+      padding: 0 2.5rem 2rem;
+    }
+
+    .enlaces-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.6rem;
+      margin-top: 0.6rem;
+    }
+
+    .enlace-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      background: #eff6ff;
+      color: var(--primary-color);
+      border: 1px solid #bfdbfe;
+      padding: 0.5rem 1rem;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      font-weight: 500;
+      text-decoration: none;
+      transition: var(--transition);
+    }
+
+    .enlace-chip:hover {
+      background: #dbeafe;
+      transform: translateY(-1px);
+    }
+
     /* Footer del artículo */
     .article-footer {
       padding: 2rem 2.5rem;
@@ -575,6 +629,10 @@ interface Post {
         padding: 0 1.25rem 1.5rem;
       }
 
+      .post-enlaces {
+        padding: 0 1.25rem 1.5rem;
+      }
+
       .article-footer {
         padding: 1.5rem 1.25rem;
       }
@@ -629,6 +687,10 @@ interface Post {
       }
 
       .related-competicion {
+        padding: 0 1rem 1.25rem;
+      }
+
+      .post-enlaces {
         padding: 0 1rem 1.25rem;
       }
 
@@ -690,6 +752,15 @@ export class PostDetailComponent implements OnInit {
 
   getCompeticionImageUrl(imageUrl: string | undefined): string {
     return getCompeticionMediaUrl(imageUrl);
+  }
+
+  isEnlaceArchivo(enlace: EnlacePost): boolean {
+    return enlace?.origen === 'archivo';
+  }
+
+  getEnlaceIcon(enlace: EnlacePost): string {
+    if (!this.isEnlaceArchivo(enlace)) return 'fa-link';
+    return getFileIcon(enlace.url);
   }
 
   volver() {

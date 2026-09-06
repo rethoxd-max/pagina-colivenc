@@ -96,9 +96,9 @@ export class PostListComponent implements OnInit, OnDestroy {
 
   hayMas(): boolean { return this.pagedPosts.length < this.filteredPosts.length; }
 
-  getPinnedPost(): any {
-    if (this.searchTerm || this.fechaDesde || this.fechaHasta) return null;
-    return this.posts.find(p => p.destacado) ?? null;
+  getPinnedPosts(): any[] {
+    if (this.searchTerm || this.fechaDesde || this.fechaHasta) return [];
+    return this.posts.filter(p => p.destacado).slice(0, 2);
   }
 
   getNonPinnedPagedPosts(): any[] {
@@ -108,10 +108,17 @@ export class PostListComponent implements OnInit, OnDestroy {
   togglePin(event: Event, postId: string): void {
     event.stopPropagation();
     this.postService.toggleDestacado(postId).subscribe({
-      next: () => {
-        this.posts.forEach(p => p.destacado = (p._id === postId ? !p.destacado : false));
+      next: (updatedPost) => {
+        const post = this.posts.find(p => p._id === postId);
+        if (post) post.destacado = updatedPost.destacado;
       },
-      error: (error) => { console.error('Error al marcar como destacada:', error); }
+      error: (error) => {
+        if (error?.status === 400) {
+          alert(error.error?.msg || 'Ya hay 2 noticias destacadas. Quita una antes de destacar otra.');
+        } else {
+          console.error('Error al marcar como destacada:', error);
+        }
+      }
     });
   }
 

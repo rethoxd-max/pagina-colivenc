@@ -30,18 +30,21 @@ const storage = multer.diskStorage({
 const upload = multer({
     storage: storage,
     limits: {
-        fileSize: 15 * 1024 * 1024 // límite de 15MB, para soportar PDFs
+        fileSize: 50 * 1024 * 1024 // 50MB, para soportar documentos adjuntos de cualquier tipo
     },
     fileFilter: (req, file, cb) => {
-        if (file.mimetype.startsWith('image/') || file.mimetype === 'application/pdf') cb(null, true);
-        else cb(new Error('Solo se permiten imágenes o archivos PDF'));
+        // La imagen principal debe seguir siendo una imagen o un PDF (se usa como portada/preview)
+        if (file.fieldname === 'image' && !file.mimetype.startsWith('image/') && file.mimetype !== 'application/pdf') {
+            return cb(new Error('La imagen principal debe ser una imagen o un PDF'));
+        }
+        cb(null, true);
     }
 });
 
-// Acepta la imagen principal y hasta 5 archivos adjuntos (para los "enlaces" de tipo archivo)
+// Acepta la imagen principal y hasta 10 archivos adjuntos (para los "enlaces" de tipo archivo)
 const uploadFields = upload.fields([
     { name: 'image', maxCount: 1 },
-    { name: 'adjuntos', maxCount: 5 }
+    { name: 'adjuntos', maxCount: 10 }
 ]);
 
 // Combina los enlaces enviados (URL manual o archivo ya existente) con los ficheros

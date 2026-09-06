@@ -22,8 +22,8 @@ export class PostService {
     return this.http.get<any[]>(`${this.apiUrl}/ultimos`); // Endpoint para traer las últimas noticias
   }
 
-  getPostDestacado(): Observable<any> {
-    return this.http.get<any>(`${this.apiUrl}/destacado`);
+  getPostsDestacados(): Observable<any[]> {
+    return this.http.get<any[]>(`${this.apiUrl}/destacado`);
   }
 
   toggleDestacado(id: string): Observable<any> {

@@ -36,6 +36,12 @@
   color: inherit;
 }
 
+.fp-card + .fp-card {
+  margin-top: 1.6rem;
+  padding-top: 1.6rem;
+  border-top: 1px solid #e5e7eb;
+}
+
 .fp-thumb {
   flex-shrink: 0;
   width: 192px;
@@ -144,6 +150,11 @@
   .fp-card {
     flex-direction: column;
     gap: 1rem;
+  }
+
+  .fp-card + .fp-card {
+    margin-top: 1.2rem;
+    padding-top: 1.2rem;
   }
 
   .fp-thumb {

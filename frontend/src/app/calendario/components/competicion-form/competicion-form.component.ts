@@ -12,7 +12,7 @@ import { DisciplinaService, Disciplina } from '../../../services/disciplina.serv
 import { AuthService } from '../../../auth/services/auth.service';
 import { PostService } from '../../../posts/services/posts.service';
 import { PdfViewerModule } from 'ng2-pdf-viewer';
-import { isPdf as isPdfUtil } from '../../utils/competicion-media.util';
+import { isPdf as isPdfUtil, getFileIcon } from '../../utils/competicion-media.util';
 import { DatePipe } from '@angular/common';
 /// <reference types="@types/googlemaps" />
 
@@ -378,7 +378,7 @@ export class CompeticionFormComponent implements OnInit {
   }
 
   addEnlace(): void {
-    if (this.enlaces.length < 5) {
+    if (this.enlaces.length < 10) {
       this.enlaces.push(this.fb.group({
         nombre: ['', Validators.required],
         url: [''],
@@ -423,10 +423,10 @@ export class CompeticionFormComponent implements OnInit {
     return url ? url.split('/').pop() || '' : '';
   }
 
-  isEnlacePdf(index: number): boolean {
+  getEnlaceIcon(index: number): string {
     const file = this.enlaceFiles[index];
-    if (file) return file.type === 'application/pdf';
-    return isPdfUtil(this.enlaces.at(index).get('url')?.value);
+    if (file) return getFileIcon(file.name);
+    return getFileIcon(this.enlaces.at(index).get('url')?.value);
   }
 
   // Método para limpiar la selección de archivo y volver a mostrar la imagen existente

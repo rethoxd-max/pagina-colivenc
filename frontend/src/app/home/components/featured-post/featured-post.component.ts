@@ -13,14 +13,14 @@ import { isPdf, getPostMediaUrl } from '../../../posts/utils/post-media.util';
   styleUrls: ['./featured-post.component.css'],
 })
 export class FeaturedPostComponent implements OnInit {
-  post: any = null;
+  posts: any[] = [];
   cargando = true;
 
   constructor(private postService: PostService) {}
 
   ngOnInit(): void {
-    this.postService.getPostDestacado().subscribe({
-      next: (data) => { this.post = data; this.cargando = false; },
+    this.postService.getPostsDestacados().subscribe({
+      next: (data) => { this.posts = data || []; this.cargando = false; },
       error: () => { this.cargando = false; }
     });
   }
