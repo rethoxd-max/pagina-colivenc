@@ -58,7 +58,7 @@
     </div>
 </div>
 
-<div class="cumpleanos-container" *ngIf="cumpleanerosHoy.length > 0">
+<div class="cumpleanos-container" *ngIf="cumpleanerosHoy.length > 0 && isAdmin()">
     <h4>¡Hoy es el cumpleaños de!</h4>
     <div class="cumpleaneros-list">
         <div *ngFor="let atleta of cumpleanerosHoy" class="cumpleanero-item">

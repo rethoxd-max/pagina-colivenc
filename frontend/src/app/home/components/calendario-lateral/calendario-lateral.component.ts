@@ -4,6 +4,7 @@ import { RouterModule } from '@angular/router';
 import { CompeticionService, Competicion, PruebaCompeticion } from '../../../calendario/services/competicion.service';
 import { AtletaService, Atleta } from '../../../services/atleta.service';
 import { DisciplinaFilterService } from '../../../services/disciplina-filter.service';
+import { AuthService } from '../../../auth/services/auth.service';
 import { Subscription } from 'rxjs';
 
 @Component({
@@ -34,7 +35,8 @@ export class CalendarioLateralComponent implements OnInit, OnDestroy {
   constructor(
     private competicionService: CompeticionService,
     private atletaService: AtletaService,
-    private disciplinaFilterService: DisciplinaFilterService
+    private disciplinaFilterService: DisciplinaFilterService,
+    private authService: AuthService
   ) {}
 
   ngOnInit(): void {
@@ -198,5 +200,9 @@ export class CalendarioLateralComponent implements OnInit, OnDestroy {
 
   closeSelectedDate(): void {
     this.selectedDate = null;
+  }
+
+  isAdmin(): boolean {
+    return this.authService.isAdmin();
   }
 } 
