@@ -13,7 +13,7 @@ param(
 $SSH_KEY      = "C:\Users\Pablo\.ssh\cecolivenc"
 $SERVER       = "root@178.104.136.39"
 $SSH_ARGS     = @("-i", $SSH_KEY, "-o", "ConnectTimeout=15", "-o", "BatchMode=yes")
-$REPO_LOCAL   = "C:\Users\Pablo\OneDrive\Documentos\paginacolivenc2\pagina-colivenc"
+$REPO_LOCAL   = "C:\Projects\pagina-colivenc"
 $FRONT_DIST   = "$REPO_LOCAL\frontend\dist\pagina-colivenc"
 $REPO_REMOTE  = "/var/www/cecolivenc/repo"
 $FRONT_REMOTE = "/var/www/cecolivenc/frontend"
